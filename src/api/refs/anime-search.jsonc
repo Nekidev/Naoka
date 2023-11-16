@@ -68,6 +68,7 @@
                             }
                         ],
                         "number": 1,
+                        "season_number": 1,
                         "duration": 24,
                         "thumbnail": {
                             "large": "https://example.com",
@@ -100,20 +101,6 @@
                             }
                         ]
                     }
-                }
-            ],
-            "licensors": [
-                {
-                    "id": 1,
-                    "name": "Crunchyroll",
-                    "type": "anime",
-                    "mappings": [
-                        {
-                            "provider": "myanimelist/licensor",
-                            "provider_id": 1,
-                            "last_updated": 123
-                        }
-                    ]
                 }
             ],
             "related": [
