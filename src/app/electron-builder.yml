@@ -1,0 +1,12 @@
+appId: dev.nyeki.naoka
+productName: Naoka
+copyright: Copyright © 2018 Rafael Bradley
+directories:
+    output: dist
+    buildResources: resources
+files:
+    - from: .
+      filter:
+          - package.json
+          - main
+publish: null

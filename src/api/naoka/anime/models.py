@@ -68,9 +68,13 @@ class Anime(models.Model):
     source = models.CharField(
         max_length=18, choices=Source.choices, default=Source.OTHER
     )
-    rating = models.CharField(max_length=6, choices=Rating.choices, default=Rating.G)
+    rating = models.CharField(
+        max_length=6, choices=Rating.choices, null=True, blank=True
+    )
 
-    genres = models.ManyToManyField("anime.AnimeGenre", blank=True, related_name="anime")
+    genres = models.ManyToManyField(
+        "anime.AnimeGenre", blank=True, related_name="anime"
+    )
     demographics = ArrayField(models.TextField(), blank=True)
 
     broadcast_start = models.DateField(null=True, blank=True)
@@ -83,14 +87,16 @@ class Anime(models.Model):
     episodes_duration = models.PositiveSmallIntegerField(null=True, blank=True)
 
     studios = models.ManyToManyField("anime.Studio", blank=True, related_name="anime")
+
     related_anime = models.ManyToManyField(
         "anime.AnimeRelationship", blank=True, related_name="anime"
     )
-
     characters = models.ManyToManyField(
         "characters.CharacterRelationship", blank=True, related_name="anime"
     )
-    staff = models.ManyToManyField("people.PersonRelationship", blank=True, related_name="anime")
+    staff = models.ManyToManyField(
+        "people.PersonRelationship", blank=True, related_name="anime"
+    )
 
     music = models.ManyToManyField(
         "anime.SongRelationship", blank=True, related_name="anime"
@@ -159,7 +165,7 @@ class Episode(models.Model):
     )
 
     number = models.PositiveIntegerField()
-    season = models.SmallPositiveIntegerField(default=1)
+    season = models.PositiveIntegerField(default=1)
 
     duration = models.PositiveIntegerField(null=True, blank=True)
 
@@ -188,4 +194,6 @@ class SongRelationship(models.Model):
     type = models.CharField(max_length=7, choices=Type.choices, default=Type.OPENING)
     node = models.ForeignKey(
         "anime.Song",
+        on_delete=models.CASCADE,
+        related_name="relationships",
     )

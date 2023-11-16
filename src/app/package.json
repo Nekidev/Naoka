@@ -1,0 +1,44 @@
+{
+    "name": "naoka",
+    "version": "0.1.0",
+    "private": true,
+    "main": "main/index.js",
+    "scripts": {
+        "clean": "rimraf dist renderer/.next renderer/out",
+        "start": "electron .",
+        "build": "next build renderer",
+        "pack-app": "npm run build && electron-builder --dir",
+        "dist": "npm run build && electron-builder"
+    },
+    "build": {
+        "asar": true,
+        "files": [
+            "main",
+            "renderer/out"
+        ]
+    },
+    "postcss": {
+        "plugins": {
+            "tailwindcss": {
+                "config": "./renderer/tailwind.config.ts"
+            }
+        }
+    },
+    "dependencies": {
+        "electron": "^27.1.0",
+        "electron-is-dev": "^2.0.0",
+        "electron-next": "^3.1.5"
+    },
+    "devDependencies": {
+        "@types/node": "^20",
+        "@types/react": "^18",
+        "@types/react-dom": "^18",
+        "autoprefixer": "^10.0.1",
+        "next": "14.0.2",
+        "postcss": "^8",
+        "react": "^18",
+        "react-dom": "^18",
+        "tailwindcss": "^3.3.0",
+        "typescript": "^5"
+    }
+}

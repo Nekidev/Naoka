@@ -1,6 +1,5 @@
 from django.db import models
-
-# Create your models here.
+from django.contrib.postgres.fields import ArrayField
 
 
 class Character(models.Model):
@@ -32,7 +31,7 @@ class Character(models.Model):
 
 
 class CharacterRelationship(models.Model):
-    class Role(models.Model):
+    class Role(models.TextChoices):
         MAIN = "main"
         SUPPORTING = "supporting"
 
