@@ -70,7 +70,7 @@ class Anime(models.Model):
     )
     rating = models.CharField(max_length=6, choices=Rating.choices, default=Rating.G)
 
-    genres = models.ManyToManyField("anime.Genre", blank=True, related_name="anime")
+    genres = models.ManyToManyField("anime.AnimeGenre", blank=True, related_name="anime")
     demographics = ArrayField(models.TextField(), blank=True)
 
     broadcast_start = models.DateField(null=True, blank=True)
@@ -88,9 +88,9 @@ class Anime(models.Model):
     )
 
     characters = models.ManyToManyField(
-        "anime.Character", blank=True, related_name="anime"
+        "characters.CharacterRelationship", blank=True, related_name="anime"
     )
-    staff = models.ManyToManyField("anime.Staff", blank=True, related_name="anime")
+    staff = models.ManyToManyField("people.PersonRelationship", blank=True, related_name="anime")
 
     music = models.ManyToManyField(
         "anime.SongRelationship", blank=True, related_name="anime"
@@ -135,7 +135,7 @@ class AnimeRelationship(models.Model):
     )
 
 
-class Genre(models.Model):
+class AnimeGenre(models.Model):
     name = models.TextField()
     mappings = ArrayField(models.JSONField(), blank=True)
 

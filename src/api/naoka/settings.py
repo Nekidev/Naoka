@@ -46,7 +46,6 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "naoka.anime",
-    "naoka.manga",
     "naoka.characters",
     "naoka.people",
 ]
