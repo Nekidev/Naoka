@@ -1,0 +1,231 @@
+{
+    "items": [
+        {
+            "id": 1,
+            "titles": [
+                {
+                    "lang": "en-US",
+                    "text": "Rascal Does Not Dream of Bunny Girl Senpai"
+                }
+            ],
+            "descriptions": [
+                {
+                    "lang": "en-US",
+                    "text": "Lorem ipsum..."
+                }
+            ],
+            "images": {
+                "cover": {
+                    "small": "https://example.com",
+                    "medium": "https://example.com",
+                    "large": "https://example.com"
+                },
+                "banner": "https://example.com"
+            },
+            "type": "tv",
+            "source": "anime",
+            "status": "ongoing",
+            "genres": [
+                {
+                    "id": 1,
+                    "name": "Romance",
+                    "mappings": [
+                        {
+                            "provider": "myanimelist/genre",
+                            "provider_id": 1,
+                            "last_updated": 123
+                        }
+                    ]
+                }
+            ],
+            "demographics": ["shoujo"],
+            "broadcast": {
+                "from": 123,
+                "to": 123,
+                "when": [
+                    {
+                        "day": 1,
+                        "time": 1234 // Seconds from 00:00:00
+                    }
+                ]
+            },
+            "episodes": {
+                "count": 12,
+                "duration": 24,
+                "nodes": [
+                    {
+                        "id": 1,
+                        "titles": [
+                            {
+                                "lang": "en-US",
+                                "text": "Rascal Does Not Dream of Bunny Girl Senpai"
+                            }
+                        ],
+                        "descriptions": [
+                            {
+                                "lang": "en-US",
+                                "text": "Lorem ipsum..."
+                            }
+                        ],
+                        "number": 1,
+                        "duration": 24,
+                        "thumbnail": {
+                            "large": "https://example.com",
+                            "medium": "https://example.com",
+                            "small": "https://example.com"
+                        },
+                        "mappings": [
+                            {
+                                "provider": "myanimelist/episode",
+                                "provider_id": 1,
+                                "last_updated": 123
+                            }
+                        ]
+                    }
+                ]
+            },
+            "rating": "pg",
+            "studios": [
+                {
+                    "is_main": true,
+                    "node": {
+                        "id": 1,
+                        "name": "Toei Animation",
+                        "type": "anime",
+                        "mappings": [
+                            {
+                                "provider": "myanimelist/studio",
+                                "provider_id": 1,
+                                "last_updated": 123
+                            }
+                        ]
+                    }
+                }
+            ],
+            "licensors": [
+                {
+                    "id": 1,
+                    "name": "Crunchyroll",
+                    "type": "anime",
+                    "mappings": [
+                        {
+                            "provider": "myanimelist/licensor",
+                            "provider_id": 1,
+                            "last_updated": 123
+                        }
+                    ]
+                }
+            ],
+            "related": [
+                {
+                    "type": "sequel",
+                    "resource_type": "anime",
+                    "node": {
+                        "id": 2,
+                        "titles": [
+                            {
+                                "lang": "en-US",
+                                "text": "Rascal Does Not Dream of a Dreaming Girl"
+                            }
+                        ],
+                        "images": {
+                            "cover": {
+                                "small": "https://example.com",
+                                "medium": "https://example.com",
+                                "large": "https://example.com"
+                            }
+                        },
+                        "type": "tv"
+                    }
+                }
+            ],
+            "characters": [
+                {
+                    "type": "main",
+                    "node": {
+                        "id": 1,
+                        "name": {
+                            "first": "Mai",
+                            "middle": null,
+                            "last": "Sakurajima",
+                            "full": "Sakurajima, Mai"
+                        },
+                        "descriptions": [
+                            {
+                                "lang": "en-US",
+                                "text": "Lorem ipsum..."
+                            }
+                        ],
+                        "image": {
+                            "small": "https://example.com",
+                            "medium": "https://example.com",
+                            "large": "https://example.com"
+                        },
+                        "mappings": [
+                            {
+                                "provider": "myanimelist/character",
+                                "provider_id": 1,
+                                "last_updated": 123
+                            }
+                        ]
+                    }
+                }
+            ],
+            "staff": [
+                {
+                    "roles": ["Director"],
+                    "node": {
+                        "id": 1,
+                        "name": {
+                            "first": "Mai",
+                            "middle": null,
+                            "last": "Sakurajima",
+                            "full": "Sakurajima, Mai"
+                        },
+                        "image": {
+                            "small": "https://example.com",
+                            "medium": "https://example.com",
+                            "large": "https://example.com"
+                        },
+                        "mappings": [
+                            {
+                                "provider": "myanimelist/person",
+                                "provider_id": 1,
+                                "last_updated": 123
+                            }
+                        ]
+                    }
+                }
+            ],
+            "links": [
+                {
+                    "title": "Twitter",
+                    "url": "https://example.com"
+                }
+            ],
+            "streaming": [
+                {
+                    "name": "Crunchyroll",
+                    "url": "https://crunchyroll.com"
+                }
+            ],
+            "music": [
+                {
+                    "type": "opening",
+                    "node": {
+                        "id": 1,
+                        "name": "Tower of God",
+                        "artists": ["Sayuri"]
+                    }
+                }
+            ],
+            "videos": [
+                {
+                    "title": "trailer",
+                    "youtube_id": "123"
+                }
+            ]
+        }
+    ],
+    "count": 1
+}
