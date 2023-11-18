@@ -1,59 +1,41 @@
 "use client";
 
 import React from "react";
-import NavigationBarContext from "@/contexts/NavigationBarContext";
+import { ChevronLeftIcon, ChevronRightIcon } from "@heroicons/react/24/outline";
 
 export default function NavigationBar(): JSX.Element {
-    const { extraComponent, setExtraComponent } =
-        React.useContext(NavigationBarContext);
-
     return (
-        <div className="sticky top-0 left-0 right-0 flex flex-row items-center">
+        <div className="fixed ml-60 top-0 left-0 flex flex-row items-center z-50">
             <div className="flex flex-row items-center gap-4 p-4">
                 <button
-                    className="hover:text-white"
+                    className="text-white/70 hover:text-white"
                     onClick={() => {
                         window.history.back();
                     }}
                 >
-                    <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        strokeWidth={1.5}
-                        stroke="currentColor"
-                        className="w-6 h-6"
-                    >
-                        <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            d="M15.75 19.5L8.25 12l7.5-7.5"
-                        />
-                    </svg>
+                    <ChevronLeftIcon className="w-6 h-6" />
                 </button>
                 <button
-                    className="hover:text-white"
+                    className="text-white/70 hover:text-white"
                     onClick={() => {
                         window.history.forward();
                     }}
                 >
-                    <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        strokeWidth={1.5}
-                        stroke="currentColor"
-                        className="w-6 h-6"
-                    >
-                        <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            d="M8.25 4.5l7.5 7.5-7.5 7.5"
-                        />
-                    </svg>
+                    <ChevronRightIcon className="w-6 h-6" />
                 </button>
             </div>
-            {extraComponent}
         </div>
     );
+}
+
+export function VerticalNavSpacer() {
+    return (
+        <div className="py-4">
+            <div className="h-6"></div>
+        </div>
+    );
+}
+
+export function LeftNavSpacer() {
+    return <div className="w-24"></div>;
 }

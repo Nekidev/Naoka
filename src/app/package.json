@@ -25,6 +25,8 @@
         }
     },
     "dependencies": {
+        "@heroicons/react": "^2.0.18",
+        "@radix-ui/react-select": "^2.0.0",
         "electron": "^27.1.0",
         "electron-is-dev": "^2.0.0",
         "electron-next": "^3.1.5"

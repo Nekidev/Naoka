@@ -20,28 +20,33 @@ function MagnifyingGlassIcon(props: any) {
 }
 
 export class MyAnimeList extends BaseAPI {
+    title: string = "MyAnimeList";
     config: Config = {
         search: {
             anime: {
-                components: [
+                filters: [
                     {
                         type: "text",
                         value: {
                             name: "query",
                             label: "Search",
-                            icon: <MagnifyingGlassIcon />,
+                            icon: (
+                                <MagnifyingGlassIcon className="h-5 w-5 stroke-2" />
+                            ),
                         },
                     },
                 ],
             },
             manga: {
-                components: [
+                filters: [
                     {
                         type: "text",
                         value: {
                             name: "query",
                             label: "Search",
-                            icon: <MagnifyingGlassIcon />,
+                            icon: (
+                                <MagnifyingGlassIcon className="h-5 w-5 stroke-2" />
+                            ),
                         },
                     },
                 ],

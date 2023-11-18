@@ -16,7 +16,10 @@ export interface SelectInput {
 }
 
 interface SearchConfig {
-    components: (
+    // Delay to wait after a key is pressed before executing a query. Will be 0
+    // if no delay is specified. Use this to prevent 429 errors.
+    typingDelay?: number;
+    filters: (
         | {
               type: "text";
               value: TextInput;
@@ -51,6 +54,7 @@ export class Anime {
 }
 
 export class BaseAPI {
+    title: string = "site";
     config: Config = {
         search: {},
     };

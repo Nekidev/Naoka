@@ -1,8 +1,10 @@
-import { MyAnimeList } from "./mal";
+import { BaseAPI } from ".";
+
+import { MyAnimeList } from "./myanimelist";
 
 
-export default function getAPI(code: string) {
+export default function getAPI(code: string): BaseAPI {
     return {
-        mal: new MyAnimeList(),
-    }[code];
+        myanimelist: new MyAnimeList(),
+    }[code] as BaseAPI;
 }
