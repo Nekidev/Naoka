@@ -40,7 +40,7 @@ export interface Config {
     };
 }
 
-export class Anime {
+export class Media {
     constructor(
         readonly id: string,
         readonly title: string,
@@ -49,7 +49,8 @@ export class Anime {
         readonly bannerUrl: string | null,
         readonly format: string,
         readonly source: string,
-        readonly status: string
+        readonly status: string,
+        readonly genres: string[]
     ) {}
 }
 
@@ -65,11 +66,11 @@ export class BaseAPI {
         }: {
             query: string;
         },
-        type: "anime" = "anime"
-    ): Promise<[Anime[], boolean]> {
+        type: "anime" | "manga" | "characters" | "people" = "anime"
+    ): Promise<[Media[], boolean]> {
         /*
-        Returns a tuple of an array of Anime objects and a boolean indicating if the search was successful.
+        Returns a tuple of an array of Anime objects and a boolean indicating if there was an error.
         */
-        return [[], false];
+        return [[], true];
     }
 }

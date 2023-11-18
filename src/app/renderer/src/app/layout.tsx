@@ -17,7 +17,7 @@ export default function RootLayout({
         <html lang="en">
             <body className={`${rubik.className} flex flex-row w-screen`}>
                 <SideBar />
-                <div className="flex-1 relative h-screen overflow-y-auto">
+                <div className="flex-1 relative h-screen max-h-screen overflow-y-hidden">
                     <NavigationBar />
                     {children}
                 </div>
