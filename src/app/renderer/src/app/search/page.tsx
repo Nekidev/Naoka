@@ -5,6 +5,7 @@ import {
     MagnifyingGlassIcon,
     Bars4Icon,
     Squares2X2Icon,
+    ArrowRightIcon
 } from "@heroicons/react/24/outline";
 import { VerticalNavSpacer, LeftNavSpacer } from "@/components/NavigationBar";
 import { Media, TextInput as TextInputInterface } from "@/lib";
@@ -51,6 +52,8 @@ export default function Search() {
 
         // Clear previous timeout and set a new one on query change
         if (timeoutId !== null) clearTimeout(timeoutId);
+        if (query != "") setLoading(true);
+
         timeoutId = setTimeout(
             delayedFunction,
             api.config.search[searchType]?.typingDelay || 500
@@ -125,6 +128,16 @@ export default function Search() {
                                 </div>
                             ) : error ? (
                                 error
+                            ) : results.length == 0 && query == "" ? (
+                                <div className="h-full w-full flex flex-col items-center justify-center text-center">
+                                    (◕‿◕✿)<br />
+                                    Start typing to search!
+                                </div>
+                            ) : results.length == 0 ? (
+                                <div className="h-full w-full flex flex-col items-center justify-center text-center">
+                                    (╯°□°）╯︵ ┻━┻<br />
+                                    Oops, No results for that query!
+                                </div>
                             ) : displayMode == "list" ? (
                                 <List results={results} />
                             ) : (
@@ -255,13 +268,13 @@ function Grid({ results }: { results: Media[] }) {
 
 function MediaRow({ media }: { media: Media }) {
     return (
-        <button className="flex flex-row items-center gap-4 p-2 hover:bg-zinc-800 rounded group transition hover:drop-shadow-md">
+        <button className="flex flex-row items-center gap-4 rounded group transition hover:drop-shadow-md py-2">
             <img
                 className="w-10 rounded aspect-[2/3] object-cover object-center"
                 src={media.imageUrl}
                 alt={media.title}
             />
-            <div className="flex flex-col justify-center gap-1">
+            <div className="flex flex-col justify-center gap-1 flex-1">
                 <div className="text-white/80 group-hover:text-white transition text-left -mt-0.5">
                     {media.title}
                 </div>
@@ -274,13 +287,16 @@ function MediaRow({ media }: { media: Media }) {
                     </div>
                 </div>
             </div>
+            <div className="opacity-0 group-hover:opacity-100 transition-all p-2">
+                <ArrowRightIcon className="w-5 h-5 text-white/90" />
+            </div>
         </button>
     );
 }
 
 function List({ results }: { results: Media[] }) {
     return (
-        <div className="flex flex-col">
+        <div className="flex flex-col -my-2">
             {results.map((result) => (
                 <MediaRow key={result.id} media={result} />
             ))}
