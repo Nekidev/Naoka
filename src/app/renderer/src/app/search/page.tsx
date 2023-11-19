@@ -5,18 +5,24 @@ import {
     MagnifyingGlassIcon,
     Bars4Icon,
     Squares2X2Icon,
-    ArrowRightIcon,
+    PlusIcon,
+    CheckIcon,
+    HeartIcon,
+    ChevronDownIcon,
 } from "@heroicons/react/24/outline";
 import { VerticalNavSpacer, LeftNavSpacer } from "@/components/NavigationBar";
-import { Media, TextInput as TextInputInterface } from "@/lib";
+import {
+    Media,
+    SearchType,
+    SelectInput as SelectInputInterface,
+    CheckboxInput as CheckboxInputInterface,
+} from "@/lib";
 import getAPI from "@/lib/api";
 import { cn } from "@/utils";
 import styles from "./styles.module.css";
 
 export default function Search() {
-    const [searchType, setSearchType] = React.useState<
-        "anime" | "manga" | "characters" | "people"
-    >("anime");
+    const [searchType, setSearchType] = React.useState<SearchType>("anime");
 
     const api = getAPI("myanimelist");
 
@@ -28,26 +34,43 @@ export default function Search() {
     const [loading, setLoading] = React.useState<boolean>(false);
     const [error, setError] = React.useState<string | null>(null);
 
+    const filtersFormRef = React.useRef<HTMLFormElement | null>(null);
+
+    const search = async () => {
+        setLoading(true);
+        setError(null);
+
+        let filters: { [key: string]: any } = {};
+
+        Array.from(
+            new FormData(
+                filtersFormRef.current ? filtersFormRef.current : undefined
+            ).entries()
+        ).map(([key, value]) => {
+            if (value == "") return;
+            filters[key] = value == "on" ? true : value;
+        });
+
+        const [res, error] = await api.search(
+            { query, ...filters },
+            searchType
+        );
+
+        if (error) {
+            setError("Oops! An error occurred :/");
+        } else {
+            setResults(res);
+        }
+
+        setLoading(false);
+    };
+
     React.useEffect(() => {
         let timeoutId: NodeJS.Timeout | null = null;
 
         const delayedFunction = () => {
             if (query === "") return;
-
-            (async () => {
-                setLoading(true);
-                setError(null);
-
-                const [res, error] = await api.search({ query }, searchType);
-
-                if (error) {
-                    setError("Oops! An error occurred :/");
-                } else {
-                    setResults(res);
-                }
-
-                setLoading(false);
-            })();
+            search();
         };
 
         // Clear previous timeout and set a new one on query change
@@ -63,6 +86,13 @@ export default function Search() {
             if (timeoutId !== null) clearTimeout(timeoutId);
         };
     }, [query]);
+
+    React.useEffect(() => {
+        setQuery("");
+        setResults([]);
+        setError(null);
+        setLoading(false);
+    }, [searchType]);
 
     const enabledSearchTypes = [
         ...(api?.config.search.anime ? ["anime"] : []),
@@ -149,9 +179,32 @@ export default function Search() {
                     </div>
                 </div>
                 <div className="w-px bg-zinc-800"></div>
-                <div className="w-60">
+                <form className="w-60 flex flex-col gap-4" ref={filtersFormRef}>
                     <div className="text-lg font-medium">Filters</div>
-                </div>
+                    {api.config.search[searchType]?.filters.map(
+                        (filter, index) => {
+                            switch (filter.type) {
+                                case "select":
+                                    return (
+                                        <SelectFilter
+                                            key={index}
+                                            onChange={search}
+                                            {...filter.value}
+                                        />
+                                    );
+
+                                case "checkbox":
+                                    return (
+                                        <CheckboxFilter
+                                            key={index}
+                                            onChange={search}
+                                            {...filter.value}
+                                        />
+                                    );
+                            }
+                        }
+                    )}
+                </form>
             </div>
         </main>
     );
@@ -185,12 +238,7 @@ function Chip({
     );
 }
 
-function TextInput({
-    name,
-    icon,
-    label,
-    ...props
-}: TextInputInterface & { [key: string]: any }) {
+function TextInput({ name, icon, label, ...props }: { [key: string]: any }) {
     return (
         <div className="relative flex-1">
             {icon && (
@@ -211,6 +259,78 @@ function TextInput({
                 {...props}
             />
         </div>
+    );
+}
+
+function Filter({ title, children }: { title: string; children: JSX.Element }) {
+    return (
+        <div className="flex flex-col gap-1">
+            <div className="text-sm text-zinc-400">{title}</div>
+            {children}
+        </div>
+    );
+}
+
+function SelectFilter({
+    name,
+    label,
+    icon,
+    values,
+    ...props
+}: SelectInputInterface & { [key: string]: any }) {
+    return (
+        <Filter title={label}>
+            <select
+                defaultValue={values[0].value}
+                name={name}
+                {...props}
+                className="py-1 px-2 leading-none rounded outline-none bg-zinc-800 text-sm cursor-pointer"
+            >
+                {values.map((v, i) => (
+                    <option key={i} value={v.value} className="bg-zinc-800">
+                        {v.label}
+                    </option>
+                ))}
+            </select>
+        </Filter>
+    );
+}
+
+function CheckboxFilter({
+    name,
+    label,
+    defaultValue,
+    ...props
+}: CheckboxInputInterface & { [key: string]: any }) {
+    const [checked, setChecked] = React.useState(defaultValue);
+
+    return (
+        <label
+            htmlFor={name}
+            className="group flex flex-row items-center gap-2 cursor-pointer"
+        >
+            <input
+                type="checkbox"
+                name={name}
+                id={name}
+                checked={checked}
+                onChange={() => {
+                    setChecked((v) => !v);
+                    props.onChange();
+                }}
+                className="hidden"
+            />
+            <div className="border border-zinc-700 group-hover:bg-zinc-700 h-4 w-4 rounded transition overflow-hidden">
+                {checked == true && (
+                    <div className="h-4 w-4 bg-zinc-100 text-zinc-950">
+                        <CheckIcon className="w-4 h-4 p-0.5 stroke-[4px]" />
+                    </div>
+                )}
+            </div>
+            <div className="text-sm text-zinc-400 group-hover:text-zinc-100 leading-none transition">
+                {label}
+            </div>
+        </label>
     );
 }
 
@@ -238,7 +358,7 @@ function ToggleButton({
 
 function MediaCard({ media }: { media: Media }) {
     return (
-        <button className="w-full rounded overflow-hidden relative">
+        <div className="w-full rounded overflow-hidden relative cursor-pointer">
             <img
                 src={media.imageUrl}
                 alt={media.title}
@@ -259,7 +379,7 @@ function MediaCard({ media }: { media: Media }) {
                     </div>
                 </div>
             </div>
-        </button>
+        </div>
     );
 }
 
@@ -275,27 +395,47 @@ function Grid({ results }: { results: Media[] }) {
 
 function MediaRow({ media }: { media: Media }) {
     return (
-        <button className="flex flex-row items-center gap-4 rounded group transition hover:drop-shadow-md py-2">
+        <button className="flex flex-row items-center gap-4 rounded group transition py-2">
             <img
-                className="w-10 rounded aspect-[2/3] object-cover object-center"
+                className="w-10 rounded aspect-square object-cover object-center"
                 src={media.imageUrl}
                 alt={media.title}
             />
-            <div className="flex flex-col justify-center gap-1 flex-1">
-                <div className="text-white/80 group-hover:text-white transition text-left -mt-0.5">
+            <div className="flex flex-col justify-center flex-1">
+                <div className="text-white/80 group-hover:text-white transition text-left line-clamp-1">
                     {media.title}
                 </div>
                 <div className="flex flex-row items-center gap-2">
-                    <div className="text-zinc-950 text-xs font-bold leading-none bg-white/80 p-1 rounded w-fit uppercase">
-                        {media.format}
-                    </div>
-                    <div className="text-xs text-white/70">
-                        {media.genres.join(", ")}
+                    <div className="text-xs text-zinc-400">
+                        {media.isAdult && (
+                            <>
+                                <span className="text-red-500">+18</span> —
+                            </>
+                        )}{" "}
+                        {media.startDate?.getFullYear()} {media.format}{" "}
+                        {media.genres.length > 0 &&
+                            "— " + media.genres.join(", ")}
                     </div>
                 </div>
             </div>
-            <div className="opacity-0 group-hover:opacity-100 transition-all p-2">
-                <ArrowRightIcon className="w-5 h-5 text-white/90" />
+            <div className="opacity-0 group-hover:opacity-100 transition-all p-2 flex flex-row items-center gap-2">
+                <div className="relative">
+                    <select className="text-xs py-1 pl-2 pr-6 rounded-full bg-zinc-800 transition hover:bg-zinc-700 appearance-none outline-none">
+                        <option className="bg-zinc-800">Not watched</option>
+                        <option className="bg-zinc-800">Planned</option>
+                        <option className="bg-zinc-800">Watching</option>
+                        <option className="bg-zinc-800">Paused</option>
+                        <option className="bg-zinc-800">Dropped</option>
+                        <option className="bg-zinc-800">Completed</option>
+                    </select>
+                    <ChevronDownIcon className="h-3 w-3 stroke-2 absolute top-0 bottom-0 right-2 my-auto pointer-events-none" />
+                </div>
+                <button className="rounded-full bg-zinc-800 p-1 transition hover:bg-zinc-700">
+                    <HeartIcon className="w-4 h-4 stroke-2" />
+                </button>
+                <button className="rounded-full bg-zinc-800 p-1 transition hover:bg-zinc-700">
+                    <PlusIcon className="w-4 h-4 stroke-2" />
+                </button>
             </div>
         </button>
     );

@@ -107,7 +107,7 @@ function UserProfile() {
                 <div className="flex flex-col gap-1 flex-1 items-start">
                     <div className="leading-none text-sm">Nyeki.py</div>
                     <div className="text-xs text-white/50 leading-none">
-                        AniList
+                        MyAnimeList
                     </div>
                 </div>
             </button>

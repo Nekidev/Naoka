@@ -1,18 +1,26 @@
-export interface TextInput {
+export type SearchType = "anime" | "manga";
+
+interface Input {
     name: string;
     label: string;
-    icon?: JSX.Element;
 }
 
-export interface SelectInput {
-    name: string;
-    label: string;
+export interface SelectInput extends Input {
     icon?: JSX.Element;
     values: {
         label: string;
         value: string;
-        default?: boolean;
     }[];
+}
+
+export interface RangeInput extends Input {
+    start: number;
+    end: number;
+    steps: number;
+}
+
+export interface CheckboxInput extends Input {
+    defaultValue: boolean;
 }
 
 interface SearchConfig {
@@ -21,15 +29,19 @@ interface SearchConfig {
     typingDelay?: number;
     filters: (
         | {
-              type: "text";
-              value: TextInput;
-          }
-        | {
               type: "select";
               value: SelectInput;
           }
+        | {
+              type: "range";
+              value: RangeInput;
+          }
+        | {
+              type: "checkbox";
+              value: CheckboxInput;
+          }
     )[];
-};
+}
 
 export interface Config {
     search: {
@@ -50,7 +62,11 @@ export class Media {
         readonly format: string,
         readonly source: string,
         readonly status: string,
-        readonly genres: string[]
+        readonly genres: string[],
+        readonly startDate: Date | null,
+        readonly endDate: Date | null,
+        readonly rating: string | null,
+        readonly isAdult: boolean,
     ) {}
 }
 
@@ -66,7 +82,7 @@ export class BaseAPI {
         }: {
             query: string;
         },
-        type: "anime" | "manga" | "characters" | "people" = "anime"
+        type: SearchType
     ): Promise<[Media[], boolean]> {
         /*
         Returns a tuple of an array of Anime objects and a boolean indicating if there was an error.
