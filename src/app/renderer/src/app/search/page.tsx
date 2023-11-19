@@ -5,7 +5,7 @@ import {
     MagnifyingGlassIcon,
     Bars4Icon,
     Squares2X2Icon,
-    ArrowRightIcon
+    ArrowRightIcon,
 } from "@heroicons/react/24/outline";
 import { VerticalNavSpacer, LeftNavSpacer } from "@/components/NavigationBar";
 import { Media, TextInput as TextInputInterface } from "@/lib";
@@ -130,12 +130,14 @@ export default function Search() {
                                 error
                             ) : results.length == 0 && query == "" ? (
                                 <div className="h-full w-full flex flex-col items-center justify-center text-center">
-                                    (◕‿◕✿)<br />
+                                    (◕‿◕✿)
+                                    <br />
                                     Start typing to search!
                                 </div>
                             ) : results.length == 0 ? (
                                 <div className="h-full w-full flex flex-col items-center justify-center text-center">
-                                    (╯°□°）╯︵ ┻━┻<br />
+                                    (╯°□°）╯︵ ┻━┻
+                                    <br />
                                     Oops, No results for that query!
                                 </div>
                             ) : displayMode == "list" ? (
@@ -248,8 +250,13 @@ function MediaCard({ media }: { media: Media }) {
                         {media.title}
                     </div>
                 </div>
-                <div className="text-xs font-bold p-1 leading-none rounded bg-white/90 text-black">
-                    {media.format.toUpperCase()}
+                <div className="flex flex-col items-start gap-1">
+                    <div className="text-xs text-left line-clamp-1">
+                        {media.genres.join(", ")}
+                    </div>
+                    <div className="text-xs font-bold p-1 leading-none rounded bg-white/90 text-black">
+                        {media.format.toUpperCase()}
+                    </div>
                 </div>
             </div>
         </button>
