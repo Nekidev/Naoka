@@ -1,4 +1,4 @@
-export type SearchType = "anime" | "manga";
+export type MediaType = "anime" | "manga";
 
 interface Input {
     name: string;
@@ -58,7 +58,7 @@ export interface Config {
 
 export class Media {
     constructor(
-        readonly type: SearchType,
+        readonly type: MediaType,
         readonly id: string,
         readonly title: string,
         readonly imageUrl: string,
@@ -68,7 +68,7 @@ export class Media {
         readonly genres: string[],
         readonly startDate: Date | null,
         readonly endDate: Date | null,
-        readonly isAdult: boolean,
+        readonly isAdult: boolean
     ) {}
 }
 
@@ -81,12 +81,12 @@ export class BaseAPI {
     async search(
         {
             query,
-            sortBy
+            sortBy,
         }: {
             query: string;
             sortBy: string | null;
         },
-        type: SearchType
+        type: MediaType
     ): Promise<[Media[], boolean]> {
         /*
         Returns a tuple of an array of Anime objects and a boolean indicating if there was an error.
@@ -94,7 +94,10 @@ export class BaseAPI {
         throw Error("Not implemented");
     }
 
-    async getMedia({ id }: { id: string }, type: SearchType): Promise<[Media | null, boolean]> {
+    async getMedia(
+        { id }: { id: string },
+        type: MediaType
+    ): Promise<[Media | null, boolean]> {
         /*
         Returns a tuple of a Media object and a boolean indicating if there was an error.
         */

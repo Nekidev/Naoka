@@ -1,4 +1,4 @@
-import { BaseAPI, Config, Media, SearchType } from "@/lib";
+import { BaseAPI, Config, Media, MediaType } from "@/lib";
 import { serializeURL } from "@/utils";
 
 export class MyAnimeList extends BaseAPI {
@@ -413,7 +413,7 @@ export class MyAnimeList extends BaseAPI {
 
     async search(
         options: { [key: string]: any },
-        type: SearchType
+        type: MediaType
     ): Promise<[Media[], boolean]> {
         switch (type) {
             case "anime":
@@ -429,7 +429,7 @@ export class MyAnimeList extends BaseAPI {
 
     async getMedia(
         { id }: { id: string },
-        type: SearchType
+        type: MediaType
     ): Promise<[Media | null, boolean]> {
         switch (type) {
             case "anime":

@@ -14,7 +14,7 @@ import {
 import { VerticalNavSpacer, LeftNavSpacer } from "@/components/NavigationBar";
 import {
     Media,
-    SearchType,
+    MediaType,
     SelectInput as SelectInputInterface,
     CheckboxInput as CheckboxInputInterface,
 } from "@/lib";
@@ -23,7 +23,7 @@ import { cn } from "@/utils";
 import styles from "./styles.module.css";
 
 export default function Search() {
-    const [searchType, setSearchType] = React.useState<SearchType>("anime");
+    const [searchType, setSearchType] = React.useState<MediaType>("anime");
 
     const api = getAPI("myanimelist");
 
