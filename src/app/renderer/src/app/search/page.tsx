@@ -53,15 +53,18 @@ export default function Search() {
             filters[key] = value == "on" ? true : value;
         });
 
-        const [res, error] = await api.search(
-            { query, sortBy: sortByRef.current?.value || null, ...filters },
-            searchType
-        );
-
-        if (error) {
+        try {
+            const [res, error] = await api.search(
+                { query, sortBy: sortByRef.current?.value || null, ...filters },
+                searchType
+            );
+            if (error) {
+                setError("Oops! An error occurred :/");
+            } else {
+                setResults(res);
+            }
+        } catch (e) {
             setError("Oops! An error occurred :/");
-        } else {
-            setResults(res);
         }
 
         setLoading(false);
@@ -151,7 +154,7 @@ export default function Search() {
                             </div>
                         </div>
                         {api.config.search[searchType]?.sortBy && (
-                            <div className="relative text-zinc-400 cursor-pointer transition hover:text-zinc-300">
+                            <div className="relative text-zinc-400 cursor-pointer transition hover:text-zinc-300 w-fit">
                                 <select
                                     className="bg-zinc-900 text-sm appearance-none pl-5 pr-2 outline-none cursor-pointer"
                                     ref={sortByRef}
@@ -183,7 +186,11 @@ export default function Search() {
                                     <div className="h-6 w-6 border-2 border-white/90 border-t-transparent rounded-full animate-spin"></div>
                                 </div>
                             ) : error ? (
-                                error
+                                <div className="h-full w-full flex flex-col items-center justify-center text-center">
+                                    (╯°□°）╯︵ ┻━┻
+                                    <br />
+                                    Oops, an error occurred!
+                                </div>
                             ) : results.length == 0 && query == "" ? (
                                 <div className="h-full w-full flex flex-col items-center justify-center text-center">
                                     (◕‿◕✿)
@@ -192,7 +199,7 @@ export default function Search() {
                                 </div>
                             ) : results.length == 0 ? (
                                 <div className="h-full w-full flex flex-col items-center justify-center text-center">
-                                    (╯°□°）╯︵ ┻━┻
+                                    (╥﹏╥)
                                     <br />
                                     Oops, No results for that query!
                                 </div>
@@ -306,18 +313,21 @@ function SelectFilter({
 }: SelectInputInterface & { [key: string]: any }) {
     return (
         <Filter title={label}>
-            <select
-                defaultValue={values[0].value}
-                name={name}
-                {...props}
-                className="py-1 px-2 leading-none rounded outline-none bg-zinc-800 text-sm cursor-pointer"
-            >
-                {values.map((v, i) => (
-                    <option key={i} value={v.value} className="bg-zinc-800">
-                        {v.label}
-                    </option>
-                ))}
-            </select>
+            <div className="relative">
+                <select
+                    defaultValue={values[0].value}
+                    name={name}
+                    {...props}
+                    className="py-2 px-2 leading-none rounded outline-none bg-zinc-800 text-sm cursor-pointer appearance-none w-full"
+                >
+                    {values.map((v, i) => (
+                        <option key={i} value={v.value} className="bg-zinc-800">
+                            {v.label}
+                        </option>
+                    ))}
+                </select>
+                <ChevronDownIcon className="h-4 w-4 stroke-2 pointer-events-none absolute top-0 bottom-0 right-2 my-auto" />
+            </div>
         </Filter>
     );
 }
@@ -384,25 +394,27 @@ function ToggleButton({
 
 function MediaCard({ media }: { media: Media }) {
     return (
-        <div className="w-full rounded overflow-hidden relative cursor-pointer">
-            <img
-                src={media.imageUrl}
-                alt={media.title}
-                className="h-full w-full aspect-[2/3] object-cover object-center"
-            />
-            <div className="absolute top-0 bottom-0 left-0 right-0 bg-zinc-950/70 p-2 flex flex-col justify-between opacity-0 hover:opacity-100 backdrop-blur-0 hover:backdrop-blur-sm transition-all">
-                <div>
-                    <div className="text-white/80 text-sm text-left line-clamp-4">
-                        {media.title}
-                    </div>
+        <div className="w-full h-full rounded relative cursor-pointer flex flex-col gap-2 group">
+            <div className="relative">
+                <img
+                    src={media.imageUrl}
+                    alt={media.title}
+                    className="w-full aspect-[2/3] object-cover object-center rounded"
+                />
+                <div className="opacity-0 group-hover:opacity-100 absolute top-0 bottom-0 left-0 right-0 bg-zinc-950/30 transition-all"></div>
+            </div>
+            <div className="flex flex-col gap-1 flex-1">
+                <div className="text-sm text-zinc-200 group-hover:text-white line-clamp-2 leading-tight transition">
+                    {media.title}
                 </div>
-                <div className="flex flex-col items-start gap-1">
-                    <div className="text-xs text-left line-clamp-1">
-                        {media.genres.join(", ")}
-                    </div>
-                    <div className="text-xs font-bold p-1 leading-none rounded bg-white/90 text-black">
-                        {media.format.toUpperCase()}
-                    </div>
+                <div className="text-xs text-zinc-400 line-clamp-1 mt-auto">
+                    {media.isAdult && (
+                        <>
+                            <span className="text-red-500">+18</span> —
+                        </>
+                    )}{" "}
+                    {media.startDate?.getFullYear()} {media.format}{" "}
+                    {media.genres.length > 0 && "— " + media.genres.join(", ")}
                 </div>
             </div>
         </div>
@@ -428,7 +440,7 @@ function MediaRow({ media }: { media: Media }) {
                 alt={media.title}
             />
             <div className="flex flex-col justify-center flex-1">
-                <div className="text-white/80 group-hover:text-white transition text-left line-clamp-1">
+                <div className="text-zinc-200 group-hover:text-white transition text-left line-clamp-1">
                     {media.title}
                 </div>
                 <div className="flex flex-row items-center gap-2">

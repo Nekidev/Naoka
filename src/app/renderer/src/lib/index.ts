@@ -58,18 +58,16 @@ export interface Config {
 
 export class Media {
     constructor(
+        readonly type: SearchType,
         readonly id: string,
         readonly title: string,
-        readonly description: string,
         readonly imageUrl: string,
         readonly bannerUrl: string | null,
         readonly format: string,
-        readonly source: string,
         readonly status: string,
         readonly genres: string[],
         readonly startDate: Date | null,
         readonly endDate: Date | null,
-        readonly rating: string | null,
         readonly isAdult: boolean,
     ) {}
 }
@@ -93,6 +91,15 @@ export class BaseAPI {
         /*
         Returns a tuple of an array of Anime objects and a boolean indicating if there was an error.
         */
-        return [[], true];
+        throw Error("Not implemented");
+    }
+
+    async getMedia({ id }: { id: string }, type: SearchType): Promise<[Media | null, boolean]> {
+        /*
+        Returns a tuple of a Media object and a boolean indicating if there was an error.
+        */
+        throw Error("Not implemented");
     }
 }
+
+export type APIProvider = "myanimelist";

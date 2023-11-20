@@ -66,15 +66,15 @@ function MenuButtons(): JSX.Element {
                     title="Search"
                     href="/search"
                 />
-                <MenuItem
+                {/* <MenuItem
                     icon={<FireIcon className="w-6 h-6" />}
                     title="Explore"
                     href="/"
-                />
+                /> */}
                 <MenuItem
                     icon={<BookmarkIcon className="w-6 h-6" />}
                     title="My library"
-                    href="/library"
+                    href="/"
                 />
             </div>
         </div>

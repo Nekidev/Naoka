@@ -147,10 +147,143 @@ export class MyAnimeList extends BaseAPI {
                 ],
             },
             manga: {
-                filters: [],
+                sortBy: [
+                    {
+                        label: "Popularity",
+                        value: "popularity",
+                    },
+                    {
+                        label: "Rank",
+                        value: "rank",
+                    },
+                    {
+                        label: "Rating",
+                        value: "score",
+                    },
+                    {
+                        label: "Title",
+                        value: "title",
+                    },
+                    {
+                        label: "Chapters",
+                        value: "chapters",
+                    },
+                    {
+                        label: "Volumes",
+                        value: "volumes",
+                    },
+                    {
+                        label: "Start date",
+                        value: "start_date",
+                    },
+                    {
+                        label: "End date",
+                        value: "end_date",
+                    },
+                ],
+                filters: [
+                    {
+                        type: "select",
+                        value: {
+                            name: "type",
+                            label: "Type",
+                            values: [
+                                {
+                                    label: "All",
+                                    value: "",
+                                },
+                                {
+                                    label: "Manga",
+                                    value: "manga",
+                                },
+                                {
+                                    label: "Light novel",
+                                    value: "lightnovel",
+                                },
+                                {
+                                    label: "One shot",
+                                    value: "oneshot",
+                                },
+                                {
+                                    label: "Doujinshi",
+                                    value: "doujin",
+                                },
+                                {
+                                    label: "Manhwa",
+                                    value: "manhwa",
+                                },
+                                {
+                                    label: "Manhua",
+                                    value: "manhua",
+                                },
+                            ],
+                        },
+                    },
+                    {
+                        type: "select",
+                        value: {
+                            name: "status",
+                            label: "Status",
+                            values: [
+                                {
+                                    label: "All",
+                                    value: "",
+                                },
+                                {
+                                    label: "Upcoming",
+                                    value: "upcoming",
+                                },
+                                {
+                                    label: "Publishing",
+                                    value: "publishing",
+                                },
+                                {
+                                    label: "Hiatus",
+                                    value: "hiatus",
+                                },
+                                {
+                                    label: "Discontinued",
+                                    value: "discontinued",
+                                },
+                                {
+                                    label: "Complete",
+                                    value: "complete",
+                                },
+                            ],
+                        },
+                    },
+                    {
+                        type: "checkbox",
+                        value: {
+                            name: "sfw",
+                            label: "Filter NSFW results",
+                            defaultValue: true,
+                        },
+                    },
+                ],
             },
         },
     };
+
+    private mediaFromAnimeJSON(anime: any): Media {
+        return new Media(
+            "anime",
+            anime.mal_id,
+            anime.titles.find((title: { type: string; title: string }) => {
+                return title.type === "Default";
+            }).title,
+            anime.images.webp.image_url,
+            anime.images.webp.large_image_url,
+            anime.type,
+            anime.status,
+            anime.genres.map((genre: any) => genre.name),
+            anime.aired.from ? new Date(anime.aired.from) : null,
+            anime.aired.to ? new Date(anime.aired.to) : null,
+            anime.rating
+                ? ["R+", "Rx"].includes(anime.rating.slice(0, 2).toLowerCase())
+                : false
+        );
+    }
 
     private async searchAnime(options: {
         [key: string]: any;
@@ -171,32 +304,95 @@ export class MyAnimeList extends BaseAPI {
         }
 
         const data = await res.json();
-        let animes: Media[] = data.data.map(
-            (anime: any) =>
-                new Media(
-                    anime.mal_id,
-                    anime.titles.find(
-                        (title: { type: string; title: string }) => {
-                            return title.type === "Default";
-                        }
-                    ).title,
-                    anime.synopsis,
-                    anime.images.webp.image_url,
-                    anime.images.webp.large_image_url,
-                    anime.type,
-                    anime.source,
-                    anime.status,
-                    anime.genres.map((genre: any) => genre.name),
-                    anime.aired.from ? new Date(anime.aired.from) : null,
-                    anime.aired.to ? new Date(anime.aired.to) : null,
-                    anime.rating,
-                    anime.rating
-                        ? anime.rating.slice(0, 1).toLowerCase() == "r"
-                        : false
-                )
+        let animes: Media[] = data.data.map((anime: any) =>
+            this.mediaFromAnimeJSON(anime)
         );
 
         return [animes, false];
+    }
+
+    private async getAnime({
+        id,
+    }: {
+        id: string;
+    }): Promise<[Media | null, boolean]> {
+        let url = `https://api.jikan.moe/v4/anime/${id}/full`;
+
+        const res = await fetch(url);
+
+        if (res.ok === false) {
+            return [null, true];
+        }
+
+        const data = await res.json();
+        let anime = this.mediaFromAnimeJSON(data.data);
+
+        return [anime, false];
+    }
+
+    private mediaFromMangaJSON(manga: any): Media {
+        return new Media(
+            "manga",
+            manga.mal_id,
+            manga.titles.find((title: { type: string; title: string }) => {
+                return title.type === "Default";
+            }).title,
+            manga.images.webp.image_url,
+            manga.images.webp.large_image_url,
+            manga.type,
+            manga.status,
+            manga.genres.map((genre: any) => genre.name),
+            manga.published.from ? new Date(manga.published.from) : null,
+            manga.published.to ? new Date(manga.published.to) : null,
+            manga.rating
+                ? ["R+", "Rx"].includes(manga.rating.slice(0, 2).toLowerCase())
+                : false
+        );
+    }
+
+    private async searchManga(options: {
+        [key: string]: any;
+    }): Promise<[Media[], boolean]> {
+        let url = `https://api.jikan.moe/v4/manga?q=${encodeURIComponent(
+            options.query
+        )}&order_by=${options.sortBy}&sort=asc`;
+
+        delete options.query;
+        delete options.sortBy;
+
+        url += `&${serializeURL(options)}`;
+
+        const res = await fetch(url);
+
+        if (res.ok === false) {
+            return [[], true];
+        }
+
+        const data = await res.json();
+        let mangas: Media[] = data.data.map((manga: any) =>
+            this.mediaFromMangaJSON(manga)
+        );
+
+        return [mangas, false];
+    }
+
+    private async getManga({
+        id,
+    }: {
+        id: string;
+    }): Promise<[Media | null, boolean]> {
+        let url = `https://api.jikan.moe/v4/manga/${id}/full`;
+
+        const res = await fetch(url);
+
+        if (res.ok === false) {
+            return [null, true];
+        }
+
+        const data = await res.json();
+        let manga = this.mediaFromMangaJSON(data.data);
+
+        return [manga, false];
     }
 
     async search(
@@ -207,8 +403,27 @@ export class MyAnimeList extends BaseAPI {
             case "anime":
                 return await this.searchAnime(options);
 
+            case "manga":
+                return await this.searchManga(options);
+
             default:
                 return [[], true];
+        }
+    }
+
+    async getMedia(
+        { id }: { id: string },
+        type: SearchType
+    ): Promise<[Media | null, boolean]> {
+        switch (type) {
+            case "anime":
+                return await this.getAnime({ id });
+
+            case "manga":
+                return await this.getManga({ id });
+
+            default:
+                return [null, true];
         }
     }
 }
