@@ -6,6 +6,36 @@ export class MyAnimeList extends BaseAPI {
     config: Config = {
         search: {
             anime: {
+                sortBy: [
+                    {
+                        label: "Popularity",
+                        value: "popularity",
+                    },
+                    {
+                        label: "Rank",
+                        value: "rank",
+                    },
+                    {
+                        label: "Rating",
+                        value: "score",
+                    },
+                    {
+                        label: "Title",
+                        value: "title",
+                    },
+                    {
+                        label: "Episodes",
+                        value: "episodes",
+                    },
+                    {
+                        label: "Start date",
+                        value: "start_date",
+                    },
+                    {
+                        label: "End date",
+                        value: "end_date",
+                    },
+                ],
                 filters: [
                     {
                         type: "select",
@@ -127,8 +157,11 @@ export class MyAnimeList extends BaseAPI {
     }): Promise<[Media[], boolean]> {
         let url = `https://api.jikan.moe/v4/anime?q=${encodeURIComponent(
             options.query
-        )}`;
-        options.query = undefined;
+        )}&order_by=${options.sortBy}&sort=asc`;
+
+        delete options.query;
+        delete options.sortBy;
+
         url += `&${serializeURL(options)}`;
 
         const res = await fetch(url);
@@ -157,7 +190,9 @@ export class MyAnimeList extends BaseAPI {
                     anime.aired.from ? new Date(anime.aired.from) : null,
                     anime.aired.to ? new Date(anime.aired.to) : null,
                     anime.rating,
-                    anime.rating.slice(0, 1).toLowerCase() == "r"
+                    anime.rating
+                        ? anime.rating.slice(0, 1).toLowerCase() == "r"
+                        : false
                 )
         );
 

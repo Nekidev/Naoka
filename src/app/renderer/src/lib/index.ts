@@ -27,6 +27,10 @@ interface SearchConfig {
     // Delay to wait after a key is pressed before executing a query. Will be 0
     // if no delay is specified. Use this to prevent 429 errors.
     typingDelay?: number;
+    sortBy?: {
+        label: string;
+        value: string;
+    }[];
     filters: (
         | {
               type: "select";
@@ -79,8 +83,10 @@ export class BaseAPI {
     async search(
         {
             query,
+            sortBy
         }: {
             query: string;
+            sortBy: string | null;
         },
         type: SearchType
     ): Promise<[Media[], boolean]> {

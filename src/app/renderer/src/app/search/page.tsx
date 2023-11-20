@@ -9,6 +9,7 @@ import {
     CheckIcon,
     HeartIcon,
     ChevronDownIcon,
+    ChevronUpDownIcon,
 } from "@heroicons/react/24/outline";
 import { VerticalNavSpacer, LeftNavSpacer } from "@/components/NavigationBar";
 import {
@@ -35,6 +36,7 @@ export default function Search() {
     const [error, setError] = React.useState<string | null>(null);
 
     const filtersFormRef = React.useRef<HTMLFormElement | null>(null);
+    const sortByRef = React.useRef<HTMLSelectElement | null>(null);
 
     const search = async () => {
         setLoading(true);
@@ -52,7 +54,7 @@ export default function Search() {
         });
 
         const [res, error] = await api.search(
-            { query, ...filters },
+            { query, sortBy: sortByRef.current?.value || null, ...filters },
             searchType
         );
 
@@ -121,29 +123,53 @@ export default function Search() {
                 </div>
             </div>
             <div className="px-4 pt-2 flex flex-row items-stretch gap-4 flex-1">
-                <div className="flex-1 flex flex-col gap-6">
-                    <div className="flex flex-row gap-4 items-center">
-                        <TextInput
-                            name="search"
-                            icon={<MagnifyingGlassIcon className="h-6 w-6" />}
-                            label={`Search in ${api.title}`}
-                            value={query}
-                            onChange={(e: any) => setQuery(e.target.value)}
-                        />
-                        <div className="flex flex-row items-center rounded bg-zinc-800 overflow-hidden">
-                            <ToggleButton
-                                selected={displayMode == "list"}
-                                onClick={() => setDisplayMode("list")}
-                            >
-                                <Bars4Icon className="h-6 w-6" />
-                            </ToggleButton>
-                            <ToggleButton
-                                selected={displayMode == "grid"}
-                                onClick={() => setDisplayMode("grid")}
-                            >
-                                <Squares2X2Icon className="h-6 w-6" />
-                            </ToggleButton>
+                <div className="flex-1 flex flex-col gap-4">
+                    <div className="flex flex-col gap-2">
+                        <div className="flex flex-row gap-4 items-center">
+                            <TextInput
+                                name="search"
+                                icon={
+                                    <MagnifyingGlassIcon className="h-6 w-6" />
+                                }
+                                label={`Search in ${api.title}`}
+                                value={query}
+                                onChange={(e: any) => setQuery(e.target.value)}
+                            />
+                            <div className="flex flex-row items-center rounded bg-zinc-800 overflow-hidden">
+                                <ToggleButton
+                                    selected={displayMode == "list"}
+                                    onClick={() => setDisplayMode("list")}
+                                >
+                                    <Bars4Icon className="h-6 w-6" />
+                                </ToggleButton>
+                                <ToggleButton
+                                    selected={displayMode == "grid"}
+                                    onClick={() => setDisplayMode("grid")}
+                                >
+                                    <Squares2X2Icon className="h-6 w-6" />
+                                </ToggleButton>
+                            </div>
                         </div>
+                        {api.config.search[searchType]?.sortBy && (
+                            <div className="relative text-zinc-400 cursor-pointer transition hover:text-zinc-300">
+                                <select
+                                    className="bg-zinc-900 text-sm appearance-none pl-5 pr-2 outline-none cursor-pointer"
+                                    ref={sortByRef}
+                                >
+                                    {api.config.search[searchType]?.sortBy?.map(
+                                        (s) => (
+                                            <option
+                                                key={s.value}
+                                                value={s.value}
+                                            >
+                                                {s.label}
+                                            </option>
+                                        )
+                                    )}
+                                </select>
+                                <ChevronUpDownIcon className="h-4 w-4 absolute top-0 bottom-0 left-0 my-auto stroke-2 pointer-events-none" />
+                            </div>
+                        )}
                     </div>
                     <div className="flex-1 relative">
                         <div
