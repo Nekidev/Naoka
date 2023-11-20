@@ -8,6 +8,10 @@ export class MyAnimeList extends BaseAPI {
             anime: {
                 sortBy: [
                     {
+                        label: "Relevance",
+                        value: "",
+                    },
+                    {
                         label: "Popularity",
                         value: "popularity",
                     },
@@ -149,6 +153,10 @@ export class MyAnimeList extends BaseAPI {
             manga: {
                 sortBy: [
                     {
+                        label: "Relevance",
+                        value: "",
+                    },
+                    {
                         label: "Popularity",
                         value: "popularity",
                     },
@@ -280,7 +288,7 @@ export class MyAnimeList extends BaseAPI {
             anime.aired.from ? new Date(anime.aired.from) : null,
             anime.aired.to ? new Date(anime.aired.to) : null,
             anime.rating
-                ? ["R+", "Rx"].includes(anime.rating.slice(0, 2).toLowerCase())
+                ? ["R+", "Rx"].includes(anime.rating.slice(0, 2))
                 : false
         );
     }
@@ -290,7 +298,11 @@ export class MyAnimeList extends BaseAPI {
     }): Promise<[Media[], boolean]> {
         let url = `https://api.jikan.moe/v4/anime?q=${encodeURIComponent(
             options.query
-        )}&order_by=${options.sortBy}&sort=asc`;
+        )}`;
+
+        if (options.sortBy != null) {
+            url += `&order_by=${options.sortBy}&sort=asc`;
+        }
 
         delete options.query;
         delete options.sortBy;
@@ -345,7 +357,7 @@ export class MyAnimeList extends BaseAPI {
             manga.published.from ? new Date(manga.published.from) : null,
             manga.published.to ? new Date(manga.published.to) : null,
             manga.rating
-                ? ["R+", "Rx"].includes(manga.rating.slice(0, 2).toLowerCase())
+                ? ["R+", "Rx"].includes(manga.rating.slice(0, 2))
                 : false
         );
     }
@@ -355,7 +367,11 @@ export class MyAnimeList extends BaseAPI {
     }): Promise<[Media[], boolean]> {
         let url = `https://api.jikan.moe/v4/manga?q=${encodeURIComponent(
             options.query
-        )}&order_by=${options.sortBy}&sort=asc`;
+        )}`;
+
+        if (options.sortBy != null) {
+            url += `&order_by=${options.sortBy}&sort=asc`;
+        }
 
         delete options.query;
         delete options.sortBy;
