@@ -27,6 +27,9 @@
     "dependencies": {
         "@heroicons/react": "^2.0.18",
         "@radix-ui/react-select": "^2.0.0",
+        "@types/lodash": "^4.14.201",
+        "dexie": "^3.2.4",
+        "dexie-react-hooks": "^1.1.7",
         "electron": "^27.1.0",
         "electron-is-dev": "^2.0.0",
         "electron-next": "^3.1.5"

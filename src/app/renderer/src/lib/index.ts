@@ -47,6 +47,12 @@ interface SearchConfig {
     )[];
 }
 
+interface Mapping {
+    type: MediaType;
+    provider: string;
+    id: string;
+}
+
 export interface Config {
     search: {
         anime?: SearchConfig;
@@ -68,7 +74,8 @@ export class Media {
         readonly genres: string[],
         readonly startDate: Date | null,
         readonly endDate: Date | null,
-        readonly isAdult: boolean
+        readonly isAdult: boolean,
+        readonly mappings: Mapping[]
     ) {}
 }
 

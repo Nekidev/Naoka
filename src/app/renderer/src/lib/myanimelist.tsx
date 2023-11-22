@@ -289,7 +289,14 @@ export class MyAnimeList extends BaseAPI {
             anime.aired.to ? new Date(anime.aired.to) : null,
             anime.rating
                 ? ["R+", "Rx"].includes(anime.rating.slice(0, 2))
-                : false
+                : false,
+            [
+                {
+                    type: "anime",
+                    provider: "myanimelist/anime",
+                    id: anime.mal_id.toString(),
+                },
+            ]
         );
     }
 
@@ -312,6 +319,7 @@ export class MyAnimeList extends BaseAPI {
         const res = await fetch(url);
 
         if (res.ok === false) {
+            console.log(res);
             return [[], true];
         }
 
@@ -358,7 +366,14 @@ export class MyAnimeList extends BaseAPI {
             manga.published.to ? new Date(manga.published.to) : null,
             manga.rating
                 ? ["R+", "Rx"].includes(manga.rating.slice(0, 2))
-                : false
+                : false,
+            [
+                {
+                    type: "manga",
+                    provider: "myanimelist/manga",
+                    id: manga.mal_id.toString(),
+                },
+            ]
         );
     }
 
@@ -381,6 +396,7 @@ export class MyAnimeList extends BaseAPI {
         const res = await fetch(url);
 
         if (res.ok === false) {
+            console.log(res);
             return [[], true];
         }
 
@@ -415,16 +431,23 @@ export class MyAnimeList extends BaseAPI {
         options: { [key: string]: any },
         type: MediaType
     ): Promise<[Media[], boolean]> {
+        let result: [Media[], boolean];
+
         switch (type) {
             case "anime":
-                return await this.searchAnime(options);
+                result = await this.searchAnime(options);
+                break;
 
             case "manga":
-                return await this.searchManga(options);
+                result = await this.searchManga(options);
+                break;
 
             default:
-                return [[], true];
+                console.log("API got an invalid media type:", type);
+                result = [[], true];
         }
+
+        return result;
     }
 
     async getMedia(

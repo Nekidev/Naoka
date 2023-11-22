@@ -59,11 +59,13 @@ export default function Search() {
                 searchType
             );
             if (error) {
+                console.log("API wrapper returned an error:", error);
                 setError("Oops! An error occurred :/");
             } else {
                 setResults(res);
             }
         } catch (e) {
+            console.log(e);
             setError("Oops! An error occurred :/");
         }
 
@@ -433,7 +435,7 @@ function Grid({ results }: { results: Media[] }) {
 
 function MediaRow({ media }: { media: Media }) {
     return (
-        <button className="flex flex-row items-center gap-4 rounded group transition py-2">
+        <div className="flex flex-row items-center gap-4 rounded group transition py-2 cursor-pointer">
             <img
                 className="w-10 rounded aspect-square object-cover object-center"
                 src={media.imageUrl}
@@ -444,7 +446,7 @@ function MediaRow({ media }: { media: Media }) {
                     {media.title}
                 </div>
                 <div className="flex flex-row items-center gap-2">
-                    <div className="text-xs text-zinc-400">
+                    <div className="text-xs text-zinc-400 line-clamp-1 text-left">
                         {media.isAdult && (
                             <>
                                 <span className="text-red-500">+18</span> —
@@ -475,7 +477,7 @@ function MediaRow({ media }: { media: Media }) {
                     <PlusIcon className="w-4 h-4 stroke-2" />
                 </button>
             </div>
-        </button>
+        </div>
     );
 }
 
