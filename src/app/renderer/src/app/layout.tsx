@@ -1,5 +1,3 @@
-"use client";
-
 import React from "react";
 import { Rubik } from "next/font/google";
 import SideBar from "@/components/SideBar";

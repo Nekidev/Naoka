@@ -18,7 +18,7 @@ export class InternalAPI {
     set config(value: object) {
         fs.writeFileSync(
             "config.json",
-            JSON.stringify(value, null, 4),
+            JSON.stringify(value, null, 2),
             "utf-8"
         );
     }

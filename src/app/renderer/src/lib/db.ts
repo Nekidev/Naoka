@@ -1,20 +1,6 @@
-import { IntRange } from "@/utils/types";
 import Dexie, { Table } from "dexie";
-
-type MediaType = "anime" | "manga";
-
-type LibraryStatus =
-    | "not_started"
-    | "planned"
-    | "in_progress"
-    | "paused"
-    | "dropped"
-    | "completed";
-
-type Provider = "myanimelist";
-
-// Provider:MediaType:ID
-type Mapping = `${Provider}:${MediaType}:${string}`;
+import { IntRange } from "@/utils/types";
+import { MediaType, Mapping, LibraryStatus, APIProvider } from "./types";
 
 interface MediaCache {
     id?: number;
@@ -22,7 +8,7 @@ interface MediaCache {
     title: string;
     imageUrl: string | null;
     bannerUrl: string | null;
-    mappings: Mapping[];
+    mapping: Mapping;
 }
 
 interface LibraryEntry {
@@ -44,7 +30,7 @@ interface List {
     id?: number;
     name: string;
     items: Mapping[];
-    syncedProviders: Provider[];
+    syncedProviders: APIProvider[];
     updatedAt: Date;
     createdAt: Date;
     accessedAt: Date;
@@ -59,7 +45,7 @@ export class NaokaDB extends Dexie {
         super("Naoka");
 
         this.version(1).stores({
-            mediaCache: "++id, type",
+            mediaCache: "++id, type, &mapping",
             library: "++id, type, status, score, &mapping",
             lists: "++id, name",
         });

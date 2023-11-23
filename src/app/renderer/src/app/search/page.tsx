@@ -14,18 +14,20 @@ import {
 import { VerticalNavSpacer, LeftNavSpacer } from "@/components/NavigationBar";
 import {
     Media,
-    MediaType,
     SelectInput as SelectInputInterface,
     CheckboxInput as CheckboxInputInterface,
-} from "@/lib";
-import getAPI from "@/lib/api";
+} from "@/lib/providers";
+import { Mapping, MediaType } from "@/lib/types";
+import API from "@/lib/api";
 import { cn } from "@/utils";
 import styles from "./styles.module.css";
+import Link from "next/link";
+import LibraryEntryModal from "@/components/LibraryEntryModal";
 
 export default function Search() {
     const [searchType, setSearchType] = React.useState<MediaType>("anime");
 
-    const api = getAPI("myanimelist");
+    const api = new API("myanimelist");
 
     const [displayMode, setDisplayMode] = React.useState<"list" | "grid">(
         "list"
@@ -37,6 +39,9 @@ export default function Search() {
 
     const filtersFormRef = React.useRef<HTMLFormElement | null>(null);
     const sortByRef = React.useRef<HTMLSelectElement | null>(null);
+
+    const [libraryEntryModalMapping, setLibraryEntryModalMapping] =
+        React.useState<Mapping | null>(null);
 
     const search = async () => {
         setLoading(true);
@@ -104,144 +109,169 @@ export default function Search() {
     const enabledSearchTypes = [
         ...(api?.config.search.anime ? ["anime"] : []),
         ...(api?.config.search.manga ? ["manga"] : []),
-        ...(api?.config.search.characters ? ["characters"] : []),
-        ...(api?.config.search.people ? ["people"] : []),
     ];
 
     return (
-        <main className="flex flex-col min-h-full">
-            <div className="flex flex-row items-center">
-                <VerticalNavSpacer />
-                <LeftNavSpacer />
-                <div className="flex flex-row gap-2 items-center">
-                    {enabledSearchTypes.map((type) => (
-                        <Chip
-                            key={type}
-                            label={
-                                type.slice(0, 1).toUpperCase() + type.slice(1)
-                            }
-                            code={type}
-                            selectedCode={searchType}
-                            setSelectedCode={setSearchType}
-                        />
-                    ))}
-                </div>
-            </div>
-            <div className="px-4 pt-2 flex flex-row items-stretch gap-4 flex-1">
-                <div className="flex-1 flex flex-col gap-4">
-                    <div className="flex flex-col gap-2">
-                        <div className="flex flex-row gap-4 items-center">
-                            <TextInput
-                                name="search"
-                                icon={
-                                    <MagnifyingGlassIcon className="h-6 w-6" />
+        <>
+            <main className="flex flex-col min-h-full">
+                <div className="flex flex-row items-center">
+                    <VerticalNavSpacer />
+                    <LeftNavSpacer />
+                    <div className="flex flex-row gap-2 items-center">
+                        {enabledSearchTypes.map((type) => (
+                            <Chip
+                                key={type}
+                                label={
+                                    type.slice(0, 1).toUpperCase() +
+                                    type.slice(1)
                                 }
-                                label={`Search in ${api.title}`}
-                                value={query}
-                                onChange={(e: any) => setQuery(e.target.value)}
+                                code={type}
+                                selectedCode={searchType}
+                                setSelectedCode={setSearchType}
                             />
-                            <div className="flex flex-row items-center rounded bg-zinc-800 overflow-hidden">
-                                <ToggleButton
-                                    selected={displayMode == "list"}
-                                    onClick={() => setDisplayMode("list")}
-                                >
-                                    <Bars4Icon className="h-6 w-6" />
-                                </ToggleButton>
-                                <ToggleButton
-                                    selected={displayMode == "grid"}
-                                    onClick={() => setDisplayMode("grid")}
-                                >
-                                    <Squares2X2Icon className="h-6 w-6" />
-                                </ToggleButton>
+                        ))}
+                    </div>
+                </div>
+                <div className="px-4 pt-2 flex flex-row items-stretch gap-4 flex-1">
+                    <div className="flex-1 flex flex-col gap-4">
+                        <div className="flex flex-col gap-2">
+                            <div className="flex flex-row gap-4 items-center">
+                                <TextInput
+                                    name="search"
+                                    icon={
+                                        <MagnifyingGlassIcon className="h-6 w-6" />
+                                    }
+                                    label={`Search in ${api.title}`}
+                                    value={query}
+                                    onChange={(e: any) =>
+                                        setQuery(e.target.value)
+                                    }
+                                />
+                                <div className="flex flex-row items-center rounded bg-zinc-800 overflow-hidden">
+                                    <ToggleButton
+                                        selected={displayMode == "list"}
+                                        onClick={() => setDisplayMode("list")}
+                                    >
+                                        <Bars4Icon className="h-6 w-6" />
+                                    </ToggleButton>
+                                    <ToggleButton
+                                        selected={displayMode == "grid"}
+                                        onClick={() => setDisplayMode("grid")}
+                                    >
+                                        <Squares2X2Icon className="h-6 w-6" />
+                                    </ToggleButton>
+                                </div>
                             </div>
-                        </div>
-                        {api.config.search[searchType]?.sortBy && (
-                            <div className="relative text-zinc-400 cursor-pointer transition hover:text-zinc-300 w-fit">
-                                <select
-                                    className="bg-zinc-900 text-sm appearance-none pl-5 pr-2 outline-none cursor-pointer"
-                                    ref={sortByRef}
-                                >
-                                    {api.config.search[searchType]?.sortBy?.map(
-                                        (s) => (
+                            {api.config.search[searchType]?.sortBy && (
+                                <div className="relative text-zinc-400 cursor-pointer transition hover:text-zinc-300 w-fit">
+                                    <select
+                                        className="bg-zinc-900 text-sm appearance-none pl-5 pr-2 outline-none cursor-pointer"
+                                        ref={sortByRef}
+                                        onChange={() => {
+                                            search();
+                                        }}
+                                    >
+                                        {api.config.search[
+                                            searchType
+                                        ]?.sortBy?.map((s: any) => (
                                             <option
                                                 key={s.value}
                                                 value={s.value}
                                             >
                                                 {s.label}
                                             </option>
-                                        )
-                                    )}
-                                </select>
-                                <ChevronUpDownIcon className="h-4 w-4 absolute top-0 bottom-0 left-0 my-auto stroke-2 pointer-events-none" />
-                            </div>
-                        )}
-                    </div>
-                    <div className="flex-1 relative">
-                        <div
-                            className={cn([
-                                "absolute top-0 bottom-0 left-0 right-0 pb-4",
-                                styles.scrollable,
-                            ])}
-                        >
-                            {loading ? (
-                                <div className="flex flex-col items-center justify-center h-full">
-                                    <div className="h-6 w-6 border-2 border-white/90 border-t-transparent rounded-full animate-spin"></div>
+                                        ))}
+                                    </select>
+                                    <ChevronUpDownIcon className="h-4 w-4 absolute top-0 bottom-0 left-0 my-auto stroke-2 pointer-events-none" />
                                 </div>
-                            ) : error ? (
-                                <div className="h-full w-full flex flex-col items-center justify-center text-center">
-                                    (╯°□°）╯︵ ┻━┻
-                                    <br />
-                                    Oops, an error occurred!
-                                </div>
-                            ) : results.length == 0 && query == "" ? (
-                                <div className="h-full w-full flex flex-col items-center justify-center text-center">
-                                    (◕‿◕✿)
-                                    <br />
-                                    Start typing to search!
-                                </div>
-                            ) : results.length == 0 ? (
-                                <div className="h-full w-full flex flex-col items-center justify-center text-center">
-                                    (╥﹏╥)
-                                    <br />
-                                    Oops, No results for that query!
-                                </div>
-                            ) : displayMode == "list" ? (
-                                <List results={results} />
-                            ) : (
-                                <Grid results={results} />
                             )}
                         </div>
+                        <div className="flex-1 relative">
+                            <div
+                                className={cn([
+                                    "absolute top-0 bottom-0 left-0 right-0 pb-4",
+                                    styles.scrollable,
+                                ])}
+                            >
+                                {loading ? (
+                                    <div className="flex flex-col items-center justify-center h-full">
+                                        <div className="h-6 w-6 border-2 border-white/90 border-t-transparent rounded-full animate-spin"></div>
+                                    </div>
+                                ) : error ? (
+                                    <div className="h-full w-full flex flex-col items-center justify-center text-center">
+                                        (╯°□°）╯︵ ┻━┻
+                                        <br />
+                                        Oops, an error occurred!
+                                    </div>
+                                ) : results.length == 0 && query == "" ? (
+                                    <div className="h-full w-full flex flex-col items-center justify-center text-center">
+                                        (◕‿◕✿)
+                                        <br />
+                                        Start typing to search!
+                                    </div>
+                                ) : results.length == 0 ? (
+                                    <div className="h-full w-full flex flex-col items-center justify-center text-center">
+                                        (╥﹏╥)
+                                        <br />
+                                        Oops, No results for that query!
+                                    </div>
+                                ) : displayMode == "list" ? (
+                                    <List
+                                        results={results}
+                                        openLibraryEntryModal={
+                                            setLibraryEntryModalMapping
+                                        }
+                                    />
+                                ) : (
+                                    <Grid
+                                        results={results}
+                                        openLibraryEntryModal={
+                                            setLibraryEntryModalMapping
+                                        }
+                                    />
+                                )}
+                            </div>
+                        </div>
                     </div>
-                </div>
-                <div className="w-px bg-zinc-800"></div>
-                <form className="w-60 flex flex-col gap-4" ref={filtersFormRef}>
-                    <div className="text-lg font-medium">Filters</div>
-                    {api.config.search[searchType]?.filters.map(
-                        (filter, index) => {
-                            switch (filter.type) {
-                                case "select":
-                                    return (
-                                        <SelectFilter
-                                            key={index}
-                                            onChange={search}
-                                            {...filter.value}
-                                        />
-                                    );
+                    <div className="w-px bg-zinc-800"></div>
+                    <form
+                        className="w-60 flex flex-col gap-4"
+                        ref={filtersFormRef}
+                    >
+                        <div className="text-lg font-medium">Filters</div>
+                        {api.config.search[searchType]?.filters.map(
+                            (filter: any, index: number) => {
+                                switch (filter.type) {
+                                    case "select":
+                                        return (
+                                            <SelectFilter
+                                                key={index}
+                                                onChange={search}
+                                                {...filter.value}
+                                            />
+                                        );
 
-                                case "checkbox":
-                                    return (
-                                        <CheckboxFilter
-                                            key={index}
-                                            onChange={search}
-                                            {...filter.value}
-                                        />
-                                    );
+                                    case "checkbox":
+                                        return (
+                                            <CheckboxFilter
+                                                key={index}
+                                                onChange={search}
+                                                {...filter.value}
+                                            />
+                                        );
+                                }
                             }
-                        }
-                    )}
-                </form>
-            </div>
-        </main>
+                        )}
+                    </form>
+                </div>
+            </main>
+            {libraryEntryModalMapping && (
+                <LibraryEntryModal
+                    mapping={libraryEntryModalMapping}
+                    closeModal={() => setLibraryEntryModalMapping(null)}
+                />
+            )}
+        </>
     );
 }
 
@@ -394,9 +424,12 @@ function ToggleButton({
     );
 }
 
-function MediaCard({ media }: { media: Media }) {
+function MediaCard({ media, onClick }: { media: Media; onClick: any }) {
     return (
-        <div className="w-full h-full rounded relative cursor-pointer flex flex-col gap-2 group">
+        <div
+            className="w-full h-full rounded relative cursor-pointer flex flex-col gap-2 group"
+            onClick={onClick}
+        >
             <div className="relative">
                 <img
                     src={media.imageUrl}
@@ -423,19 +456,32 @@ function MediaCard({ media }: { media: Media }) {
     );
 }
 
-function Grid({ results }: { results: Media[] }) {
+function Grid({
+    results,
+    openLibraryEntryModal,
+}: {
+    results: Media[];
+    openLibraryEntryModal: any;
+}) {
     return (
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-6 relative gap-4">
             {results.map((media) => (
-                <MediaCard key={media.id} media={media} />
+                <MediaCard
+                    key={media.id}
+                    media={media}
+                    onClick={() => openLibraryEntryModal(media.mappings[0])}
+                />
             ))}
         </div>
     );
 }
 
-function MediaRow({ media }: { media: Media }) {
+function MediaRow({ media, onClick }: { media: Media; onClick: any }) {
     return (
-        <div className="flex flex-row items-center gap-4 rounded group transition py-2 cursor-pointer">
+        <div
+            className="flex flex-row items-center gap-4 rounded group transition py-2 cursor-pointer"
+            onClick={onClick}
+        >
             <img
                 className="w-10 rounded aspect-square object-cover object-center"
                 src={media.imageUrl}
@@ -481,11 +527,21 @@ function MediaRow({ media }: { media: Media }) {
     );
 }
 
-function List({ results }: { results: Media[] }) {
+function List({
+    results,
+    openLibraryEntryModal,
+}: {
+    results: Media[];
+    openLibraryEntryModal: any;
+}) {
     return (
         <div className="flex flex-col -my-2">
             {results.map((result) => (
-                <MediaRow key={result.id} media={result} />
+                <MediaRow
+                    key={result.id}
+                    media={result}
+                    onClick={() => openLibraryEntryModal(result.mappings[0])}
+                />
             ))}
         </div>
     );

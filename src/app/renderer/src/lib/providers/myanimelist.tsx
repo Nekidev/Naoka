@@ -1,4 +1,5 @@
-import { BaseAPI, Config, Media, MediaType } from "@/lib";
+import { BaseAPI, Config, Media } from "@/lib/providers";
+import { MediaType } from "../types";
 import { serializeURL } from "@/utils";
 
 export class MyAnimeList extends BaseAPI {
@@ -290,13 +291,7 @@ export class MyAnimeList extends BaseAPI {
             anime.rating
                 ? ["R+", "Rx"].includes(anime.rating.slice(0, 2))
                 : false,
-            [
-                {
-                    type: "anime",
-                    provider: "myanimelist/anime",
-                    id: anime.mal_id.toString(),
-                },
-            ]
+            [`myanimelist:anime:${anime.mal_id.toString()}`]
         );
     }
 
@@ -368,11 +363,7 @@ export class MyAnimeList extends BaseAPI {
                 ? ["R+", "Rx"].includes(manga.rating.slice(0, 2))
                 : false,
             [
-                {
-                    type: "manga",
-                    provider: "myanimelist/manga",
-                    id: manga.mal_id.toString(),
-                },
+                `myanimelist:manga:${manga.mal_id.toString()}`,
             ]
         );
     }

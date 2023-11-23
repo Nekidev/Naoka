@@ -1,4 +1,4 @@
-export type MediaType = "anime" | "manga";
+import { MediaType, Mapping } from "../types";
 
 interface Input {
     name: string;
@@ -47,18 +47,10 @@ interface SearchConfig {
     )[];
 }
 
-interface Mapping {
-    type: MediaType;
-    provider: string;
-    id: string;
-}
-
 export interface Config {
     search: {
         anime?: SearchConfig;
         manga?: SearchConfig;
-        characters?: SearchConfig;
-        people?: SearchConfig;
     };
 }
 
@@ -86,12 +78,8 @@ export class BaseAPI {
     };
 
     async search(
-        {
-            query,
-            sortBy,
-        }: {
-            query: string;
-            sortBy: string | null;
+        options: {
+            [key: string]: any;
         },
         type: MediaType
     ): Promise<[Media[], boolean]> {
@@ -111,5 +99,3 @@ export class BaseAPI {
         throw Error("Not implemented");
     }
 }
-
-export type APIProvider = "myanimelist";
