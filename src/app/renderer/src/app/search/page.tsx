@@ -265,12 +265,10 @@ export default function Search() {
                     </form>
                 </div>
             </main>
-            {libraryEntryModalMapping && (
-                <LibraryEntryModal
-                    mapping={libraryEntryModalMapping}
-                    closeModal={() => setLibraryEntryModalMapping(null)}
-                />
-            )}
+            <LibraryEntryModal
+                mapping={libraryEntryModalMapping}
+                closeModal={() => setLibraryEntryModalMapping(null)}
+            />
         </>
     );
 }

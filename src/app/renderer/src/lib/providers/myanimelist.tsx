@@ -281,8 +281,8 @@ export class MyAnimeList extends BaseAPI {
             anime.titles.find((title: { type: string; title: string }) => {
                 return title.type === "Default";
             }).title,
-            anime.images.webp.image_url,
             anime.images.webp.large_image_url,
+            null,
             anime.type,
             anime.status,
             anime.genres.map((genre: any) => genre.name),
@@ -352,8 +352,8 @@ export class MyAnimeList extends BaseAPI {
             manga.titles.find((title: { type: string; title: string }) => {
                 return title.type === "Default";
             }).title,
-            manga.images.webp.image_url,
             manga.images.webp.large_image_url,
+            null,
             manga.type,
             manga.status,
             manga.genres.map((genre: any) => genre.name),
