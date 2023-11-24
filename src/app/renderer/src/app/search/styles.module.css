@@ -6,12 +6,4 @@
         @apply overflow-auto -mr-4;
         scrollbar-gutter: stable;
     }
-    .scrollable::-webkit-scrollbar {
-        @apply w-4;
-    }
-    .scrollable::-webkit-scrollbar-thumb {
-        @apply bg-zinc-700 rounded-full;
-        border: 6px solid transparent;
-        background-clip: content-box;
-    }
 }

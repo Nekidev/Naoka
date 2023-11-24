@@ -2,9 +2,37 @@
 @tailwind components;
 @tailwind utilities;
 
-
 @layer base {
-    html, body {
+    html,
+    body {
         @apply bg-zinc-900 text-white/90 select-none;
+    }
+
+    input::-webkit-outer-spin-button,
+    input::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+    }
+    input[type="number"] {
+        -moz-appearance: textfield;
+        appearance: textfield;
+    }
+
+    input[type="date"]::-webkit-calendar-picker-indicator {
+        color: transparent;
+        background: none;
+        z-index: 1;
+    }
+
+    ::-webkit-scrollbar {
+        @apply w-4;
+    }
+    ::-webkit-scrollbar-thumb {
+        @apply bg-zinc-700 rounded-full;
+        border: 6px solid transparent;
+        background-clip: content-box;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+        @apply bg-zinc-600;
     }
 }

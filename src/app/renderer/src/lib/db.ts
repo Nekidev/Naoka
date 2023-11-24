@@ -20,8 +20,8 @@ interface LibraryEntry {
     chapterProgress?: number;
     volumeProgress?: number;
     restarts: number;
-    startDate: Date;
-    finishDate: Date;
+    startDate: Date | null;
+    finishDate: Date | null;
     notes: string;
     mapping: Mapping;
 }
