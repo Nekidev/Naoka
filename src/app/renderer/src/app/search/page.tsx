@@ -177,6 +177,7 @@ export default function Search() {
                                             <option
                                                 key={s.value}
                                                 value={s.value}
+                                                className="text-zinc-300"
                                             >
                                                 {s.label}
                                             </option>

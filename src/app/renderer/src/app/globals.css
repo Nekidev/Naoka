@@ -36,3 +36,10 @@
         @apply bg-zinc-600;
     }
 }
+
+@layer components {
+    .draggable {
+        @apply active:cursor-grabbing;
+        -webkit-app-region: drag;
+    }
+}
