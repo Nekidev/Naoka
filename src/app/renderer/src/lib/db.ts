@@ -3,7 +3,6 @@ import { IntRange } from "@/utils/types";
 import { MediaType, Mapping, LibraryStatus, APIProvider } from "./types";
 
 export interface MediaCache {
-    id?: number;
     type: MediaType;
     title: string;
     imageUrl: string | null;
@@ -12,7 +11,6 @@ export interface MediaCache {
 }
 
 export interface LibraryEntry {
-    id?: number;
     type: MediaType;
     status: LibraryStatus;
     score: IntRange<1, 100>;
@@ -45,8 +43,8 @@ export class NaokaDB extends Dexie {
         super("Naoka");
 
         this.version(1).stores({
-            mediaCache: "++id, type, &mapping",
-            library: "++id, type, status, score, &mapping",
+            mediaCache: "&mapping, type",
+            library: "&mapping, type, status, score",
             lists: "++id, name",
         });
     }

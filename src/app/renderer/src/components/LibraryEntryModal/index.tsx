@@ -98,13 +98,11 @@ function Modal({
                             name="status"
                         >
                             <option value="not_started">
-                                Not yet{" "}
-                                {mediaType == "anime" ? "watched" : "read"}
+                                Not {mediaType == "anime" ? "watched" : "read"}
                             </option>
                             <option value="planned">Planned</option>
                             <option value="in_progress">
-                                Currently{" "}
-                                {mediaType == "anime" ? "watching" : "reading"}
+                                {mediaType == "anime" ? "Watching" : "Reading"}
                             </option>
                             <option value="paused">Paused</option>
                             <option value="dropped">Dropped</option>
@@ -199,7 +197,7 @@ function Modal({
                                 className="text-sm rounded p-2 border border-zinc-700 leading-none text-zinc-400 transition hover:border-red-400 hover:bg-red-400 hover:text-zinc-950"
                                 onClick={() => {
                                     db.library
-                                        .delete(libraryEntry.id!)
+                                        .delete(libraryEntry.mapping!)
                                         .then(() => {
                                             closeModal();
                                         });
@@ -216,7 +214,6 @@ function Modal({
                                 const formData = new FormData(formRef.current!);
 
                                 const newLibraryEntry: LibraryEntry = {
-                                    id: libraryEntry?.id,
                                     type: mediaType,
                                     status: formData.get(
                                         "status"

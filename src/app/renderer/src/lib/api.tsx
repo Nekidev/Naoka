@@ -39,7 +39,7 @@ export default class API {
         const [results, error] = await this.api.search(options, type);
 
         db.mediaCache
-            .bulkAdd(
+            .bulkPut(
                 results.map((value: Media, index: number) => {
                     return {
                         type: value.type,
