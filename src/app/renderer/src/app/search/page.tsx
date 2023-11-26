@@ -426,6 +426,16 @@ function ToggleButton({
 }
 
 function MediaCard({ media, onClick }: { media: Media; onClick: any }) {
+    const libraryEntry = useLiveQuery(
+        () => db.library.get({ mapping: media.mappings[0] }),
+        [media],
+        {
+            ...defaultLibraryEntry,
+            type: media.type,
+            mapping: media.mappings[0],
+        }
+    );
+
     return (
         <div
             className="w-full h-full rounded relative cursor-pointer flex flex-col gap-2 group"
@@ -438,6 +448,11 @@ function MediaCard({ media, onClick }: { media: Media; onClick: any }) {
                     className="w-full aspect-[2/3] object-cover object-center rounded"
                 />
                 <div className="opacity-0 group-hover:opacity-100 absolute top-0 bottom-0 left-0 right-0 bg-zinc-950/30 transition-all"></div>
+                {libraryEntry?.favorite && (
+                    <button className="rounded-full bg-zinc-950 absolute top-1 left-1 p-1">
+                        <HeartIcon className="h-3 w-3 text-red-400 fill-red-400" />
+                    </button>
+                )}
             </div>
             <div className="flex flex-col gap-1 flex-1">
                 <div className="text-sm text-zinc-200 group-hover:text-white line-clamp-2 leading-tight transition">

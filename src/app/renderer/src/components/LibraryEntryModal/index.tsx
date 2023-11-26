@@ -172,7 +172,7 @@ function Modal({
                     <div className="text-lg flex-1">{mediaCache.title}</div>
                 </div>
                 <form
-                    className="p-8 pt-12 grid grid-cols-3 gap-8 relative"
+                    className="p-8 pt-12 grid grid-cols-3 gap-8"
                     onSubmit={(e) => e.preventDefault()}
                     ref={formRef}
                 >
