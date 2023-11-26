@@ -12,6 +12,7 @@ export interface MediaCache {
 
 export interface LibraryEntry {
     type: MediaType;
+    favorite: boolean;
     status: LibraryStatus;
     score: IntRange<1, 100>;
     episodeProgress?: number;
@@ -44,7 +45,7 @@ export class NaokaDB extends Dexie {
 
         this.version(1).stores({
             mediaCache: "&mapping, type",
-            library: "&mapping, type, status, score",
+            library: "&mapping, type, favorite, status, score",
             lists: "++id, name",
         });
     }

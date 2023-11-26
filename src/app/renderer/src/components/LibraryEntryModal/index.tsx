@@ -6,6 +6,8 @@ import {
     CalendarIcon,
     ChevronDownIcon,
     ChevronUpIcon,
+    HeartIcon,
+    PlusIcon,
     StarIcon,
     XMarkIcon,
 } from "@heroicons/react/24/outline";
@@ -43,7 +45,49 @@ function Modal({
 
     const formRef = React.useRef<HTMLFormElement>(null);
 
+    const isFavorite =
+        useLiveQuery(() => db.library.get({ mapping }))?.favorite || false;
+
     if (!mediaCache) return null;
+
+    function save(overrides = {}) {
+        const formData = new FormData(formRef.current!);
+
+        const newLibraryEntry: LibraryEntry = {
+            type: mediaType,
+            favorite: isFavorite,
+            status: formData.get("status") as LibraryStatus,
+            score: parseInt(formData.get("score") as string) as IntRange<
+                1,
+                100
+            >,
+            episodeProgress:
+                parseInt(formData.get("episodeProgress") as string) || 0,
+            chapterProgress:
+                parseInt(formData.get("chapterProgress") as string) || 0,
+            volumeProgress:
+                parseInt(formData.get("volumeProgress") as string) || 0,
+            restarts: parseInt(formData.get("restarts") as string),
+            startDate: formData.get("startDate")
+                ? new Date(formData.get("startDate") as string)
+                : null,
+            finishDate: formData.get("finishDate")
+                ? new Date(formData.get("finishDate") as string)
+                : null,
+            notes: formData.get("notes") as string,
+            mapping: mapping,
+            ...overrides,
+        };
+
+        db.library
+            .put(newLibraryEntry as LibraryEntry)
+            .then((value) => {
+                console.log("updated!");
+            })
+            .catch((error) => {
+                console.error(error);
+            });
+    }
 
     return (
         <motion.div
@@ -75,17 +119,44 @@ function Modal({
                     }}
                 ></div>
                 <div className="flex flex-row px-8 py-4 gap-4 relative h-40 items-end">
-                    <button
-                        className="p-2 rounded-full absolute top-2 right-2"
-                        onClick={closeModal}
-                    >
-                        <XMarkIcon className="w-6 h-6" />
-                    </button>
+                    <div className="absolute top-2 right-2 flex flex-row items-center gap-2">
+                        <button className="flex flex-row items-center gap-2 text-xs p-2 leading-none rounded hover:bg-zinc-950/20 transition">
+                            <PlusIcon className="h-4 w-4 stroke-2" />
+                            Add to list
+                        </button>
+                        <button
+                            className="flex flex-row items-center gap-2 text-xs p-2 leading-none rounded hover:bg-zinc-950/20 transition"
+                            onClick={() => {
+                                db.library
+                                    .update(mapping, { favorite: !isFavorite })
+                                    .then((updated) => {
+                                        if (!updated) {
+                                            save({ favorite: true });
+                                        }
+                                    });
+                            }}
+                        >
+                            <HeartIcon
+                                className={`h-4 w-4 stroke-2 ${
+                                    libraryEntry?.favorite
+                                        ? "text-red-400 fill-red-400"
+                                        : ""
+                                }`}
+                            />
+                            Favorite
+                        </button>
+                        <button
+                            className="p-2 rounded-full"
+                            onClick={closeModal}
+                        >
+                            <XMarkIcon className="w-6 h-6" />
+                        </button>
+                    </div>
                     <img
                         className="w-24 aspect-cover rounded -mb-10 object-cover object-center"
                         src={mediaCache.imageUrl!}
                     />
-                    <div className="text-lg">{mediaCache.title}</div>
+                    <div className="text-lg flex-1">{mediaCache.title}</div>
                 </div>
                 <form
                     className="p-8 pt-12 grid grid-cols-3 gap-8 relative"
@@ -178,9 +249,11 @@ function Modal({
                         title="Notes"
                         span={mediaType == "anime" ? 3 : 2}
                     >
-                        <TextArea rows={1} name="notes">
-                            {libraryEntry?.notes}
-                        </TextArea>
+                        <TextArea
+                            rows={1}
+                            name="notes"
+                            defaulValue={libraryEntry?.notes}
+                        />
                     </LibraryEntryInput>
                     {mediaType == "manga" && (
                         <LibraryEntryInput title={"Total Rereads"}>
@@ -210,67 +283,7 @@ function Modal({
                         )}
                         <button
                             className="bg-zinc-100 rounded py-2 px-4 leading-none text-sm text-zinc-950 hover:opacity-70 transition"
-                            onClick={() => {
-                                const formData = new FormData(formRef.current!);
-
-                                const newLibraryEntry: LibraryEntry = {
-                                    type: mediaType,
-                                    status: formData.get(
-                                        "status"
-                                    ) as LibraryStatus,
-                                    score: parseInt(
-                                        formData.get("score") as string
-                                    ) as IntRange<1, 100>,
-                                    episodeProgress:
-                                        parseInt(
-                                            formData.get(
-                                                "episodeProgress"
-                                            ) as string
-                                        ) || 0,
-                                    chapterProgress:
-                                        parseInt(
-                                            formData.get(
-                                                "chapterProgress"
-                                            ) as string
-                                        ) || 0,
-                                    volumeProgress:
-                                        parseInt(
-                                            formData.get(
-                                                "volumeProgress"
-                                            ) as string
-                                        ) || 0,
-                                    restarts: parseInt(
-                                        formData.get("restarts") as string
-                                    ),
-                                    startDate: formData.get("startDate")
-                                        ? new Date(
-                                              formData.get(
-                                                  "startDate"
-                                              ) as string
-                                          )
-                                        : null,
-                                    finishDate: formData.get("finishDate")
-                                        ? new Date(
-                                              formData.get(
-                                                  "finishDate"
-                                              ) as string
-                                          )
-                                        : null,
-                                    notes: formData.get("notes") as string,
-                                    mapping: mapping,
-                                };
-
-                                console.log(newLibraryEntry);
-
-                                db.library
-                                    .put(newLibraryEntry as LibraryEntry)
-                                    .then((value) => {
-                                        console.log("updated!");
-                                    })
-                                    .catch((error) => {
-                                        console.error(error);
-                                    });
-                            }}
+                            onClick={save}
                         >
                             Save
                         </button>
@@ -501,9 +514,7 @@ function TextArea({ ...props }: { [key: string]: any }) {
             <textarea
                 className="rounded p-2 bg-zinc-900 w-full text-sm outline-none peer placeholder:text-zinc-400 resize-y"
                 {...props}
-            >
-                {props.children}
-            </textarea>
+            ></textarea>
         </div>
     );
 }
