@@ -10,9 +10,10 @@ import {
     XMarkIcon,
 } from "@heroicons/react/24/outline";
 
-import { Mapping, MediaType } from "@/lib/types";
-import { db } from "@/lib/db";
+import { LibraryStatus, Mapping, MediaType } from "@/lib/types";
+import { LibraryEntry, db } from "@/lib/db";
 import React from "react";
+import { IntRange } from "@/utils/types";
 
 export default function LibraryEntryModal({
     mapping,
@@ -39,6 +40,8 @@ function Modal({
     const mediaCache = useLiveQuery(() => db.mediaCache.get({ mapping }));
 
     const mediaType = mapping.split(":")[1] as MediaType;
+
+    const formRef = React.useRef<HTMLFormElement>(null);
 
     if (!mediaCache) return null;
 
@@ -84,7 +87,11 @@ function Modal({
                     />
                     <div className="text-lg">{mediaCache.title}</div>
                 </div>
-                <div className="p-8 pt-12 grid grid-cols-3 gap-8 relative">
+                <form
+                    className="p-8 pt-12 grid grid-cols-3 gap-8 relative"
+                    onSubmit={(e) => e.preventDefault()}
+                    ref={formRef}
+                >
                     <LibraryEntryInput title="Status">
                         <SelectInput
                             defaultValue={libraryEntry?.status || "not_started"}
@@ -133,10 +140,24 @@ function Modal({
                         </LibraryEntryInput>
                     )}
                     <LibraryEntryInput title="Start Date">
-                        <DateInput defaultValue={libraryEntry?.finishDate} />
+                        <DateInput
+                            defaultValue={
+                                libraryEntry?.startDate
+                                    ?.toISOString()
+                                    .split("T")[0]
+                            }
+                            name="startDate"
+                        />
                     </LibraryEntryInput>
                     <LibraryEntryInput title="Finish Date">
-                        <DateInput defaultValue={libraryEntry?.finishDate} />
+                        <DateInput
+                            defaultValue={
+                                libraryEntry?.finishDate
+                                    ?.toISOString()
+                                    .split("T")[0]
+                            }
+                            name="finishDate"
+                        />
                     </LibraryEntryInput>
                     {mediaType == "anime" ? (
                         <LibraryEntryInput title={"Total Rewatches"}>
@@ -159,7 +180,9 @@ function Modal({
                         title="Notes"
                         span={mediaType == "anime" ? 3 : 2}
                     >
-                        <TextArea rows={1}>{libraryEntry?.notes}</TextArea>
+                        <TextArea rows={1} name="notes">
+                            {libraryEntry?.notes}
+                        </TextArea>
                     </LibraryEntryInput>
                     {mediaType == "manga" && (
                         <LibraryEntryInput title={"Total Rereads"}>
@@ -170,7 +193,92 @@ function Modal({
                             />
                         </LibraryEntryInput>
                     )}
-                </div>
+                    <div className="flex flex-row items-center justify-between col-span-3">
+                        {libraryEntry ? (
+                            <button
+                                className="text-sm rounded p-2 border border-zinc-700 leading-none text-zinc-400 transition hover:border-red-400 hover:bg-red-400 hover:text-zinc-950"
+                                onClick={() => {
+                                    db.library
+                                        .delete(libraryEntry.id!)
+                                        .then(() => {
+                                            closeModal();
+                                        });
+                                }}
+                            >
+                                Remove from library
+                            </button>
+                        ) : (
+                            <div></div>
+                        )}
+                        <button
+                            className="bg-zinc-100 rounded py-2 px-4 leading-none text-sm text-zinc-950 hover:opacity-70 transition"
+                            onClick={() => {
+                                const formData = new FormData(formRef.current!);
+
+                                const newLibraryEntry: LibraryEntry = {
+                                    id: libraryEntry?.id,
+                                    type: mediaType,
+                                    status: formData.get(
+                                        "status"
+                                    ) as LibraryStatus,
+                                    score: parseInt(
+                                        formData.get("score") as string
+                                    ) as IntRange<1, 100>,
+                                    episodeProgress:
+                                        parseInt(
+                                            formData.get(
+                                                "episodeProgress"
+                                            ) as string
+                                        ) || 0,
+                                    chapterProgress:
+                                        parseInt(
+                                            formData.get(
+                                                "chapterProgress"
+                                            ) as string
+                                        ) || 0,
+                                    volumeProgress:
+                                        parseInt(
+                                            formData.get(
+                                                "volumeProgress"
+                                            ) as string
+                                        ) || 0,
+                                    restarts: parseInt(
+                                        formData.get("restarts") as string
+                                    ),
+                                    startDate: formData.get("startDate")
+                                        ? new Date(
+                                              formData.get(
+                                                  "startDate"
+                                              ) as string
+                                          )
+                                        : null,
+                                    finishDate: formData.get("finishDate")
+                                        ? new Date(
+                                              formData.get(
+                                                  "finishDate"
+                                              ) as string
+                                          )
+                                        : null,
+                                    notes: formData.get("notes") as string,
+                                    mapping: mapping,
+                                };
+
+                                console.log(newLibraryEntry);
+
+                                db.library
+                                    .put(newLibraryEntry as LibraryEntry)
+                                    .then((value) => {
+                                        console.log("updated!");
+                                    })
+                                    .catch((error) => {
+                                        console.error(error);
+                                    });
+                            }}
+                        >
+                            Save
+                        </button>
+                    </div>
+                </form>
             </motion.div>
         </motion.div>
     );

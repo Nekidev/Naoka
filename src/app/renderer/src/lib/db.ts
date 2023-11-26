@@ -2,7 +2,7 @@ import Dexie, { Table } from "dexie";
 import { IntRange } from "@/utils/types";
 import { MediaType, Mapping, LibraryStatus, APIProvider } from "./types";
 
-interface MediaCache {
+export interface MediaCache {
     id?: number;
     type: MediaType;
     title: string;
@@ -11,7 +11,7 @@ interface MediaCache {
     mapping: Mapping;
 }
 
-interface LibraryEntry {
+export interface LibraryEntry {
     id?: number;
     type: MediaType;
     status: LibraryStatus;
@@ -26,7 +26,7 @@ interface LibraryEntry {
     mapping: Mapping;
 }
 
-interface List {
+export interface List {
     id?: number;
     name: string;
     items: Mapping[];
