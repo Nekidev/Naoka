@@ -1,6 +1,6 @@
 import Dexie, { Table } from "dexie";
 import { IntRange } from "@/utils/types";
-import { MediaType, Mapping, LibraryStatus, APIProvider } from "./types";
+import { MediaType, Mapping, LibraryStatus, APIProvider } from "../types";
 
 export interface MediaCache {
     type: MediaType;

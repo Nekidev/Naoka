@@ -16,6 +16,7 @@ import { LibraryStatus, Mapping, MediaType } from "@/lib/types";
 import { LibraryEntry, db } from "@/lib/db";
 import React from "react";
 import { IntRange } from "@/utils/types";
+import { defaultLibraryEntry } from "@/lib/db/defaults";
 
 export default function LibraryEntryModal({
     mapping,
@@ -38,15 +39,22 @@ function Modal({
     mapping: Mapping;
     closeModal: () => void;
 }) {
-    const libraryEntry = useLiveQuery(() => db.library.get({ mapping }));
-    const mediaCache = useLiveQuery(() => db.mediaCache.get({ mapping }));
-
     const mediaType = mapping.split(":")[1] as MediaType;
 
-    const formRef = React.useRef<HTMLFormElement>(null);
+    const libraryEntry: LibraryEntry | undefined = useLiveQuery(
+        () => db.library.get({ mapping }),
+        [mapping],
+        {
+            ...defaultLibraryEntry,
+            type: mediaType,
+            mapping: mapping,
+        }
+    );
+    const isFavorite = libraryEntry?.favorite || false;
 
-    const isFavorite =
-        useLiveQuery(() => db.library.get({ mapping }))?.favorite || false;
+    const mediaCache = useLiveQuery(() => db.mediaCache.get({ mapping }));
+
+    const formRef = React.useRef<HTMLFormElement>(null);
 
     if (!mediaCache) return null;
 
@@ -81,9 +89,7 @@ function Modal({
 
         db.library
             .put(newLibraryEntry as LibraryEntry)
-            .then((value) => {
-                console.log("updated!");
-            })
+            .then((value) => {})
             .catch((error) => {
                 console.error(error);
             });
@@ -91,7 +97,7 @@ function Modal({
 
     return (
         <motion.div
-            className="fixed top-0 bottom-0 left-0 right-0 bg-zinc-950/50 flex flex-col items-center justify-center p-8"
+            className="fixed top-0 bottom-0 left-0 right-0 bg-zinc-950/50 flex flex-col items-center justify-center p-8 z-30"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -131,7 +137,14 @@ function Modal({
                                     .update(mapping, { favorite: !isFavorite })
                                     .then((updated) => {
                                         if (!updated) {
-                                            save({ favorite: true });
+                                            db.library
+                                                .add({
+                                                    ...defaultLibraryEntry,
+                                                    type: mediaType,
+                                                    mapping: mapping,
+                                                    favorite: !isFavorite,
+                                                })
+                                                .then((value) => {});
                                         }
                                     });
                             }}
@@ -177,7 +190,7 @@ function Modal({
                             </option>
                             <option value="paused">Paused</option>
                             <option value="dropped">Dropped</option>
-                            <option value="completed">Finished</option>
+                            <option value="completed">Completed</option>
                         </SelectInput>
                     </LibraryEntryInput>
                     <LibraryEntryInput title="Rating">

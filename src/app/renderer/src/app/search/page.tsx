@@ -17,12 +17,14 @@ import {
     SelectInput as SelectInputInterface,
     CheckboxInput as CheckboxInputInterface,
 } from "@/lib/providers";
-import { Mapping, MediaType } from "@/lib/types";
+import { LibraryStatus, Mapping, MediaType } from "@/lib/types";
 import API from "@/lib/api";
 import { cn } from "@/utils";
 import styles from "./styles.module.css";
-import Link from "next/link";
 import LibraryEntryModal from "@/components/LibraryEntryModal";
+import { useLiveQuery } from "dexie-react-hooks";
+import { db } from "@/lib/db";
+import { defaultLibraryEntry } from "@/lib/db/defaults";
 
 export default function Search() {
     const [searchType, setSearchType] = React.useState<MediaType>("anime");
@@ -476,11 +478,18 @@ function Grid({
 }
 
 function MediaRow({ media, onClick }: { media: Media; onClick: any }) {
+    const libraryEntry = useLiveQuery(
+        () => db.library.get({ mapping: media.mappings[0] }),
+        [media],
+        {
+            ...defaultLibraryEntry,
+            type: media.type,
+            mapping: media.mappings[0],
+        }
+    );
+
     return (
-        <div
-            className="flex flex-row items-center gap-4 rounded group transition py-2 cursor-pointer"
-            onClick={onClick}
-        >
+        <div className="flex flex-row items-center gap-4 rounded group transition py-2 cursor-pointer relative">
             <img
                 className="w-10 rounded aspect-square object-cover object-center"
                 src={media.imageUrl}
@@ -503,20 +512,84 @@ function MediaRow({ media, onClick }: { media: Media; onClick: any }) {
                     </div>
                 </div>
             </div>
-            <div className="opacity-0 group-hover:opacity-100 transition-all p-2 flex flex-row items-center gap-2">
+            {/* There is a separate div to handle the clicks to prevent the
+                modal from being opened when the buttons are clicked */}
+            <div
+                className="absolute top-0 bottom-0 left-0 right-0"
+                onClick={onClick}
+            ></div>
+            <div className="opacity-0 group-hover:opacity-100 transition-all p-2 flex flex-row items-center gap-2 z-10">
                 <div className="relative">
-                    <select className="text-xs py-1 pl-2 pr-6 rounded-full bg-zinc-800 transition hover:bg-zinc-700 appearance-none outline-none">
-                        <option className="bg-zinc-800">Not watched</option>
-                        <option className="bg-zinc-800">Planned</option>
-                        <option className="bg-zinc-800">Watching</option>
-                        <option className="bg-zinc-800">Paused</option>
-                        <option className="bg-zinc-800">Dropped</option>
-                        <option className="bg-zinc-800">Completed</option>
+                    <select
+                        className="text-xs py-1 pl-2 pr-6 rounded-full bg-zinc-800 transition hover:bg-zinc-700 appearance-none outline-none"
+                        value={libraryEntry?.status || "not_started"}
+                        onChange={(e) => {
+                            db.library
+                                .update(media.mappings[0], {
+                                    status: e.target.value,
+                                })
+                                .then((updated) => {
+                                    if (!updated) {
+                                        db.library.add({
+                                            ...defaultLibraryEntry,
+                                            type: media.type,
+                                            mapping: media.mappings[0],
+                                            status: e.target
+                                                .value as LibraryStatus,
+                                        });
+                                    }
+                                });
+                        }}
+                    >
+                        <option className="bg-zinc-800" value="not_started">
+                            Not {media.type == "anime" ? "watched" : "read"}
+                        </option>
+                        <option className="bg-zinc-800" value="planned">
+                            Planned
+                        </option>
+                        <option className="bg-zinc-800" value="in_progress">
+                            {media.type == "anime" ? "Watching" : "Reading"}
+                        </option>
+                        <option className="bg-zinc-800" value="paused">
+                            Paused
+                        </option>
+                        <option className="bg-zinc-800" value="dropped">
+                            Dropped
+                        </option>
+                        <option className="bg-zinc-800" value="completed">
+                            Completed
+                        </option>
                     </select>
                     <ChevronDownIcon className="h-3 w-3 stroke-2 absolute top-0 bottom-0 right-2 my-auto pointer-events-none" />
                 </div>
-                <button className="rounded-full bg-zinc-800 p-1 transition hover:bg-zinc-700">
-                    <HeartIcon className="w-4 h-4 stroke-2" />
+                <button
+                    className="rounded-full bg-zinc-800 p-1 transition hover:bg-zinc-700"
+                    onClick={() => {
+                        db.library
+                            .update(media.mappings[0], {
+                                favorite: !libraryEntry?.favorite,
+                            })
+                            .then((updated) => {
+                                if (!updated) {
+                                    db.library
+                                        .add({
+                                            ...defaultLibraryEntry,
+                                            type: media.type,
+                                            mapping: media.mappings[0],
+                                            favorite: true,
+                                        })
+                                        .then((value) => {});
+                                }
+                            });
+                    }}
+                >
+                    <HeartIcon
+                        className={`w-4 h-4 stroke-2 ${
+                            libraryEntry?.favorite
+                                ? "text-red-400 fill-red-400"
+                                : ""
+                        }`}
+                    />
                 </button>
                 <button className="rounded-full bg-zinc-800 p-1 transition hover:bg-zinc-700">
                     <PlusIcon className="w-4 h-4 stroke-2" />
