@@ -295,8 +295,12 @@ function Modal({
                             <div></div>
                         )}
                         <button
-                            className="bg-zinc-100 rounded py-2 px-4 leading-none text-sm text-zinc-950 hover:opacity-70 transition"
-                            onClick={save}
+                            className="bg-zinc-100 border border-transparent rounded py-2 px-4 leading-none text-sm text-zinc-950 hover:opacity-70 transition"
+                            onClick={() => {
+                                // Don't replace by onClick={save} as it'll add
+                                // all event props to the lib entry
+                                save();
+                            }}
                         >
                             Save
                         </button>
