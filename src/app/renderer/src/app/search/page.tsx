@@ -25,6 +25,8 @@ import LibraryEntryModal from "@/components/LibraryEntryModal";
 import { useLiveQuery } from "dexie-react-hooks";
 import { db } from "@/lib/db";
 import { defaultLibraryEntry } from "@/lib/db/defaults";
+import Chip from "@/components/Chip";
+import TextInput from "@/components/TextInput";
 
 export default function Search() {
     const [searchType, setSearchType] = React.useState<MediaType>("anime");
@@ -127,9 +129,10 @@ export default function Search() {
                                     type.slice(0, 1).toUpperCase() +
                                     type.slice(1)
                                 }
-                                code={type}
-                                selectedCode={searchType}
-                                setSelectedCode={setSearchType}
+                                selected={searchType === type}
+                                onClick={() => {
+                                    setSearchType(type as MediaType);
+                                }}
                             />
                         ))}
                     </div>
@@ -273,58 +276,6 @@ export default function Search() {
                 closeModal={() => setLibraryEntryModalMapping(null)}
             />
         </>
-    );
-}
-
-function Chip({
-    label,
-    code,
-    selectedCode,
-    setSelectedCode,
-}: {
-    label: string;
-    code: string;
-    selectedCode: string;
-    setSelectedCode: any;
-}) {
-    return (
-        <button
-            className={
-                "text-sm leading-none py-2 px-4 rounded-full transition " +
-                (code === selectedCode
-                    ? "bg-zinc-100 hover:bg-zinc-300 text-zinc-900"
-                    : "bg-zinc-800 hover:bg-zinc-700")
-            }
-            onClick={() => {
-                setSelectedCode(code);
-            }}
-        >
-            {label}
-        </button>
-    );
-}
-
-function TextInput({ name, icon, label, ...props }: { [key: string]: any }) {
-    return (
-        <div className="relative flex-1">
-            {icon && (
-                <div className="absolute top-0 bottom-0 left-2 my-auto h-fit">
-                    {icon}
-                </div>
-            )}
-            <input
-                type="text"
-                name={name}
-                placeholder={label}
-                className={cn([
-                    "p-2 py-2.5 leading-none rounded bg-zinc-800 outline-none border",
-                    "border-transparent focus:border-white transition placeholder:text-zinc-400",
-                    "text-white/90 w-full",
-                    ...(icon ? ["pl-10"] : []),
-                ])}
-                {...props}
-            />
-        </div>
     );
 }
 

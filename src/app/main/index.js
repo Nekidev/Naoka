@@ -29,7 +29,7 @@ app.on("ready", async () => {
     });
 
     const url = isDev
-        ? "http://localhost:8000"
+        ? "http://localhost:8000/library"
         : format({
               pathname: join(__dirname, "../renderer/out/index.html"),
               protocol: "file:",

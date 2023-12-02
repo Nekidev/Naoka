@@ -77,7 +77,7 @@ function MenuButtons(): JSX.Element {
                 <MenuItem
                     icon={<BookmarkIcon className="w-6 h-6" />}
                     title="My library"
-                    href="/"
+                    href="/library"
                 />
             </div>
         </div>
