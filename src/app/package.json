@@ -28,6 +28,7 @@
         "@heroicons/react": "^2.0.18",
         "@radix-ui/react-select": "^2.0.0",
         "@types/lodash": "^4.14.201",
+        "@uidotdev/usehooks": "^2.4.1",
         "dexie": "^3.2.4",
         "dexie-react-hooks": "^1.1.7",
         "electron": "^27.1.0",

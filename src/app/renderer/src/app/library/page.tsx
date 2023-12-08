@@ -14,7 +14,9 @@ import TextInput from "@/components/TextInput";
 import colors from "tailwindcss/colors";
 import { db, LibraryEntry } from "@/lib/db";
 import { useLiveQuery } from "dexie-react-hooks";
-import { LibraryStatus } from "@/lib/types";
+import { LibraryStatus, Mapping } from "@/lib/types";
+import LibraryEntryModal from "@/components/LibraryEntryModal";
+import { useDebounce } from "@uidotdev/usehooks";
 
 export default function Library() {
     const [mediaTypeFilters, setMediaTypeFilters] = React.useState<
@@ -22,86 +24,148 @@ export default function Library() {
     >([]);
 
     const [query, setQuery] = React.useState("");
+    const debouncedQuery = useDebounce(query, 300);
 
-    const libraryEntries = useLiveQuery(() => db.library.toArray());
+    const libraryEntries = useLiveQuery(() => {
+        return db.library.toArray(async (array: LibraryEntry[]) => {
+            let result = [];
+
+            for (let entry of array) {
+                if (mediaTypeFilters.length > 0) {
+                    if (
+                        (mediaTypeFilters.includes("favorites") &&
+                            !entry.favorite) ||
+                        ((mediaTypeFilters.includes("anime") ||
+                            mediaTypeFilters.includes("manga")) &&
+                            !mediaTypeFilters.includes(entry.type))
+                    ) {
+                        continue;
+                    }
+                }
+
+                entry.media = await db.mediaCache.get({
+                    mapping: entry.mapping,
+                });
+
+                if (
+                    !entry.media?.title
+                        .toLowerCase()
+                        .includes(query.toLowerCase())
+                )
+                    continue;
+
+                result.push(entry);
+            }
+
+            return result;
+        });
+    }, [debouncedQuery, mediaTypeFilters]);
+    const [openModalMapping, setOpenModalMapping] =
+        React.useState<null | Mapping>(null);
 
     return (
-        <main className="flex flex-col min-h-full">
-            <div className="flex flex-row items-center">
-                <VerticalNavSpacer />
-                <LeftNavSpacer />
-                <div className="flex flex-row gap-2 items-center">
-                    <button
-                        className={cn([
-                            "p-2 rounded-full bg-zinc-800 transition hover:bg-zinc-700 disabled:opacity-60",
-                            "disabled:hover:bg-zinc-800 disabled:cursor-not-allowed",
-                        ])}
-                        disabled={mediaTypeFilters.length === 0}
-                        onClick={() => {
-                            setMediaTypeFilters([]);
-                        }}
-                    >
-                        <XMarkIcon className="h-4 w-4 stroke-2" />
-                    </button>
-                    {["favorites", "anime", "manga"].map((type) => (
-                        <Chip
-                            key={type}
-                            label={
-                                type.slice(0, 1).toUpperCase() + type.slice(1)
-                            }
-                            selected={mediaTypeFilters.includes(type)}
-                            onClick={() => {
-                                setMediaTypeFilters((v) => {
-                                    if (v.includes(type)) {
-                                        return v.filter((t) => t !== type);
-                                    } else {
-                                        return [...v, type];
+        <>
+            <main className="flex flex-col min-h-full max-h-full overflow-y-auto">
+                <div className="sticky top-0 shrink-0 bg-zinc-900 z-10">
+                    <div className="flex flex-row items-center">
+                        <VerticalNavSpacer />
+                        <LeftNavSpacer />
+                        <div className="flex flex-row gap-2 items-center">
+                            <button
+                                className={cn([
+                                    "p-2 rounded-full bg-zinc-800 transition hover:bg-zinc-700 disabled:opacity-60",
+                                    "disabled:hover:bg-zinc-800 disabled:cursor-not-allowed",
+                                ])}
+                                disabled={mediaTypeFilters.length === 0}
+                                onClick={() => {
+                                    setMediaTypeFilters([]);
+                                }}
+                            >
+                                <XMarkIcon className="h-4 w-4 stroke-2" />
+                            </button>
+                            {["favorites", "anime", "manga"].map((type) => (
+                                <Chip
+                                    key={type}
+                                    label={
+                                        type.slice(0, 1).toUpperCase() +
+                                        type.slice(1)
                                     }
-                                });
-                            }}
+                                    selected={mediaTypeFilters.includes(type)}
+                                    onClick={() => {
+                                        setMediaTypeFilters((v) => {
+                                            if (v.includes(type)) {
+                                                return v.filter(
+                                                    (t) => t !== type
+                                                );
+                                            } else {
+                                                return [...v, type];
+                                            }
+                                        });
+                                    }}
+                                />
+                            ))}
+                        </div>
+                    </div>
+                    <div className="px-4 py-2 flex flex-col gap-4">
+                        <TextInput
+                            name="search"
+                            icon={<MagnifyingGlassIcon className="h-6 w-6" />}
+                            label={`Search in your library`}
+                            value={query}
+                            onChange={(e: any) => setQuery(e.target.value)}
                         />
-                    ))}
+                        <div className="flex flex-row items-center gap-4">
+                            <StatusSelector
+                                label="Not started"
+                                color={colors.yellow["400"]}
+                            />
+                            <StatusSelector
+                                label="Planned"
+                                color={colors.pink["400"]}
+                            />
+                            <StatusSelector
+                                label="In progress"
+                                color={colors.blue["400"]}
+                            />
+                            <StatusSelector
+                                label="Paused"
+                                color={colors.orange["400"]}
+                            />
+                            <StatusSelector
+                                label="Dropped"
+                                color={colors.red["400"]}
+                            />
+                            <StatusSelector
+                                label="Completed"
+                                color={colors.green["400"]}
+                            />
+                        </div>
+                    </div>
+                    <div className="h-px shrink-0 bg-zinc-800 mt-2"></div>
                 </div>
-            </div>
-            <div className="px-4 py-2 flex flex-col gap-4">
-                <TextInput
-                    name="search"
-                    icon={<MagnifyingGlassIcon className="h-6 w-6" />}
-                    label={`Search in your library`}
-                    value={query}
-                    onChange={(e: any) => setQuery(e.target.value)}
-                />
-                <div className="flex flex-row items-center gap-4">
-                    <StatusSelector
-                        label="Not started"
-                        color={colors.yellow["400"]}
-                    />
-                    <StatusSelector
-                        label="Planned"
-                        color={colors.pink["400"]}
-                    />
-                    <StatusSelector
-                        label="In progress"
-                        color={colors.blue["400"]}
-                    />
-                    <StatusSelector
-                        label="Paused"
-                        color={colors.orange["400"]}
-                    />
-                    <StatusSelector label="Dropped" color={colors.red["400"]} />
-                    <StatusSelector
-                        label="Completed"
-                        color={colors.green["400"]}
-                    />
-                </div>
-            </div>
-            <div className="h-px bg-zinc-800 mt-2"></div>
-            <div className="p-4 flex flex-col gap-4">
-                {libraryEntries?.map((entry) => (
-                    <LibraryEntryRow entry={entry} />
-                ))}
-            </div>
-        </main>
+                {libraryEntries ? (
+                    <div className="p-4 flex flex-col gap-4">
+                        {libraryEntries.map((entry) => (
+                            <LibraryEntryRow
+                                key={entry.mapping}
+                                entry={entry}
+                                openModal={() =>
+                                    setOpenModalMapping(entry.mapping)
+                                }
+                            />
+                        ))}
+                    </div>
+                ) : (
+                    <div className="flex-1 flex flex-col items-center justify-center">
+                        <div className="h-6 w-6 border-2 border-white/90 border-t-transparent rounded-full animate-spin"></div>
+                    </div>
+                )}
+            </main>
+            <LibraryEntryModal
+                mapping={openModalMapping}
+                closeModal={() => setOpenModalMapping(null)}
+            />
+        </>
     );
 }
 
@@ -119,13 +183,13 @@ function StatusSelector({ color, label }: { color: string; label: string }) {
     );
 }
 
-function LibraryEntryRow({ entry }: { entry: LibraryEntry }) {
-    const media = useLiveQuery(() =>
-        db.mediaCache.get({ mapping: entry.mapping })
-    );
-
-    if (!media) return null;
-
+function LibraryEntryRow({
+    entry,
+    openModal,
+}: {
+    entry: LibraryEntry;
+    openModal: any;
+}) {
     const statusColors: { [key in LibraryStatus]: string } = {
         not_started: colors.yellow["400"],
         planned: colors.pink["400"],
@@ -136,25 +200,50 @@ function LibraryEntryRow({ entry }: { entry: LibraryEntry }) {
     };
 
     return (
-        <div className="flex flex-row items-strtetch gap-4 p-2 -m-2 relative hover:bg-zinc-800 rounded transition cursor-pointer group">
+        <div
+            className="flex flex-row items-strtetch gap-4 p-2 -m-2 relative hover:bg-zinc-800 rounded transition cursor-pointer group"
+            onClick={() => openModal()}
+        >
             <div
                 className="w-1 rounded-full"
                 style={{
                     backgroundColor: statusColors[entry.status],
                 }}
             ></div>
-            <img
-                src={media.imageUrl!}
-                className="w-10 aspect-square rounded object-cover object-center"
-            />
-            <div className="flex flex-col justify-center text-zinc-300 group-hover:text-zinc-100 transition">
-                {media.title}
-                <span className="text-zinc-400 text-sm">
-                    {media.type == "anime" ? "Anime" : "Manga"}
+            {entry.media ? (
+                <img
+                    src={entry.media.imageUrl!}
+                    alt={entry.media.title}
+                    className="w-10 aspect-square rounded object-cover object-center"
+                />
+            ) : (
+                <div className="w-10 aspect-square rounded bg-zinc-800 group-hover:bg-zinc-700 transition animate-pulse"></div>
+            )}
+            <div className="flex flex-col gap-1 justify-center text-zinc-300 group-hover:text-zinc-100 transition">
+                {entry.media ? (
+                    <span className="line-clamp-1 leading-none">
+                        {entry.media?.title}
+                    </span>
+                ) : (
+                    <div
+                        className="h-4 rounded bg-zinc-800 group-hover:bg-zinc-700 transition animate-pulse"
+                        style={{ width: Math.random() * 200 + 30 + "px" }}
+                    ></div>
+                )}
+                <span className="text-zinc-400 text-sm leading-none">
+                    {entry.type == "anime" ? "Anime" : "Manga"}
                 </span>
             </div>
             <div className="flex-1"></div>
-            <div className="flex flex-row items-center gap-8">
+            <div className="flex flex-row items-center gap-8 text-zinc-400 text-sm whitespace-nowrap">
+                {entry.type == "anime" ? (
+                    <span>{entry.episodeProgress} eps.</span>
+                ) : (
+                    <span>
+                        {entry.chapterProgress} chs., {entry.volumeProgress}{" "}
+                        vol.
+                    </span>
+                )}
                 {entry.favorite ? (
                     <HeartIcon className="h-4 w-4 text-red-400 fill-red-400" />
                 ) : (

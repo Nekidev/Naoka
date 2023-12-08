@@ -23,6 +23,7 @@ export interface LibraryEntry {
     finishDate: Date | null;
     notes: string;
     mapping: Mapping;
+    media?: MediaCache;
 }
 
 export interface List {

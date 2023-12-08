@@ -17,6 +17,7 @@ import { LibraryEntry, db } from "@/lib/db";
 import React from "react";
 import { IntRange } from "@/utils/types";
 import { defaultLibraryEntry } from "@/lib/db/defaults";
+import ImageModal from "../ImageModal";
 
 export default function LibraryEntryModal({
     mapping,
@@ -55,6 +56,8 @@ function Modal({
     const mediaCache = useLiveQuery(() => db.mediaCache.get({ mapping }));
 
     const formRef = React.useRef<HTMLFormElement>(null);
+
+    const [isImageModalOpen, setIsImageModalOpen] = React.useState(false);
 
     if (!mediaCache) return null;
 
@@ -96,218 +99,236 @@ function Modal({
     }
 
     return (
-        <motion.div
-            className="fixed top-0 bottom-0 left-0 right-0 bg-zinc-950/50 flex flex-col items-center justify-center p-8 z-30"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.2 }}
-        >
-            <div
-                className="absolute top-0 bottom-0 left-0 right-0"
-                onClick={closeModal}
-            ></div>
+        <>
             <motion.div
-                className="w-full max-w-3xl bg-zinc-800 relative rounded overflow-x-hidden overflow-y-auto shadow-2xl"
-                initial={{
-                    translateY: 10,
-                }}
-                animate={{ translateY: 0 }}
-                exit={{ translateY: 10 }}
+                className="fixed top-0 bottom-0 left-0 right-0 bg-zinc-950/50 flex flex-col items-center justify-center p-8 z-30"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
                 transition={{ duration: 0.2 }}
             >
                 <div
-                    className="h-40 bg-center bg-cover opacity-40 absolute top-0 bottom-0 left-0 right-0"
-                    style={{
-                        backgroundImage: `url(${
-                            mediaCache.bannerUrl || mediaCache.imageUrl
-                        })`,
-                    }}
+                    className="absolute top-0 bottom-0 left-0 right-0"
+                    onClick={closeModal}
                 ></div>
-                <div className="flex flex-row px-8 py-4 gap-4 relative h-40 items-end">
-                    <div className="absolute top-2 right-2 flex flex-row items-center gap-2">
-                        <button className="flex flex-row items-center gap-2 text-xs p-2 leading-none rounded hover:bg-zinc-950/20 transition">
-                            <PlusIcon className="h-4 w-4 stroke-2" />
-                            Add to list
-                        </button>
-                        <button
-                            className="flex flex-row items-center gap-2 text-xs p-2 leading-none rounded hover:bg-zinc-950/20 transition"
-                            onClick={() => {
-                                db.library
-                                    .update(mapping, { favorite: !isFavorite })
-                                    .then((updated) => {
-                                        if (!updated) {
-                                            db.library
-                                                .add({
-                                                    ...defaultLibraryEntry,
-                                                    type: mediaType,
-                                                    mapping: mapping,
-                                                    favorite: !isFavorite,
-                                                })
-                                                .then((value) => {});
-                                        }
-                                    });
-                            }}
-                        >
-                            <HeartIcon
-                                className={`h-4 w-4 stroke-2 ${
-                                    libraryEntry?.favorite
-                                        ? "text-red-400 fill-red-400"
-                                        : ""
-                                }`}
-                            />
-                            Favorite
-                        </button>
-                        <button
-                            className="p-2 rounded-full"
-                            onClick={closeModal}
-                        >
-                            <XMarkIcon className="w-6 h-6" />
-                        </button>
-                    </div>
-                    <img
-                        className="w-24 aspect-cover rounded -mb-10 object-cover object-center"
-                        src={mediaCache.imageUrl!}
-                    />
-                    <div className="text-lg flex-1">{mediaCache.title}</div>
-                </div>
-                <form
-                    className="p-8 pt-12 grid grid-cols-3 gap-8"
-                    onSubmit={(e) => e.preventDefault()}
-                    ref={formRef}
+                <motion.div
+                    className="w-full max-w-3xl bg-zinc-800 relative rounded overflow-x-hidden overflow-y-auto shadow-2xl"
+                    initial={{
+                        translateY: 10,
+                    }}
+                    animate={{ translateY: 0 }}
+                    exit={{ translateY: 10 }}
+                    transition={{ duration: 0.2 }}
                 >
-                    <LibraryEntryInput title="Status">
-                        <SelectInput
-                            defaultValue={libraryEntry?.status || "not_started"}
-                            name="status"
-                        >
-                            <option value="not_started">
-                                Not {mediaType == "anime" ? "watched" : "read"}
-                            </option>
-                            <option value="planned">Planned</option>
-                            <option value="in_progress">
-                                {mediaType == "anime" ? "Watching" : "Reading"}
-                            </option>
-                            <option value="paused">Paused</option>
-                            <option value="dropped">Dropped</option>
-                            <option value="completed">Completed</option>
-                        </SelectInput>
-                    </LibraryEntryInput>
-                    <LibraryEntryInput title="Rating">
-                        <RatingInput
-                            stars={5}
-                            defaultValue={(libraryEntry?.score || 0) / 20}
-                            name="score"
-                        />
-                    </LibraryEntryInput>
-                    {mediaType == "anime" ? (
-                        <LibraryEntryInput title="Episode Progress">
-                            <NumberInput
-                                defaultValue={
-                                    libraryEntry?.episodeProgress || 0
-                                }
-                                min={0}
-                                name="episodeProgress"
-                            />
-                        </LibraryEntryInput>
-                    ) : (
-                        <LibraryEntryInput title="Chapter Progress">
-                            <NumberInput
-                                defaultValue={
-                                    libraryEntry?.chapterProgress || 0
-                                }
-                                min={0}
-                                name="chapterProgress"
-                            />
-                        </LibraryEntryInput>
-                    )}
-                    <LibraryEntryInput title="Start Date">
-                        <DateInput
-                            defaultValue={
-                                libraryEntry?.startDate
-                                    ?.toISOString()
-                                    .split("T")[0]
-                            }
-                            name="startDate"
-                        />
-                    </LibraryEntryInput>
-                    <LibraryEntryInput title="Finish Date">
-                        <DateInput
-                            defaultValue={
-                                libraryEntry?.finishDate
-                                    ?.toISOString()
-                                    .split("T")[0]
-                            }
-                            name="finishDate"
-                        />
-                    </LibraryEntryInput>
-                    {mediaType == "anime" ? (
-                        <LibraryEntryInput title={"Total Rewatches"}>
-                            <NumberInput
-                                defaultValue={libraryEntry?.restarts || 0}
-                                min={0}
-                                name="restarts"
-                            />
-                        </LibraryEntryInput>
-                    ) : (
-                        <LibraryEntryInput title={"Volume Progress"}>
-                            <NumberInput
-                                defaultValue={libraryEntry?.volumeProgress || 0}
-                                min={0}
-                                name="volumeProgress"
-                            />
-                        </LibraryEntryInput>
-                    )}
-                    <LibraryEntryInput
-                        title="Notes"
-                        span={mediaType == "anime" ? 3 : 2}
-                    >
-                        <TextArea
-                            rows={1}
-                            name="notes"
-                            defaulValue={libraryEntry?.notes}
-                        />
-                    </LibraryEntryInput>
-                    {mediaType == "manga" && (
-                        <LibraryEntryInput title={"Total Rereads"}>
-                            <NumberInput
-                                defaultValue={libraryEntry?.restarts || 0}
-                                min={0}
-                                name="restarts"
-                            />
-                        </LibraryEntryInput>
-                    )}
-                    <div className="flex flex-row items-center justify-between col-span-3">
-                        {libraryEntry ? (
+                    <div
+                        className="h-40 bg-center bg-cover opacity-40 absolute top-0 bottom-0 left-0 right-0"
+                        style={{
+                            backgroundImage: `url(${
+                                mediaCache.bannerUrl || mediaCache.imageUrl
+                            })`,
+                        }}
+                    ></div>
+                    <div className="flex flex-row px-8 py-4 gap-4 relative h-40 items-end">
+                        <div className="absolute top-2 right-2 flex flex-row items-center gap-2">
+                            <button className="flex flex-row items-center gap-2 text-xs p-2 leading-none rounded hover:bg-zinc-950/20 transition">
+                                <PlusIcon className="h-4 w-4 stroke-2" />
+                                Add to list
+                            </button>
                             <button
-                                className="text-sm rounded p-2 border border-zinc-700 leading-none text-zinc-400 transition hover:border-red-400 hover:bg-red-400 hover:text-zinc-950"
+                                className="flex flex-row items-center gap-2 text-xs p-2 leading-none rounded hover:bg-zinc-950/20 transition"
                                 onClick={() => {
                                     db.library
-                                        .delete(libraryEntry.mapping!)
-                                        .then(() => {
-                                            closeModal();
+                                        .update(mapping, {
+                                            favorite: !isFavorite,
+                                        })
+                                        .then((updated) => {
+                                            if (!updated) {
+                                                db.library
+                                                    .add({
+                                                        ...defaultLibraryEntry,
+                                                        type: mediaType,
+                                                        mapping: mapping,
+                                                        favorite: !isFavorite,
+                                                    })
+                                                    .then((value) => {});
+                                            }
                                         });
                                 }}
                             >
-                                Remove from library
+                                <HeartIcon
+                                    className={`h-4 w-4 stroke-2 ${
+                                        libraryEntry?.favorite
+                                            ? "text-red-400 fill-red-400"
+                                            : ""
+                                    }`}
+                                />
+                                Favorite
                             </button>
-                        ) : (
-                            <div></div>
-                        )}
-                        <button
-                            className="bg-zinc-100 border border-transparent rounded py-2 px-4 leading-none text-sm text-zinc-950 hover:opacity-70 transition"
+                            <button
+                                className="p-2 rounded-full"
+                                onClick={closeModal}
+                            >
+                                <XMarkIcon className="w-6 h-6" />
+                            </button>
+                        </div>
+                        <img
+                            className="w-24 aspect-cover rounded -mb-10 object-cover object-center ring-1 ring-transparent hover:ring-zinc-100 transition-all cursor-pointer"
+                            src={mediaCache.imageUrl!}
                             onClick={() => {
-                                // Don't replace by onClick={save} as it'll add
-                                // all event props to the lib entry
-                                save();
+                                setIsImageModalOpen(true);
                             }}
-                        >
-                            Save
-                        </button>
+                        />
+                        <div className="text-lg flex-1">{mediaCache.title}</div>
                     </div>
-                </form>
+                    <form
+                        className="p-8 pt-12 grid grid-cols-3 gap-8"
+                        onSubmit={(e) => e.preventDefault()}
+                        ref={formRef}
+                    >
+                        <LibraryEntryInput title="Status">
+                            <SelectInput
+                                defaultValue={
+                                    libraryEntry?.status || "not_started"
+                                }
+                                name="status"
+                            >
+                                <option value="not_started">
+                                    Not{" "}
+                                    {mediaType == "anime" ? "watched" : "read"}
+                                </option>
+                                <option value="planned">Planned</option>
+                                <option value="in_progress">
+                                    {mediaType == "anime"
+                                        ? "Watching"
+                                        : "Reading"}
+                                </option>
+                                <option value="paused">Paused</option>
+                                <option value="dropped">Dropped</option>
+                                <option value="completed">Completed</option>
+                            </SelectInput>
+                        </LibraryEntryInput>
+                        <LibraryEntryInput title="Rating">
+                            <RatingInput
+                                stars={5}
+                                defaultValue={(libraryEntry?.score || 0) / 20}
+                                name="score"
+                            />
+                        </LibraryEntryInput>
+                        {mediaType == "anime" ? (
+                            <LibraryEntryInput title="Episode Progress">
+                                <NumberInput
+                                    defaultValue={
+                                        libraryEntry?.episodeProgress || 0
+                                    }
+                                    min={0}
+                                    name="episodeProgress"
+                                />
+                            </LibraryEntryInput>
+                        ) : (
+                            <LibraryEntryInput title="Chapter Progress">
+                                <NumberInput
+                                    defaultValue={
+                                        libraryEntry?.chapterProgress || 0
+                                    }
+                                    min={0}
+                                    name="chapterProgress"
+                                />
+                            </LibraryEntryInput>
+                        )}
+                        <LibraryEntryInput title="Start Date">
+                            <DateInput
+                                defaultValue={
+                                    libraryEntry?.startDate
+                                        ?.toISOString()
+                                        .split("T")[0]
+                                }
+                                name="startDate"
+                            />
+                        </LibraryEntryInput>
+                        <LibraryEntryInput title="Finish Date">
+                            <DateInput
+                                defaultValue={
+                                    libraryEntry?.finishDate
+                                        ?.toISOString()
+                                        .split("T")[0]
+                                }
+                                name="finishDate"
+                            />
+                        </LibraryEntryInput>
+                        {mediaType == "anime" ? (
+                            <LibraryEntryInput title={"Total Rewatches"}>
+                                <NumberInput
+                                    defaultValue={libraryEntry?.restarts || 0}
+                                    min={0}
+                                    name="restarts"
+                                />
+                            </LibraryEntryInput>
+                        ) : (
+                            <LibraryEntryInput title={"Volume Progress"}>
+                                <NumberInput
+                                    defaultValue={
+                                        libraryEntry?.volumeProgress || 0
+                                    }
+                                    min={0}
+                                    name="volumeProgress"
+                                />
+                            </LibraryEntryInput>
+                        )}
+                        <LibraryEntryInput
+                            title="Notes"
+                            span={mediaType == "anime" ? 3 : 2}
+                        >
+                            <TextArea
+                                rows={1}
+                                name="notes"
+                                defaulValue={libraryEntry?.notes}
+                            />
+                        </LibraryEntryInput>
+                        {mediaType == "manga" && (
+                            <LibraryEntryInput title={"Total Rereads"}>
+                                <NumberInput
+                                    defaultValue={libraryEntry?.restarts || 0}
+                                    min={0}
+                                    name="restarts"
+                                />
+                            </LibraryEntryInput>
+                        )}
+                        <div className="flex flex-row items-center justify-between col-span-3">
+                            {libraryEntry ? (
+                                <button
+                                    className="text-sm rounded p-2 border border-zinc-700 leading-none text-zinc-400 transition hover:border-red-400 hover:bg-red-400 hover:text-zinc-950"
+                                    onClick={() => {
+                                        db.library
+                                            .delete(libraryEntry.mapping!)
+                                            .then(() => {
+                                                closeModal();
+                                            });
+                                    }}
+                                >
+                                    Remove from library
+                                </button>
+                            ) : (
+                                <div></div>
+                            )}
+                            <button
+                                className="bg-zinc-100 border border-transparent rounded py-2 px-4 leading-none text-sm text-zinc-950 hover:opacity-70 transition"
+                                onClick={() => {
+                                    // Don't replace by onClick={save} as it'll add
+                                    // all event props to the lib entry
+                                    save();
+                                }}
+                            >
+                                Save
+                            </button>
+                        </div>
+                    </form>
+                </motion.div>
             </motion.div>
-        </motion.div>
+            <ImageModal
+                imageUrl={isImageModalOpen ? mediaCache.imageUrl : null}
+                closeModal={() => setIsImageModalOpen(false)}
+            />
+        </>
     );
 }
 
