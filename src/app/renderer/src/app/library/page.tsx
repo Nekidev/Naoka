@@ -17,11 +17,15 @@ import { useLiveQuery } from "dexie-react-hooks";
 import { LibraryStatus, Mapping } from "@/lib/types";
 import LibraryEntryModal from "@/components/LibraryEntryModal";
 import { useDebounce } from "@uidotdev/usehooks";
+import { motion, AnimatePresence } from "framer-motion";
 
 export default function Library() {
     const [mediaTypeFilters, setMediaTypeFilters] = React.useState<
         Array<String>
     >([]);
+    const [statusFilters, setStatusFilters] = React.useState<LibraryStatus[]>(
+        []
+    );
 
     const [query, setQuery] = React.useState("");
     const debouncedQuery = useDebounce(query, 300);
@@ -43,6 +47,12 @@ export default function Library() {
                     }
                 }
 
+                if (statusFilters.length > 0) {
+                    if (!statusFilters.includes(entry.status)) {
+                        continue;
+                    }
+                }
+
                 entry.media = await db.mediaCache.get({
                     mapping: entry.mapping,
                 });
@@ -59,9 +69,20 @@ export default function Library() {
 
             return result;
         });
-    }, [debouncedQuery, mediaTypeFilters]);
+    }, [debouncedQuery, mediaTypeFilters, statusFilters]);
+
     const [openModalMapping, setOpenModalMapping] =
         React.useState<null | Mapping>(null);
+
+    function handleOnStatusSelectorClick(status: LibraryStatus) {
+        return function () {
+            if (statusFilters.includes(status)) {
+                setStatusFilters(statusFilters.filter((s) => s !== status));
+            } else {
+                setStatusFilters([...statusFilters, status]);
+            }
+        };
+    }
 
     return (
         <>
@@ -115,29 +136,80 @@ export default function Library() {
                             onChange={(e: any) => setQuery(e.target.value)}
                         />
                         <div className="flex flex-row items-center gap-4">
+                            <AnimatePresence>
+                                {statusFilters.length > 0 && (
+                                    <motion.button
+                                        initial={{
+                                            marginLeft: "-1rem",
+                                            marginRight: "-1rem",
+                                            width: "0rem",
+                                            opacity: 0
+                                        }}
+                                        animate={{
+                                            marginLeft: "-0.5rem",
+                                            marginRight: "-0.5rem",
+                                            width: "1rem",
+                                            opacity: 1
+                                        }}
+                                        exit={{
+                                            marginLeft: "-1rem",
+                                            marginRight: "-1rem",
+                                            width: "0rem",
+                                            opacity: 0
+                                        }}
+                                        transition={{
+                                            duration: 0.2,
+                                        }}
+                                        className="p-2 -mx-2 -my-3 box-content overflow-hidden"
+                                        onClick={() => {
+                                            setStatusFilters([]);
+                                        }}
+                                    >
+                                        <XMarkIcon className="h-4 w-4 stroke-2" />
+                                    </motion.button>
+                                )}
+                            </AnimatePresence>
                             <StatusSelector
                                 label="Not started"
                                 color={colors.yellow["400"]}
+                                selected={statusFilters.includes("not_started")}
+                                onClick={handleOnStatusSelectorClick(
+                                    "not_started"
+                                )}
                             />
                             <StatusSelector
                                 label="Planned"
                                 color={colors.pink["400"]}
+                                selected={statusFilters.includes("planned")}
+                                onClick={handleOnStatusSelectorClick("planned")}
                             />
                             <StatusSelector
                                 label="In progress"
                                 color={colors.blue["400"]}
+                                selected={statusFilters.includes("in_progress")}
+                                onClick={handleOnStatusSelectorClick(
+                                    "in_progress"
+                                )}
                             />
                             <StatusSelector
                                 label="Paused"
                                 color={colors.orange["400"]}
+                                selected={statusFilters.includes("paused")}
+                                onClick={handleOnStatusSelectorClick("paused")}
                             />
                             <StatusSelector
                                 label="Dropped"
                                 color={colors.red["400"]}
+                                selected={statusFilters.includes("dropped")}
+                                onClick={handleOnStatusSelectorClick("dropped")}
                             />
                             <StatusSelector
                                 label="Completed"
                                 color={colors.green["400"]}
+                                selected={statusFilters.includes("completed")}
+                                onClick={handleOnStatusSelectorClick(
+                                    "completed"
+                                )}
                             />
                         </div>
                     </div>
@@ -169,17 +241,34 @@ export default function Library() {
     );
 }
 
-function StatusSelector({ color, label }: { color: string; label: string }) {
+function StatusSelector({
+    color,
+    label,
+    selected,
+    onClick,
+}: {
+    color: string;
+    label: string;
+    selected: boolean;
+    onClick: any;
+}) {
     return (
-        <div className="flex flex-row items-center gap-2">
+        <button
+            className={`flex flex-row items-center gap-2 transition cursor-pointer ${
+                selected
+                    ? "text-zinc-100 hover:text-zinc-300"
+                    : "text-zinc-400 hover:text-zinc-100"
+            }`}
+            onClick={onClick}
+        >
             <div
                 className="h-2 w-2 rounded-full"
                 style={{
                     backgroundColor: color,
                 }}
             ></div>
-            <span className="text-sm leading-none text-zinc-400">{label}</span>
-        </div>
+            <span className="text-sm leading-none">{label}</span>
+        </button>
     );
 }
 
