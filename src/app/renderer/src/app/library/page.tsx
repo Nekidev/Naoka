@@ -143,19 +143,19 @@ export default function Library() {
                                             marginLeft: "-1rem",
                                             marginRight: "-1rem",
                                             width: "0rem",
-                                            opacity: 0
+                                            opacity: 0,
                                         }}
                                         animate={{
                                             marginLeft: "-0.5rem",
                                             marginRight: "-0.5rem",
                                             width: "1rem",
-                                            opacity: 1
+                                            opacity: 1,
                                         }}
                                         exit={{
                                             marginLeft: "-1rem",
                                             marginRight: "-1rem",
                                             width: "0rem",
-                                            opacity: 0
+                                            opacity: 0,
                                         }}
                                         transition={{
                                             duration: 0.2,
@@ -216,17 +216,31 @@ export default function Library() {
                     <div className="h-px shrink-0 bg-zinc-800 mt-2"></div>
                 </div>
                 {libraryEntries ? (
-                    <div className="p-4 flex flex-col gap-4">
-                        {libraryEntries.map((entry) => (
-                            <LibraryEntryRow
-                                key={entry.mapping}
-                                entry={entry}
-                                openModal={() =>
-                                    setOpenModalMapping(entry.mapping)
-                                }
-                            />
-                        ))}
-                    </div>
+                    libraryEntries.length > 0 ? (
+                        <div className="p-4 flex flex-col gap-4">
+                            {libraryEntries.map((entry) => (
+                                <LibraryEntryRow
+                                    key={entry.mapping}
+                                    entry={entry}
+                                    openModal={() =>
+                                        setOpenModalMapping(entry.mapping)
+                                    }
+                                />
+                            ))}
+                        </div>
+                    ) : (
+                        <div className="flex-1 flex flex-col justify-center items-center text-zinc-300">
+                            <div className="mb-2">(╥﹏╥)</div>
+                            <div>There's nothing here!</div>
+                            {(statusFilters.length > 0 ||
+                                mediaTypeFilters.length > 0 ||
+                                debouncedQuery.length > 0) && (
+                                <div className="opacity-50 text-xs">
+                                    (Maybe your filters are wrong)
+                                </div>
+                            )}
+                        </div>
+                    )
                 ) : (
                     <div className="flex-1 flex flex-col items-center justify-center">
                         <div className="h-6 w-6 border-2 border-white/90 border-t-transparent rounded-full animate-spin"></div>
