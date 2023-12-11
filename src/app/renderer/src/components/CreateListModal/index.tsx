@@ -32,7 +32,7 @@ function Modal({ closeModal }: { closeModal: () => void }) {
                     onClick={closeModal}
                 ></div>
                 <motion.div
-                    className="w-full max-w-xl bg-zinc-800 relative rounded overflow-x-hidden overflow-y-auto shadow-2xl p-4 flex flex-col gap-4"
+                    className="w-full max-w-lg bg-zinc-800 relative rounded overflow-x-hidden overflow-y-auto shadow-2xl p-4 flex flex-col gap-4"
                     initial={{
                         translateY: 10,
                     }}
