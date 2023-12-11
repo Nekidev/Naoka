@@ -8,15 +8,29 @@ import {
     FireIcon,
     BookmarkIcon,
     Cog6ToothIcon,
-    PlusIcon
+    PlusIcon,
 } from "@heroicons/react/24/outline";
+import React from "react";
+import CreateListModal from "../CreateListModal";
 
 export default function SideBar() {
+    const [isCreateListModalOpen, setIsCreateListModalOpen] =
+        React.useState(false);
+
     return (
         <div className="w-60 h-screen bg-zinc-950 flex flex-col">
             <MenuButtons />
-            <Lists />
+            <Lists
+                isCreateListModalOpen={isCreateListModalOpen}
+                setIsCreateListModalOpen={setIsCreateListModalOpen}
+            />
             <UserProfile />
+            <CreateListModal
+                isOpen={isCreateListModalOpen}
+                closeModal={() => {
+                    setIsCreateListModalOpen(false);
+                }}
+            />
         </div>
     );
 }
@@ -84,13 +98,22 @@ function MenuButtons(): JSX.Element {
     );
 }
 
-function Lists(): JSX.Element {
+function Lists({
+    isCreateListModalOpen,
+    setIsCreateListModalOpen,
+}: {
+    isCreateListModalOpen: boolean;
+    setIsCreateListModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
+}): JSX.Element {
     return (
         <div className="flex-1 border-y border-zinc-900 p-4">
             <div className="flex flex-row items-center justify-between">
                 <div className="uppercase text-white/50 text-xs">My lists</div>
                 <div className="flex flex-row items-center gap-2 -my-0.5">
-                    <button className="text-white/50 hover:text-white/70 transition">
+                    <button
+                        className="text-white/50 hover:text-white/70 transition"
+                        onClick={() => setIsCreateListModalOpen(true)}
+                    >
                         <PlusIcon className="w-5 h-5" />
                     </button>
                 </div>
@@ -114,11 +137,7 @@ function UserProfile() {
                     </div>
                 </div>
             </button>
-            <IconButton
-                icon={
-                    <Cog6ToothIcon className="w-6 h-6" />
-                }
-            />
+            <IconButton icon={<Cog6ToothIcon className="w-6 h-6" />} />
         </div>
     );
 }
