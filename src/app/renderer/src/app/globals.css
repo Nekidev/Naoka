@@ -35,6 +35,11 @@
     ::-webkit-scrollbar-thumb:hover {
         @apply bg-zinc-600;
     }
+
+    *, *::after, *::before {
+        -webkit-user-drag: none;
+        -webkit-app-region: no-drag;
+    }
 }
 
 @layer components {

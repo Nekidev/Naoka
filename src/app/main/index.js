@@ -17,8 +17,10 @@ app.on("ready", async () => {
         webPreferences: {
             nodeIntegration: false,
             preload: join(__dirname, "preload.js"),
+            spellcheck: false
         },
         autoHideMenuBar: true,
+        title: "Naoka",
         titleBarStyle: "hidden",
         titleBarOverlay: {
             color: "#00000000",

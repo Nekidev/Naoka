@@ -9,9 +9,13 @@ import {
     BookmarkIcon,
     Cog6ToothIcon,
     PlusIcon,
+    RectangleStackIcon,
 } from "@heroicons/react/24/outline";
 import React from "react";
 import CreateListModal from "../CreateListModal";
+import { useLiveQuery } from "dexie-react-hooks";
+import { List, db } from "@/lib/db";
+import { Mapping, MediaType } from "@/lib/types";
 
 export default function SideBar() {
     const [isCreateListModalOpen, setIsCreateListModalOpen] =
@@ -87,7 +91,7 @@ function MenuButtons(): JSX.Element {
                     icon={<FireIcon className="w-6 h-6" />}
                     title="Explore"
                     href="/"
-                /> */}
+                 /> */}
                 <MenuItem
                     icon={<BookmarkIcon className="w-6 h-6" />}
                     title="My library"
@@ -98,6 +102,28 @@ function MenuButtons(): JSX.Element {
     );
 }
 
+function List({
+    list
+}: {
+    list: List;
+}) {
+    const images = [];
+    const title = list.name;
+    const subtitle = list.items.length > 0 ? `${list.items.length} items` : "No items";
+
+    return <button className="hover:bg-zinc-800 transition rounded p-2 -m-2 group flex flex-row items-center gap-2">
+        {images.length == 0 && (
+            <div className="w-8 h-8 rounded bg-zinc-800 flex flex-col items-center justify-center group-hover:bg-zinc-700 transition">
+                <RectangleStackIcon className="h-4 w-4 text-zinc-500 stroke-2" />
+            </div>
+        )}
+        <div className="flex-1 flex flex-col items-start">
+            <div className="text-sm text-zinc-200 line-clamp-1">{title}</div>
+            <div className="text-xs text-zinc-400 line-clamp-1">{subtitle}</div>
+        </div>
+    </button>;
+}
+
 function Lists({
     isCreateListModalOpen,
     setIsCreateListModalOpen,
@@ -105,8 +131,10 @@ function Lists({
     isCreateListModalOpen: boolean;
     setIsCreateListModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
 }): JSX.Element {
+    const lists = useLiveQuery(() => db.lists.toArray());
+
     return (
-        <div className="flex-1 border-y border-zinc-900 p-4">
+        <div className="flex-1 border-y border-zinc-900 p-4 flex flex-col gap-4">
             <div className="flex flex-row items-center justify-between">
                 <div className="uppercase text-white/50 text-xs">My lists</div>
                 <div className="flex flex-row items-center gap-2 -my-0.5">
@@ -118,6 +146,12 @@ function Lists({
                     </button>
                 </div>
             </div>
+            {lists?.map((list, index) => (
+                <List
+                    key={list.id}
+                    list={list}
+                />
+            ))}
         </div>
     );
 }

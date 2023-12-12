@@ -1,3 +1,4 @@
+import { db } from "@/lib/db";
 import { motion, AnimatePresence } from "framer-motion";
 import React from "react";
 
@@ -17,6 +18,21 @@ export default function CreateListModal({
 
 function Modal({ closeModal }: { closeModal: () => void }) {
     const [title, setTitle] = React.useState("");
+
+    async function createList() {
+        if (!title || title.trim().length < 1) return;
+
+        const listId = await db.lists.add({
+            name: title.trim(),
+            items: [],
+            syncedProviders: [],
+            updatedAt: new Date(),
+            createdAt: new Date(),
+            accessedAt: new Date(),
+        })
+
+        return listId
+    }
 
     return (
         <>
@@ -60,6 +76,11 @@ function Modal({ closeModal }: { closeModal: () => void }) {
                         <button
                             className="py-2 px-4 leading-none rounded transition text-zinc-900 bg-zinc-100 hover:bg-zinc-300 disabled:opacity-50 disabled:hover:bg-zinc-100 disabled:cursor-not-allowed"
                             disabled={title.trim() == ""}
+                            onClick={() => {
+                                createList().then((listId) => {
+                                    closeModal();
+                                })
+                            }}
                         >
                             Create
                         </button>
