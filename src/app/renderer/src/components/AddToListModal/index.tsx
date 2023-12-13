@@ -32,7 +32,7 @@ function FormModal({
     return (
         <Modal closeModal={closeModal}>
             <div className="w-screen max-w-sm bg-zinc-800 relative rounded overflow-x-hidden overflow-y-auto">
-                <div className="p-4 flex flex-col gap-4 border-b border-zinc-700">
+                <div className="p-4 flex flex-col gap-4">
                     <div className="flex flex-row items-center justify-between">
                         <h1 className="leading-none text-xl">Add to list</h1>
                         <button className="p-2 -m-2" onClick={closeModal}>
@@ -54,10 +54,15 @@ function FormModal({
                         </div>
                     </div>
                 </div>
-                <div className="p-2 overflow-y-auto relative">
+                <div className="p-2 overflow-y-auto flex flex-col justify-stretch border-y border-zinc-700">
                     {lists?.map((list) => (
                         <List key={list.id} list={list} mapping={mapping} />
                     ))}
+                </div>
+                <div className="flex flex-col items-stretch gap-2 p-4">
+                    <button className="p-2 rounded text-center leading-none text-zinc-300 bg-zinc-700 hover:bg-zinc-600 transition">
+                        Create new list
+                    </button>
                 </div>
             </div>
         </Modal>
@@ -66,7 +71,7 @@ function FormModal({
 
 function List({ list, mapping }: { list: List; mapping: Mapping }) {
     return (
-        <button className="flex flex-row items-center gap-2 p-2 rounded hover:bg-zinc-700 group transition w-full">
+        <button className="flex flex-row items-center gap-2 p-2 rounded hover:bg-zinc-700 group transition">
             <div className="rounded h-10 w-10 bg-zinc-700 flex flex-col items-center justify-center group-hover:bg-zinc-600 transition">
                 <RectangleStackIcon className="h-5 w-5 text-zinc-500 stroke-2" />
             </div>
