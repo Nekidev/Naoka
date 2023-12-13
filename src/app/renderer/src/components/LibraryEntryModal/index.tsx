@@ -18,6 +18,7 @@ import React from "react";
 import { IntRange } from "@/utils/types";
 import { defaultLibraryEntry } from "@/lib/db/defaults";
 import ImageModal from "../ImageModal";
+import Modal from "../Modal";
 
 export default function LibraryEntryModal({
     mapping,
@@ -28,12 +29,12 @@ export default function LibraryEntryModal({
 }) {
     return (
         <AnimatePresence>
-            {mapping && <Modal mapping={mapping} closeModal={closeModal} />}
+            {mapping && <FormModal mapping={mapping} closeModal={closeModal} />}
         </AnimatePresence>
     );
 }
 
-function Modal({
+function FormModal({
     mapping,
     closeModal,
 }: {
@@ -100,26 +101,8 @@ function Modal({
 
     return (
         <>
-            <motion.div
-                className="fixed top-0 bottom-0 left-0 right-0 bg-zinc-950/50 flex flex-col items-center justify-center p-8 z-30"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.2 }}
-            >
-                <div
-                    className="absolute top-0 bottom-0 left-0 right-0"
-                    onClick={closeModal}
-                ></div>
-                <motion.div
-                    className="w-full max-w-3xl bg-zinc-800 relative rounded overflow-x-hidden overflow-y-auto shadow-2xl"
-                    initial={{
-                        translateY: 10,
-                    }}
-                    animate={{ translateY: 0 }}
-                    exit={{ translateY: 10 }}
-                    transition={{ duration: 0.2 }}
-                >
+            <Modal closeModal={closeModal}>
+                <div className="w-screen max-w-3xl bg-zinc-800 relative rounded overflow-x-hidden overflow-y-auto shadow-2xl">
                     <div
                         className="h-40 bg-center bg-cover opacity-40 absolute top-0 bottom-0 left-0 right-0"
                         style={{
@@ -322,8 +305,8 @@ function Modal({
                             </button>
                         </div>
                     </form>
-                </motion.div>
-            </motion.div>
+                </div>
+            </Modal>
             <ImageModal
                 imageUrl={isImageModalOpen ? mediaCache.imageUrl : null}
                 closeModal={() => setIsImageModalOpen(false)}

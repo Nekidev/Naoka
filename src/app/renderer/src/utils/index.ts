@@ -10,3 +10,7 @@ export function serializeURL(obj: { [key: string]: any }) {
         }
     return str.join("&");
 }
+
+export function allTrim(str: string): string {
+    return str.replace(/\s+/g, " ").replace(/^\s+|\s+$/, "");
+}

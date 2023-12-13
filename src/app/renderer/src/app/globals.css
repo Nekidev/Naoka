@@ -3,6 +3,10 @@
 @tailwind utilities;
 
 @layer base {
+    * {
+        @apply outline-none;
+    }
+
     html,
     body {
         @apply bg-zinc-900 text-white/90 select-none;

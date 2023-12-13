@@ -102,26 +102,32 @@ function MenuButtons(): JSX.Element {
     );
 }
 
-function List({
-    list
-}: {
-    list: List;
-}) {
+function List({ list }: { list: List }) {
     const images = [];
     const title = list.name;
-    const subtitle = list.items.length > 0 ? `${list.items.length} items` : "No items";
+    const subtitle =
+        list.items.length > 0 ? `${list.items.length} items` : "No items";
 
-    return <button className="hover:bg-zinc-800 transition rounded p-2 -m-2 group flex flex-row items-center gap-2">
-        {images.length == 0 && (
-            <div className="w-8 h-8 rounded bg-zinc-800 flex flex-col items-center justify-center group-hover:bg-zinc-700 transition">
-                <RectangleStackIcon className="h-4 w-4 text-zinc-500 stroke-2" />
+    return (
+        <Link
+            href={`/list?id=${encodeURIComponent(list.id!)}`}
+            className="hover:bg-zinc-800 transition rounded p-2 -m-2 group flex flex-row items-center gap-2"
+        >
+            {images.length == 0 && (
+                <div className="w-8 h-8 rounded bg-zinc-800 flex flex-col items-center justify-center group-hover:bg-zinc-700 transition">
+                    <RectangleStackIcon className="h-4 w-4 text-zinc-500 stroke-2" />
+                </div>
+            )}
+            <div className="flex-1 flex flex-col items-start">
+                <div className="text-sm text-zinc-200 line-clamp-1">
+                    {title}
+                </div>
+                <div className="text-xs text-zinc-400 line-clamp-1">
+                    {subtitle}
+                </div>
             </div>
-        )}
-        <div className="flex-1 flex flex-col items-start">
-            <div className="text-sm text-zinc-200 line-clamp-1">{title}</div>
-            <div className="text-xs text-zinc-400 line-clamp-1">{subtitle}</div>
-        </div>
-    </button>;
+        </Link>
+    );
 }
 
 function Lists({
@@ -147,10 +153,7 @@ function Lists({
                 </div>
             </div>
             {lists?.map((list, index) => (
-                <List
-                    key={list.id}
-                    list={list}
-                />
+                <List key={list.id} list={list} />
             ))}
         </div>
     );
