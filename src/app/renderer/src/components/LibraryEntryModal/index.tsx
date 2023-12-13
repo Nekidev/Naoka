@@ -19,6 +19,7 @@ import { IntRange } from "@/utils/types";
 import { defaultLibraryEntry } from "@/lib/db/defaults";
 import ImageModal from "../ImageModal";
 import Modal from "../Modal";
+import AddToListModal from "../AddToListModal";
 
 export default function LibraryEntryModal({
     mapping,
@@ -59,6 +60,8 @@ function FormModal({
     const formRef = React.useRef<HTMLFormElement>(null);
 
     const [isImageModalOpen, setIsImageModalOpen] = React.useState(false);
+    const [isAddToListModalOpen, setIsAddToListModalOpen] =
+        React.useState(false);
 
     if (!mediaCache) return null;
 
@@ -102,7 +105,7 @@ function FormModal({
     return (
         <>
             <Modal closeModal={closeModal}>
-                <div className="w-screen max-w-3xl bg-zinc-800 relative rounded overflow-x-hidden overflow-y-auto shadow-2xl">
+                <div className="w-screen max-w-3xl bg-zinc-800 relative rounded overflow-x-hidden overflow-y-auto">
                     <div
                         className="h-40 bg-center bg-cover opacity-40 absolute top-0 bottom-0 left-0 right-0"
                         style={{
@@ -113,7 +116,12 @@ function FormModal({
                     ></div>
                     <div className="flex flex-row px-8 py-4 gap-4 relative h-40 items-end">
                         <div className="absolute top-2 right-2 flex flex-row items-center gap-2">
-                            <button className="flex flex-row items-center gap-2 text-xs p-2 leading-none rounded hover:bg-zinc-950/20 transition">
+                            <button
+                                className="flex flex-row items-center gap-2 text-xs p-2 leading-none rounded hover:bg-zinc-950/20 transition"
+                                onClick={() => {
+                                    setIsAddToListModalOpen(true);
+                                }}
+                            >
                                 <PlusIcon className="h-4 w-4 stroke-2" />
                                 Add to list
                             </button>
@@ -310,6 +318,10 @@ function FormModal({
             <ImageModal
                 imageUrl={isImageModalOpen ? mediaCache.imageUrl : null}
                 closeModal={() => setIsImageModalOpen(false)}
+            />
+            <AddToListModal
+                mapping={isAddToListModalOpen ? mapping : undefined}
+                closeModal={() => setIsAddToListModalOpen(false)}
             />
         </>
     );
