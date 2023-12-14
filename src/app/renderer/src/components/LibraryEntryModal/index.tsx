@@ -20,6 +20,7 @@ import { defaultLibraryEntry } from "@/lib/db/defaults";
 import ImageModal from "../ImageModal";
 import Modal from "../Modal";
 import AddToListModal from "../AddToListModal";
+import ConfirmModal from "../ConfirmModal";
 
 export default function LibraryEntryModal({
     mapping,
@@ -61,6 +62,9 @@ function FormModal({
 
     const [isImageModalOpen, setIsImageModalOpen] = React.useState(false);
     const [isAddToListModalOpen, setIsAddToListModalOpen] =
+        React.useState(false);
+
+    const [isRemoveFromLibraryModalOpen, setIsRemoveFromLibraryModalOpen] =
         React.useState(false);
 
     if (!mediaCache) return null;
@@ -289,19 +293,7 @@ function FormModal({
                                 <button
                                     className="text-sm rounded p-2 border border-zinc-700 leading-none text-zinc-400 transition hover:border-red-400 hover:bg-red-400 hover:text-zinc-950"
                                     onClick={() => {
-                                        let confirmed = confirm(
-                                            "This will remove the entry from your library and from your favorites. Are you sure?"
-                                        );
-
-                                        if (!confirmed) {
-                                            return;
-                                        }
-
-                                        db.library
-                                            .delete(libraryEntry.mapping!)
-                                            .then(() => {
-                                                closeModal();
-                                            });
+                                        setIsRemoveFromLibraryModalOpen(true);
                                     }}
                                 >
                                     Remove from library
@@ -330,6 +322,22 @@ function FormModal({
             <AddToListModal
                 mapping={isAddToListModalOpen ? mapping : undefined}
                 closeModal={() => setIsAddToListModalOpen(false)}
+            />
+            <ConfirmModal
+                title="Remove from library"
+                content="This will delete this entry from your library and from your favorites."
+                onConfirm={() => {
+                    db.library
+                        .delete(mapping)
+                        .then(() => {
+                            closeModal();
+                        })
+                        .catch((error) => {
+                            console.error(error);
+                        });
+                }}
+                isOpen={isRemoveFromLibraryModalOpen}
+                closeModal={() => setIsRemoveFromLibraryModalOpen(false)}
             />
         </>
     );

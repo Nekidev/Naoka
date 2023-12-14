@@ -250,7 +250,7 @@ export default function Search() {
                         ref={filtersFormRef}
                     >
                         <VerticalNavSpacer />
-                        <div className="text-lg font-medium -mt-5">Filters</div>
+                        <div className="text-lg font-medium -mt-3">Filters</div>
                         {api.config.search[searchType]?.filters.map(
                             (filter: any, index: number) => {
                                 switch (filter.type) {

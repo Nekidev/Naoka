@@ -14,7 +14,7 @@ import {
 import React from "react";
 import CreateListModal from "../CreateListModal";
 import { useLiveQuery } from "dexie-react-hooks";
-import { List, db } from "@/lib/db";
+import { List, MediaCache, db } from "@/lib/db";
 import { Mapping, MediaType } from "@/lib/types";
 import styles from "./styles.module.css";
 
@@ -104,19 +104,26 @@ function MenuButtons(): JSX.Element {
 }
 
 function List({ list }: { list: List }) {
-    const images = [];
+    const images = list.itemCaches!.map((v) => v.imageUrl);
     const title = list.name;
     const subtitle =
-        list.items.length > 0 ? `${list.items.length} items` : "No items";
+        list.items.length > 0
+            ? `${list.items.length} item${list.items.length > 1 ? "s" : ""}`
+            : "No items";
 
     return (
         <Link
             href={`/list?id=${encodeURIComponent(list.id!)}`}
             className="hover:bg-zinc-800 transition rounded p-2 -m-2 group flex flex-row items-center gap-2"
         >
-            {images.length == 0 && (
+            {images.length < 2 ? (
                 <div className="w-8 h-8 rounded bg-zinc-800 flex flex-col items-center justify-center group-hover:bg-zinc-700 transition">
                     <RectangleStackIcon className="h-4 w-4 text-zinc-500 stroke-2" />
+                </div>
+            ) : (
+                <div className="h-8 w-8 relative">
+                    <img src={images[0]!} className="rounded absolute top-0 left-0 bottom-0 aspect-cover object-center object-cover h-full z-10" />
+                    <img src={images[1]!} className="rounded absolute top-0 right-0 bottom-0 aspect-cover object-center object-cover h-full" />
                 </div>
             )}
             <div className="flex-1 flex flex-col items-start">
@@ -138,7 +145,28 @@ function Lists({
     isCreateListModalOpen: boolean;
     setIsCreateListModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
 }): JSX.Element {
-    const lists = useLiveQuery(() => db.lists.toArray());
+    const lists = useLiveQuery(() =>
+        db.lists.toArray(async (lists) => {
+            let itemCacheMappings: Array<Mapping> = [];
+
+            for (const list of lists) {
+                list.items.map((mapping: Mapping) =>
+                    itemCacheMappings.push(mapping)
+                );
+            }
+
+            const itemCaches: MediaCache[] = (await db.mediaCache.bulkGet([
+                ...new Set(itemCacheMappings),
+            ])) as MediaCache[];
+
+            return lists.map((list) => {
+                list.itemCaches = itemCaches.filter((v) =>
+                    list.items.includes(v!.mapping)
+                );
+                return list;
+            });
+        })
+    );
 
     return (
         <div

@@ -15,6 +15,7 @@ import { useLiveQuery } from "dexie-react-hooks";
 import { useRouter, useSearchParams } from "next/navigation";
 import React from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import ConfirmModal from "@/components/ConfirmModal";
 
 export default function List() {
     const searchParams = useSearchParams();
@@ -42,8 +43,10 @@ export default function List() {
     const mainRef = React.useRef<any>(null);
     const [scrollY, setScrollY] = React.useState(0);
 
+    const [isConfirmModalOpen, setIsConfirmModalOpen] = React.useState(false);
+
     React.useEffect(() => {
-        function handleScroll(e) {
+        function handleScroll(e: any) {
             setScrollY(e.target.scrollTop);
         }
 
@@ -56,7 +59,7 @@ export default function List() {
                 mainRef.current.removeEventListener("scroll", handleScroll);
             }
         };
-    })
+    });
 
     if (!list) {
         return (
@@ -78,9 +81,14 @@ export default function List() {
                 className="flex flex-col min-h-full max-h-full overflow-y-auto"
                 ref={mainRef}
             >
-                <div className={"sticky top-0 shrink-0 bg-zinc-900 z-20 border-b-zinc-800"} style={{
-                    borderBottomWidth: scrollY > 112 ? 1 : 0
-                }}>
+                <div
+                    className={
+                        "sticky top-0 shrink-0 bg-zinc-900 z-20 border-b-zinc-800"
+                    }
+                    style={{
+                        borderBottomWidth: scrollY > 112 ? 1 : 0,
+                    }}
+                >
                     <div className="flex flex-row items-center">
                         <VerticalNavSpacer />
                         <LeftNavSpacer />
@@ -115,9 +123,28 @@ export default function List() {
                 </div>
                 <div className="p-4 flex flex-row items-center justify-between gap-8 border-b border-zinc-800">
                     <div className="flex flex-row items-center gap-4">
-                        <div className="h-20 w-20 rounded bg-zinc-700 flex flex-col items-center justify-center shrink-0">
-                            <RectangleStackIcon className="h-8 w-8 text-zinc-400" />
-                        </div>
+                        {list.items.length < 2 ? (
+                            <div className="h-20 w-20 rounded bg-zinc-700 flex flex-col items-center justify-center shrink-0">
+                                <RectangleStackIcon className="h-8 w-8 text-zinc-400" />
+                            </div>
+                        ) : (
+                            <div className="h-20 w-20 rounded bg-zinc-700 relative">
+                                <img
+                                    src={
+                                        list.itemCaches![0].imageUrl ||
+                                        undefined
+                                    }
+                                    className="absolute top-0 bottom-0 left-0 h-full rounded aspect-cover object-cover object-center z-10"
+                                />
+                                <img
+                                    src={
+                                        list.itemCaches![1].imageUrl ||
+                                        undefined
+                                    }
+                                    className="absolute top-0 bottom-0 right-0 h-full rounded aspect-cover object-cover object-center"
+                                />
+                            </div>
+                        )}
                         <div className="flex flex-col items-start justify-center">
                             <h1 className="text-3xl line-clamp-1">
                                 {list.name}
@@ -138,14 +165,7 @@ export default function List() {
                         <button
                             className="p-2 rounded bg-zinc-700 hover:bg-red-400 transition text-zinc-200 leading-none"
                             onClick={() => {
-                                let confirmed = confirm(
-                                    "Are you sure you want to delete this list? This action cannot be undone."
-                                );
-                                if (!confirmed) return;
-
-                                db.lists.where("id").equals(list.id!).delete();
-
-                                router.replace("/library");
+                                setIsConfirmModalOpen(true);
                             }}
                         >
                             <TrashIcon className="h-4 w-4 stroke-2" />
@@ -184,6 +204,25 @@ export default function List() {
                     setLibraryEntryModalMapping(null);
                 }}
             />
+            <ConfirmModal
+                isOpen={isConfirmModalOpen}
+                title="Delete this list"
+                content="Are you sure you want to delete this list? This action cannot be undone."
+                onConfirm={() => {
+                    setIsConfirmModalOpen(false);
+                    router.replace("/library");
+                    setTimeout(
+                        () => db.lists.where("id").equals(list.id!).delete(),
+                        300
+                    );
+                }}
+                onDecline={() => {
+                    setIsConfirmModalOpen(false);
+                }}
+                closeModal={() => {
+                    setIsConfirmModalOpen(false);
+                }}
+            />
         </>
     );
 }
@@ -197,43 +236,53 @@ function MediaItem({
     media: MediaCache;
     openLibraryEntryModal: any;
 }) {
-    return (
-        <div className="w-full p-2 rounded flex flex-row items-center gap-2 hover:bg-zinc-800 transition cursor-pointer group relative">
-            <img
-                src={media.imageUrl || undefined}
-                className="h-10 w-10 rounded object-cover object-center"
-            />
-            <div className="flex flex-col flex-1 gap-1">
-                <div className="line-clamp-1 leading-none text-zinc-300">
-                    {media.title}
-                </div>
-                <div className="text-sm text-zinc-400 leading-none">
-                    {media.type == "anime" ? "Anime" : "Manga"}
-                </div>
-            </div>
-            <div
-                className="absolute top-0 bottom-0 left-0 right-0"
-                onClick={() => {
-                    openLibraryEntryModal(media.mapping);
-                }}
-            ></div>
-            <button
-                className="p-1 rounded bg-zinc-700 hover:bg-zinc-600 opacity-0 group-hover:opacity-100 transition z-10"
-                onClick={async () => {
-                    let confirmed = confirm(
-                        "Are you sure you want to remove this item from the list?"
-                    );
-                    if (!confirmed) return;
+    const [isConfirmModalOpen, setIsConfirmModalOpen] = React.useState(false);
 
+    return (
+        <>
+            <div className="w-full p-2 rounded flex flex-row items-center gap-2 hover:bg-zinc-800 transition cursor-pointer group relative">
+                <img
+                    src={media.imageUrl || undefined}
+                    className="h-10 w-10 rounded object-cover object-center"
+                />
+                <div className="flex flex-col flex-1 gap-1">
+                    <div className="line-clamp-1 leading-none text-zinc-300">
+                        {media.title}
+                    </div>
+                    <div className="text-sm text-zinc-400 leading-none">
+                        {media.type == "anime" ? "Anime" : "Manga"}
+                    </div>
+                </div>
+                <div
+                    className="absolute top-0 bottom-0 left-0 right-0"
+                    onClick={() => {
+                        openLibraryEntryModal(media.mapping);
+                    }}
+                ></div>
+                <button
+                    className="p-1 rounded bg-zinc-700 hover:bg-zinc-600 opacity-0 group-hover:opacity-100 transition z-10"
+                    onClick={() => {
+                        setIsConfirmModalOpen(true);
+                    }}
+                >
+                    <XMarkIcon className="h-4 w-4" />
+                </button>
+            </div>
+            <ConfirmModal
+                isOpen={isConfirmModalOpen}
+                title="Remove from this list"
+                content={`Do you want to remove '${media.title}' from the list?`}
+                onConfirm={async () => {
                     await db.lists.update(list.id!, {
                         items: list.items.filter(
                             (v: string) => v != media.mapping
                         ),
                     });
                 }}
-            >
-                <XMarkIcon className="h-4 w-4" />
-            </button>
-        </div>
+                closeModal={() => {
+                    setIsConfirmModalOpen(false);
+                }}
+            />
+        </>
     );
 }
