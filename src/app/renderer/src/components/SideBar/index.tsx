@@ -16,6 +16,7 @@ import CreateListModal from "../CreateListModal";
 import { useLiveQuery } from "dexie-react-hooks";
 import { List, db } from "@/lib/db";
 import { Mapping, MediaType } from "@/lib/types";
+import styles from "./styles.module.css";
 
 export default function SideBar() {
     const [isCreateListModalOpen, setIsCreateListModalOpen] =
@@ -140,7 +141,9 @@ function Lists({
     const lists = useLiveQuery(() => db.lists.toArray());
 
     return (
-        <div className="flex-1 border-y border-zinc-900 p-4 flex flex-col gap-4">
+        <div
+            className={`flex-1 overflow-y-auto border-y border-zinc-900 py-4 px-3 flex flex-col gap-4 ${styles.sidebarLists}`}
+        >
             <div className="flex flex-row items-center justify-between">
                 <div className="uppercase text-white/50 text-xs">My lists</div>
                 <div className="flex flex-row items-center gap-2 -my-0.5">
@@ -152,9 +155,25 @@ function Lists({
                     </button>
                 </div>
             </div>
-            {lists?.map((list, index) => (
-                <List key={list.id} list={list} />
-            ))}
+            {lists ? (
+                lists.length > 0 ? (
+                    lists.map((list, index) => (
+                        <List key={list.id} list={list} />
+                    ))
+                ) : (
+                    <div className="flex-1 flex flex-col justify-center items-center text-zinc-300 text-sm">
+                        <div className="mb-1">(⩾﹏⩽)</div>
+                        <div>There's nothing here!</div>
+                        <div className="opacity-50 text-xs">
+                            (You can create a new list on top!)
+                        </div>
+                    </div>
+                )
+            ) : (
+                <div className="flex-1 flex flex-col items-center justify-center">
+                    <div className="h-4 w-4 border-2 border-zinc-100 border-t-transparent rounded-full animate-spin"></div>
+                </div>
+            )}
         </div>
     );
 }

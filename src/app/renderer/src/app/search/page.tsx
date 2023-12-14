@@ -27,6 +27,7 @@ import { db } from "@/lib/db";
 import { defaultLibraryEntry } from "@/lib/db/defaults";
 import Chip from "@/components/Chip";
 import TextInput from "@/components/TextInput";
+import AddToListModal from "@/components/AddToListModal";
 
 export default function Search() {
     const [searchType, setSearchType] = React.useState<MediaType>("anime");
@@ -45,6 +46,8 @@ export default function Search() {
     const sortByRef = React.useRef<HTMLSelectElement | null>(null);
 
     const [libraryEntryModalMapping, setLibraryEntryModalMapping] =
+        React.useState<Mapping | null>(null);
+    const [addToListModalMapping, setAddToListModalMapping] =
         React.useState<Mapping | null>(null);
 
     const search = async () => {
@@ -118,28 +121,28 @@ export default function Search() {
     return (
         <>
             <main className="flex flex-col min-h-full">
-                <div className="flex flex-row items-center">
-                    <VerticalNavSpacer />
-                    <LeftNavSpacer />
-                    <div className="flex flex-row gap-2 items-center">
-                        {enabledSearchTypes.map((type) => (
-                            <Chip
-                                key={type}
-                                label={
-                                    type.slice(0, 1).toUpperCase() +
-                                    type.slice(1)
-                                }
-                                selected={searchType === type}
-                                onClick={() => {
-                                    setSearchType(type as MediaType);
-                                }}
-                            />
-                        ))}
-                    </div>
-                </div>
-                <div className="px-4 pt-2 flex flex-row items-stretch gap-4 flex-1">
-                    <div className="flex-1 flex flex-col gap-4">
-                        <div className="flex flex-col gap-2">
+                <div className="flex flex-row items-stretch gap-4 flex-1 pr-4">
+                    <div className="flex-1 flex flex-col border-r border-r-zinc-800">
+                        <div className="flex flex-row items-center">
+                            <VerticalNavSpacer />
+                            <LeftNavSpacer />
+                            <div className="flex flex-row gap-2 items-center">
+                                {enabledSearchTypes.map((type) => (
+                                    <Chip
+                                        key={type}
+                                        label={
+                                            type.slice(0, 1).toUpperCase() +
+                                            type.slice(1)
+                                        }
+                                        selected={searchType === type}
+                                        onClick={() => {
+                                            setSearchType(type as MediaType);
+                                        }}
+                                    />
+                                ))}
+                            </div>
+                        </div>
+                        <div className="flex flex-col gap-2 border-b border-zinc-800 px-4 pb-2 mt-2">
                             <div className="flex flex-row gap-4 items-center">
                                 <TextInput
                                     name="search"
@@ -195,7 +198,7 @@ export default function Search() {
                         <div className="flex-1 relative">
                             <div
                                 className={cn([
-                                    "absolute top-0 bottom-0 left-0 right-0 pb-4",
+                                    "absolute top-0 bottom-0 left-0 right-0",
                                     styles.scrollable,
                                 ])}
                             >
@@ -227,6 +230,9 @@ export default function Search() {
                                         openLibraryEntryModal={
                                             setLibraryEntryModalMapping
                                         }
+                                        openAddToListModal={
+                                            setAddToListModalMapping
+                                        }
                                     />
                                 ) : (
                                     <Grid
@@ -239,12 +245,12 @@ export default function Search() {
                             </div>
                         </div>
                     </div>
-                    <div className="w-px bg-zinc-800"></div>
                     <form
                         className="w-60 flex flex-col gap-4"
                         ref={filtersFormRef}
                     >
-                        <div className="text-lg font-medium">Filters</div>
+                        <VerticalNavSpacer />
+                        <div className="text-lg font-medium -mt-5">Filters</div>
                         {api.config.search[searchType]?.filters.map(
                             (filter: any, index: number) => {
                                 switch (filter.type) {
@@ -274,6 +280,10 @@ export default function Search() {
             <LibraryEntryModal
                 mapping={libraryEntryModalMapping}
                 closeModal={() => setLibraryEntryModalMapping(null)}
+            />
+            <AddToListModal
+                mapping={addToListModalMapping || undefined}
+                closeModal={() => setAddToListModalMapping(null)}
             />
         </>
     );
@@ -443,7 +453,15 @@ function Grid({
     );
 }
 
-function MediaRow({ media, onClick }: { media: Media; onClick: any }) {
+function MediaRow({
+    media,
+    onClick,
+    addToList,
+}: {
+    media: Media;
+    onClick: any;
+    addToList: any;
+}) {
     const libraryEntry = useLiveQuery(
         () => db.library.get({ mapping: media.mappings[0] }),
         [media],
@@ -455,7 +473,7 @@ function MediaRow({ media, onClick }: { media: Media; onClick: any }) {
     );
 
     return (
-        <div className="flex flex-row items-center gap-4 rounded group transition py-2 cursor-pointer relative">
+        <div className="flex flex-row items-center gap-4 rounded group transition py-2 px-2 cursor-pointer relative hover:bg-zinc-800">
             <img
                 className="w-10 rounded aspect-square object-cover object-center"
                 src={media.imageUrl}
@@ -487,7 +505,7 @@ function MediaRow({ media, onClick }: { media: Media; onClick: any }) {
             <div className="opacity-0 group-hover:opacity-100 transition-all p-2 flex flex-row items-center gap-2 z-10">
                 <div className="relative">
                     <select
-                        className="text-xs py-1 pl-2 pr-6 rounded-full bg-zinc-800 transition hover:bg-zinc-700 appearance-none outline-none"
+                        className="text-xs py-1 pl-2 pr-6 rounded-full bg-zinc-700 transition hover:bg-zinc-600 appearance-none outline-none"
                         value={libraryEntry?.status || "not_started"}
                         onChange={(e) => {
                             db.library
@@ -507,29 +525,29 @@ function MediaRow({ media, onClick }: { media: Media; onClick: any }) {
                                 });
                         }}
                     >
-                        <option className="bg-zinc-800" value="not_started">
+                        <option className="bg-zinc-700" value="not_started">
                             Not {media.type == "anime" ? "watched" : "read"}
                         </option>
-                        <option className="bg-zinc-800" value="planned">
+                        <option className="bg-zinc-700" value="planned">
                             Planned
                         </option>
-                        <option className="bg-zinc-800" value="in_progress">
+                        <option className="bg-zinc-700" value="in_progress">
                             {media.type == "anime" ? "Watching" : "Reading"}
                         </option>
-                        <option className="bg-zinc-800" value="paused">
+                        <option className="bg-zinc-700" value="paused">
                             Paused
                         </option>
-                        <option className="bg-zinc-800" value="dropped">
+                        <option className="bg-zinc-700" value="dropped">
                             Dropped
                         </option>
-                        <option className="bg-zinc-800" value="completed">
+                        <option className="bg-zinc-700" value="completed">
                             Completed
                         </option>
                     </select>
                     <ChevronDownIcon className="h-3 w-3 stroke-2 absolute top-0 bottom-0 right-2 my-auto pointer-events-none" />
                 </div>
                 <button
-                    className="rounded-full bg-zinc-800 p-1 transition hover:bg-zinc-700"
+                    className="rounded-full bg-zinc-700 p-1 transition hover:bg-zinc-600"
                     onClick={() => {
                         db.library
                             .update(media.mappings[0], {
@@ -557,7 +575,10 @@ function MediaRow({ media, onClick }: { media: Media; onClick: any }) {
                         }`}
                     />
                 </button>
-                <button className="rounded-full bg-zinc-800 p-1 transition hover:bg-zinc-700">
+                <button
+                    className="rounded-full bg-zinc-700 p-1 transition hover:bg-zinc-600"
+                    onClick={addToList}
+                >
                     <PlusIcon className="w-4 h-4 stroke-2" />
                 </button>
             </div>
@@ -568,17 +589,20 @@ function MediaRow({ media, onClick }: { media: Media; onClick: any }) {
 function List({
     results,
     openLibraryEntryModal,
+    openAddToListModal,
 }: {
     results: Media[];
-    openLibraryEntryModal: any;
+    openLibraryEntryModal: (mapping: Mapping) => void;
+    openAddToListModal: (mapping: Mapping) => void;
 }) {
     return (
-        <div className="flex flex-col -my-2">
+        <div className="flex flex-col p-2">
             {results.map((result) => (
                 <MediaRow
                     key={result.id}
                     media={result}
                     onClick={() => openLibraryEntryModal(result.mappings[0])}
+                    addToList={() => openAddToListModal(result.mappings[0])}
                 />
             ))}
         </div>

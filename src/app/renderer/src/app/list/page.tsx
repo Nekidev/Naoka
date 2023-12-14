@@ -1,17 +1,62 @@
 "use client";
 
+import EditListModal from "@/components/EditListModal";
+import LibraryEntryModal from "@/components/LibraryEntryModal";
 import { LeftNavSpacer, VerticalNavSpacer } from "@/components/NavigationBar";
-import { List, db } from "@/lib/db";
+import { List, MediaCache, db } from "@/lib/db";
 import { Mapping, MediaType } from "@/lib/types";
-import { PencilIcon, RectangleStackIcon } from "@heroicons/react/24/outline";
+import {
+    PencilIcon,
+    RectangleStackIcon,
+    TrashIcon,
+    XMarkIcon,
+} from "@heroicons/react/24/outline";
 import { useLiveQuery } from "dexie-react-hooks";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
+import React from "react";
+import { motion, AnimatePresence } from "framer-motion";
 
 export default function List() {
     const searchParams = useSearchParams();
+    const router = useRouter();
+
     const id = searchParams.get("id");
 
-    const list = useLiveQuery(() => db.lists.get(parseInt(id!)), [id]);
+    const list = useLiveQuery(
+        () =>
+            db.lists.get(parseInt(id!)).then(async (list) => {
+                let itemCaches = await db.mediaCache.bulkGet([...list!.items]);
+
+                return {
+                    ...list,
+                    itemCaches: itemCaches || [],
+                } as List;
+            }),
+        [id]
+    );
+
+    const [isEditModalOpen, setIsEditModalOpen] = React.useState(false);
+    const [libraryEntryModalMapping, setLibraryEntryModalMapping] =
+        React.useState<Mapping | null>(null);
+
+    const mainRef = React.useRef(null);
+    const [scrollY, setScrollY] = React.useState(0);
+
+    React.useEffect(() => {
+        function handleScroll(e) {
+            setScrollY(e.target.scrollTop);
+        }
+
+        if (mainRef.current) {
+            mainRef.current.addEventListener("scroll", handleScroll);
+        }
+
+        return () => {
+            if (mainRef.current) {
+                mainRef.current.removeEventListener("scroll", handleScroll);
+            }
+        };
+    })
 
     if (!list) {
         return (
@@ -22,35 +67,173 @@ export default function List() {
     }
 
     function countItemsByMedia(mediaType: MediaType) {
-        return list!.items.filter((v: Mapping) => v.split(":")[1] === mediaType).length;
+        return list!.itemCaches!.filter(
+            (v: MediaCache | undefined) => v!.type === mediaType
+        ).length;
     }
 
     return (
-        <main className="flex flex-col min-h-full max-h-full overflow-y-auto">
-            <div className="sticky top-0 shrink-0 bg-zinc-900 z-10">
-                <div className="flex flex-row items-center">
-                    <VerticalNavSpacer />
-                    <LeftNavSpacer />
-                </div>
-            </div>
-            <div className="p-4 flex flex-row items-center justify-between border-b border-zinc-800">
-                <div className="flex flex-row items-center gap-4">
-                    <div className="h-20 w-20 rounded bg-zinc-700 flex flex-col items-center justify-center">
-                        <RectangleStackIcon className="h-8 w-8 text-zinc-400" />
+        <>
+            <main
+                className="flex flex-col min-h-full max-h-full overflow-y-auto"
+                ref={mainRef}
+            >
+                <div className={"sticky top-0 shrink-0 bg-zinc-900 z-20 border-b-zinc-800"} style={{
+                    borderBottomWidth: scrollY > 112 ? 1 : 0
+                }}>
+                    <div className="flex flex-row items-center">
+                        <VerticalNavSpacer />
+                        <LeftNavSpacer />
+                        <AnimatePresence>
+                            {scrollY > 112 && (
+                                <motion.div
+                                    initial={{
+                                        opacity: 0,
+                                        translateY: 5,
+                                    }}
+                                    animate={{
+                                        opacity: 1,
+                                        translateY: 0,
+                                    }}
+                                    exit={{
+                                        opacity: 0,
+                                        translateY: 5,
+                                    }}
+                                    transition={{ duration: 0.15 }}
+                                    className="flex flex-row items-center gap-2"
+                                >
+                                    <div className="py-1 px-2 rounded bg-zinc-800 leading-none">
+                                        List
+                                    </div>
+                                    <div className="line-clamp-1 leading-none">
+                                        {list.name}
+                                    </div>
+                                </motion.div>
+                            )}
+                        </AnimatePresence>
                     </div>
-                    <div className="flex flex-col items-start justify-center">
-                        <h1 className="text-3xl line-clamp-2">{list.name}</h1>
-                        <div className="text-zinc-400">
-                            {countItemsByMedia("anime")} animes, {countItemsByMedia("manga")} mangas
+                </div>
+                <div className="p-4 flex flex-row items-center justify-between gap-8 border-b border-zinc-800">
+                    <div className="flex flex-row items-center gap-4">
+                        <div className="h-20 w-20 rounded bg-zinc-700 flex flex-col items-center justify-center shrink-0">
+                            <RectangleStackIcon className="h-8 w-8 text-zinc-400" />
+                        </div>
+                        <div className="flex flex-col items-start justify-center">
+                            <h1 className="text-3xl line-clamp-1">
+                                {list.name}
+                            </h1>
+                            <div className="text-zinc-400">
+                                {countItemsByMedia("anime")} animes,{" "}
+                                {countItemsByMedia("manga")} mangas
+                            </div>
                         </div>
                     </div>
+                    <div className="flex flex-row items-center gap-2">
+                        <button
+                            className="p-2 rounded bg-zinc-700 hover:bg-zinc-600 transition text-zinc-200 leading-none"
+                            onClick={() => setIsEditModalOpen(true)}
+                        >
+                            <PencilIcon className="h-4 w-4 stroke-2" />
+                        </button>
+                        <button
+                            className="p-2 rounded bg-zinc-700 hover:bg-red-400 transition text-zinc-200 leading-none"
+                            onClick={() => {
+                                let confirmed = confirm(
+                                    "Are you sure you want to delete this list? This action cannot be undone."
+                                );
+                                if (!confirmed) return;
+
+                                db.lists.where("id").equals(list.id!).delete();
+
+                                router.replace("/library");
+                            }}
+                        >
+                            <TrashIcon className="h-4 w-4 stroke-2" />
+                        </button>
+                    </div>
                 </div>
-                <div className="flex flex-row items-center gap-4">
-                    <button className="p-2 rounded bg-zinc-700 hover:bg-zinc-600 transition text-zinc-200 leading-none flex flex-row items-center gap-4">
-                        <PencilIcon className="h-4 w-4 stroke-2" />
-                    </button>
+                {list.items.length > 0 ? (
+                    <div className="p-2 gap-x-4 grid grid-cols-3 relative">
+                        {list.itemCaches!.map((item: MediaCache) => (
+                            <MediaItem
+                                list={list}
+                                media={item}
+                                openLibraryEntryModal={
+                                    setLibraryEntryModalMapping
+                                }
+                            />
+                        ))}
+                    </div>
+                ) : (
+                    <div className="flex-1 flex flex-col justify-center items-center text-zinc-300">
+                        <div className="mb-2">(╥﹏╥)</div>
+                        <div>Where's everyone?</div>
+                        <div className="opacity-50 text-xs">
+                            Add some items to the list to see them here!
+                        </div>
+                    </div>
+                )}
+            </main>
+            <EditListModal
+                list={isEditModalOpen ? list : undefined}
+                closeModal={() => setIsEditModalOpen(false)}
+            />
+            <LibraryEntryModal
+                mapping={libraryEntryModalMapping}
+                closeModal={() => {
+                    setLibraryEntryModalMapping(null);
+                }}
+            />
+        </>
+    );
+}
+
+function MediaItem({
+    list,
+    media,
+    openLibraryEntryModal,
+}: {
+    list: List;
+    media: MediaCache;
+    openLibraryEntryModal: any;
+}) {
+    return (
+        <div className="w-full p-2 rounded flex flex-row items-center gap-2 hover:bg-zinc-800 transition cursor-pointer group relative">
+            <img
+                src={media.imageUrl || undefined}
+                className="h-10 w-10 rounded object-cover object-center"
+            />
+            <div className="flex flex-col flex-1 gap-1">
+                <div className="line-clamp-1 leading-none text-zinc-300">
+                    {media.title}
+                </div>
+                <div className="text-sm text-zinc-400 leading-none">
+                    {media.type == "anime" ? "Anime" : "Manga"}
                 </div>
             </div>
-        </main>
+            <div
+                className="absolute top-0 bottom-0 left-0 right-0"
+                onClick={() => {
+                    openLibraryEntryModal(media.mapping);
+                }}
+            ></div>
+            <button
+                className="p-1 rounded bg-zinc-700 hover:bg-zinc-600 opacity-0 group-hover:opacity-100 transition z-10"
+                onClick={async () => {
+                    let confirmed = confirm(
+                        "Are you sure you want to remove this item from the list?"
+                    );
+                    if (!confirmed) return;
+
+                    await db.lists.update(list.id!, {
+                        items: list.items.filter(
+                            (v: string) => v != media.mapping
+                        ),
+                    });
+                }}
+            >
+                <XMarkIcon className="h-4 w-4" />
+            </button>
+        </div>
     );
 }

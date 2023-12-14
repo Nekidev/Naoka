@@ -3,7 +3,7 @@
 
 @layer components {
     .scrollable {
-        @apply overflow-auto -mr-4;
+        @apply overflow-auto;
         scrollbar-gutter: stable;
     }
 }

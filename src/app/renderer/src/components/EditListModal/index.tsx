@@ -1,61 +1,69 @@
-import { db } from "@/lib/db";
+import { List, db } from "@/lib/db";
 import { allTrim } from "@/utils";
 import { ExclamationTriangleIcon } from "@heroicons/react/24/outline";
 import { useLiveQuery } from "dexie-react-hooks";
 import { motion, AnimatePresence } from "framer-motion";
 import React from "react";
 import Modal from "../Modal";
+import { Mapping } from "@/lib/types";
 
-export default function CreateListModal({
-    isOpen,
+export default function EditListModal({
+    list,
     closeModal,
 }: {
-    isOpen: boolean;
+    list?: List;
     closeModal: () => void;
 }) {
-    const [name, setName] = React.useState("");
+    const [name, setName] = React.useState(list?.name || "");
+
     const listsWithSameName = useLiveQuery(
         () =>
             db.lists
                 .filter(
                     ({ name: listName }) =>
                         allTrim(listName.toLowerCase()) ==
-                        allTrim(name.toLowerCase())
+                            allTrim(name.toLowerCase()) &&
+                        allTrim(listName) != allTrim(list?.name || "")
                 )
                 .count(),
         [name]
     );
 
-    async function createList() {
-        if (!name || name.trim().length < 1) return;
+    React.useEffect(() => {
+        setName(list?.name || "");
+    }, [list]);
 
-        const listId = await db.lists.add({
-            name: name.trim(),
-            items: [],
-            syncedProviders: [],
-            updatedAt: new Date(),
-            createdAt: new Date(),
-            accessedAt: new Date(),
-        });
-
-        return listId;
+    async function updateList() {
+        if (list) {
+            await db.lists.update(list.id!, {
+                name,
+            });
+        }
     }
 
     return (
         <AnimatePresence>
-            {isOpen && (
+            {list && (
                 <Modal closeModal={closeModal}>
                     <div className="w-screen max-w-lg bg-zinc-800 relative rounded overflow-x-hidden overflow-y-auto shadow-2xl p-4 flex flex-col gap-4">
-                        <h2 className="text-xl leading-none">Create a list</h2>
+                        <h2 className="text-xl leading-none p-4 -m-4 mb-0 border-b border-zinc-700">
+                            Update{" "}
+                            <span className="py-1 px-2 -my-1 rounded bg-zinc-700">
+                                {list?.name}
+                            </span>
+                        </h2>
                         <form
                             className="w-full"
                             onSubmit={(e) => {
                                 e.preventDefault();
-                                createList().then((listId) => {
+                                updateList().then(() => {
                                     closeModal();
                                 });
                             }}
                         >
+                            <label className="text-sm leading-none mb-1 text-zinc-300">
+                                Name
+                            </label>
                             <input
                                 type="text"
                                 className="w-full border border-zinc-900 rounded bg-zinc-900 p-2 leading-none outline-none placeholder:text-zinc-400 focus:border-zinc-100 transition"
@@ -98,18 +106,18 @@ export default function CreateListModal({
                                 className="py-2 px-4 leading-none rounded transition text-zinc-300 bg-zinc-700 hover:bg-zinc-600"
                                 onClick={closeModal}
                             >
-                                Cancel
+                                Discard
                             </button>
                             <button
                                 className="py-2 px-4 leading-none rounded transition text-zinc-900 bg-zinc-100 hover:bg-zinc-300 disabled:opacity-50 disabled:hover:bg-zinc-100 disabled:cursor-not-allowed"
                                 disabled={name.trim() == ""}
                                 onClick={() => {
-                                    createList().then((listId) => {
+                                    updateList().then(() => {
                                         closeModal();
                                     });
                                 }}
                             >
-                                Create
+                                Update
                             </button>
                         </div>
                     </div>

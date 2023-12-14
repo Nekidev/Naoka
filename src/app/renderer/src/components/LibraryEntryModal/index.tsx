@@ -289,6 +289,14 @@ function FormModal({
                                 <button
                                     className="text-sm rounded p-2 border border-zinc-700 leading-none text-zinc-400 transition hover:border-red-400 hover:bg-red-400 hover:text-zinc-950"
                                     onClick={() => {
+                                        let confirmed = confirm(
+                                            "This will remove the entry from your library and from your favorites. Are you sure?"
+                                        );
+
+                                        if (!confirmed) {
+                                            return;
+                                        }
+
                                         db.library
                                             .delete(libraryEntry.mapping!)
                                             .then(() => {

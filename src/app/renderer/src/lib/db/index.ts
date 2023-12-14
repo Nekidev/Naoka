@@ -30,6 +30,7 @@ export interface List {
     id?: number;
     name: string;
     items: Mapping[];
+    itemCaches?: MediaCache[];
     syncedProviders: APIProvider[];
     updatedAt: Date;
     createdAt: Date;
