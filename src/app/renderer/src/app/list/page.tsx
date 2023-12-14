@@ -39,7 +39,7 @@ export default function List() {
     const [libraryEntryModalMapping, setLibraryEntryModalMapping] =
         React.useState<Mapping | null>(null);
 
-    const mainRef = React.useRef(null);
+    const mainRef = React.useRef<any>(null);
     const [scrollY, setScrollY] = React.useState(0);
 
     React.useEffect(() => {
