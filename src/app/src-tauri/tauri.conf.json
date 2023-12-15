@@ -3,7 +3,7 @@
 	"build": {
 		"beforeBuildCommand": "pnpm build",
 		"beforeDevCommand": "pnpm dev",
-		"devPath": "http://localhost:3000/library/",
+		"devPath": "http://localhost:3000/",
 		"distDir": "../renderer/out"
 	},
 	"package": {
@@ -22,7 +22,8 @@
 				"minimize": true,
 				"unmaximize": true,
 				"unminimize": true,
-				"startDragging": true
+				"startDragging": true,
+				"setSize": true
 			}
 		},
 		"bundle": {
@@ -67,14 +68,14 @@
 		"windows": [
 			{
 				"title": "Naoka",
-				"height": 600,
-				"width": 1000,
+				"height": 200,
+				"width": 400,
 				"resizable": true,
 				"fullscreen": false,
 				"decorations": false,
 				"transparent": true,
 				"center": true,
-				"url": "/library/"
+				"url": "/"
 			}
 		]
 	}

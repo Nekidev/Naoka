@@ -2,9 +2,8 @@
 
 import React from "react";
 import { Rubik } from "next/font/google";
-import SideBar from "@/components/SideBar";
-import NavigationBar from "@/components/NavigationBar";
 import "./globals.css";
+import SideBarContext from "@/contexts/SideBarContext";
 
 const rubik = Rubik({ subsets: ["latin"] });
 
@@ -13,19 +12,29 @@ export default function RootLayout({
 }: {
     children: React.ReactNode;
 }) {
+    const [isExpanded, setIsExpanded] = React.useState(
+        false
+    );
+
     return (
         <html lang="en">
             <head>
                 <title>Naoka</title>
             </head>
-            <body className={`${rubik.className} flex flex-row w-screen`} onContextMenu={(e) => {
-                e.preventDefault();
-            }}>
-                <SideBar />
-                <div className="flex-1 relative h-screen max-h-screen overflow-y-hidden">
-                    <NavigationBar />
+            <body
+                className={`${rubik.className} flex flex-row w-screen`}
+                onContextMenu={(e) => {
+                    e.preventDefault();
+                }}
+            >
+                <SideBarContext.Provider
+                    value={{
+                        isExpanded,
+                        setIsExpanded,
+                    }}
+                >
                     {children}
-                </div>
+                </SideBarContext.Provider>
             </body>
         </html>
     );

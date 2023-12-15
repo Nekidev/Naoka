@@ -15,6 +15,9 @@ const config: Config = {
             },
             aspectRatio: {
                 cover: "2 / 3",
+            },
+            spacing: {
+                14: "3.5rem"
             }
         },
     },

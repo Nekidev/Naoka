@@ -1,7 +1,7 @@
 import { Mapping } from "@/lib/types";
 import { AnimatePresence } from "framer-motion";
 import Modal from "../Modal";
-import { List, db } from "@/lib/db";
+import { List, MediaCache, db } from "@/lib/db";
 import { useLiveQuery } from "dexie-react-hooks";
 import { RectangleStackIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import CreateListModal from "../CreateListModal";
@@ -29,7 +29,28 @@ function FormModal({
     closeModal: () => void;
 }) {
     const media = useLiveQuery(() => db.mediaCache.get({ mapping }), [mapping]);
-    const lists = useLiveQuery(() => db.lists.toArray());
+    const lists = useLiveQuery(() =>
+        db.lists.toArray(async (lists) => {
+            let itemCacheMappings: Array<Mapping> = [];
+
+            for (const list of lists) {
+                list.items.map((mapping: Mapping) =>
+                    itemCacheMappings.push(mapping)
+                );
+            }
+
+            const itemCaches: MediaCache[] = (await db.mediaCache.bulkGet([
+                ...new Set(itemCacheMappings),
+            ])) as MediaCache[];
+
+            return lists.map((list) => {
+                list.itemCaches = itemCaches.filter((v) =>
+                    list.items.includes(v!.mapping)
+                );
+                return list;
+            });
+        })
+    );
 
     const [isCreateListModalOpen, setIsCreateListModalOpen] =
         React.useState(false);
@@ -131,9 +152,16 @@ function List({
                 closeModal();
             }}
         >
-            <div className="rounded h-10 w-10 bg-zinc-700 flex flex-col items-center justify-center group-hover:bg-zinc-600 group-disabled:group-hover:bg-zinc-700 transition">
-                <RectangleStackIcon className="h-5 w-5 text-zinc-500 stroke-2" />
-            </div>
+            {list.items.length < 2 ? (
+                <div className="rounded h-10 w-10 bg-zinc-700 flex flex-col items-center justify-center group-hover:bg-zinc-600 group-disabled:group-hover:bg-zinc-700 transition">
+                    <RectangleStackIcon className="h-5 w-5 text-zinc-500 stroke-2" />
+                </div>
+            ) : (
+                <div className="rounded h-10 w-10 bg-zinc-700 relative">
+                    <img src={list.itemCaches![0].imageUrl!} className="rounded absolute top-0 left-0 bottom-0 aspect-cover h-full object-center object-cover z-10" />
+                    <img src={list.itemCaches![1].imageUrl!} className="rounded absolute top-0 right-0 bottom-0 aspect-cover h-full object-center object-cover" />
+                </div>
+            )}
             <div className="flex-1 flex flex-col items-start justify-center gap-1">
                 <div className="leading-none line-clamp-1 text-zinc-300">
                     {list.name}

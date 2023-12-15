@@ -24,7 +24,7 @@ export function useMaximized(appWindow: any) {
     const [isMaximized, setIsMaximized] = React.useState(false);
 
     const update = async () => {
-        if (await appWindow.isMaximized()) {
+        if (await appWindow?.isMaximized()) {
             setIsMaximized(true);
         } else {
             setIsMaximized(false);
