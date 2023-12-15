@@ -12,6 +12,7 @@ export default function TextInput({ name, icon, label, ...props }: { [key: strin
                 type="text"
                 name={name}
                 placeholder={label}
+                autoComplete="off"
                 className={cn([
                     "p-2 py-2.5 leading-none rounded bg-zinc-800 outline-none border",
                     "border-transparent focus:border-white transition placeholder:text-zinc-400",

@@ -23,15 +23,18 @@ export async function toggleWindowMaximize(appWindow: any, status: boolean | nul
 export function useMaximized(appWindow: any) {
     const [isMaximized, setIsMaximized] = React.useState(false);
 
+    const update = async () => {
+        if (await appWindow.isMaximized()) {
+            setIsMaximized(true);
+        } else {
+            setIsMaximized(false);
+        }
+    }
+
     appWindow?.onResized(() => {
-        (async () => {
-            if (await appWindow.isMaximized()) {
-                setIsMaximized(true);
-            } else {
-                setIsMaximized(false);
-            }
-        })();
+        update();
     })
+    update();
 
     return isMaximized;
 }

@@ -1,3 +1,5 @@
+"use client";
+
 import React from "react";
 import { Rubik } from "next/font/google";
 import SideBar from "@/components/SideBar";
@@ -16,7 +18,9 @@ export default function RootLayout({
             <head>
                 <title>Naoka</title>
             </head>
-            <body className={`${rubik.className} flex flex-row w-screen`}>
+            <body className={`${rubik.className} flex flex-row w-screen`} onContextMenu={(e) => {
+                e.preventDefault();
+            }}>
                 <SideBar />
                 <div className="flex-1 relative h-screen max-h-screen overflow-y-hidden">
                     <NavigationBar />
