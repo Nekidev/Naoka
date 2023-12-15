@@ -1,12 +1,23 @@
 "use client";
 
 import React from "react";
-import { ChevronLeftIcon, ChevronRightIcon } from "@heroicons/react/24/outline";
+import {
+    ChevronLeftIcon,
+    ChevronRightIcon,
+    MinusIcon,
+    Square2StackIcon,
+    StopIcon,
+    XMarkIcon,
+} from "@heroicons/react/24/outline";
+import { toggleWindowMaximize, useAppWindow, useMaximized } from "@/utils/window";
 
 export default function NavigationBar(): JSX.Element {
+    const appWindow = useAppWindow();
+    const isMaximized = useMaximized(appWindow);
+
     return (
-        <div className="fixed ml-60 top-0 left-0 flex flex-row items-center z-50">
-            <div className="flex flex-row items-center gap-4 p-4">
+        <div className="fixed ml-60 top-0 left-0 right-0 flex flex-row items-center justify-between pointer-events-none z-50">
+            <div className="flex flex-row items-center gap-4 p-4 pointer-events-auto">
                 <button
                     className="text-white/70 hover:text-white"
                     onClick={() => {
@@ -22,6 +33,37 @@ export default function NavigationBar(): JSX.Element {
                     }}
                 >
                     <ChevronRightIcon className="w-6 h-6" />
+                </button>
+            </div>
+            <div
+                data-tauri-drag-region
+                className="flex flex-row items-center mr-2 w-fit pointer-events-auto"
+            >
+                <button
+                    className="p-2 rounded hover:bg-zinc-800 transition"
+                    onClick={() => {
+                        appWindow?.minimize();
+                    }}
+                >
+                    <MinusIcon className="h-4 w-4" />
+                </button>
+                <button
+                    className="p-2 rounded hover:bg-zinc-800 transition"
+                    onClick={() => toggleWindowMaximize(appWindow)}
+                >
+                    {isMaximized ? (
+                        <Square2StackIcon className="h-4 w-4" />
+                    ) : (
+                        <StopIcon className="h-4 w-4" />
+                    )}
+                </button>
+                <button
+                    className="p-2 rounded hover:bg-red-400 transition"
+                    onClick={() => {
+                        appWindow?.close();
+                    }}
+                >
+                    <XMarkIcon className="h-4 w-4" />
                 </button>
             </div>
         </div>

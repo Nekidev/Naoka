@@ -1,6 +1,7 @@
 appId: dev.nyeki.naoka
 productName: Naoka
-copyright: Copyright © 2023 Rafael Bradley
+authors: Nyeki
+copyright: Copyright © 2023 Nyeki.py
 directories:
     output: dist
     buildResources: resources

@@ -17,6 +17,7 @@ import { useLiveQuery } from "dexie-react-hooks";
 import { List, MediaCache, db } from "@/lib/db";
 import { Mapping, MediaType } from "@/lib/types";
 import styles from "./styles.module.css";
+import { useAppWindow } from "@/utils/window";
 
 export default function SideBar() {
     const [isCreateListModalOpen, setIsCreateListModalOpen] =
@@ -74,19 +75,23 @@ function IconButton({ icon }: { icon: JSX.Element }): JSX.Element {
 }
 
 function MenuButtons(): JSX.Element {
+    const appWindow = useAppWindow();
+
     return (
         <div className="pb-2">
             <div className="flex flex-row items-stretch">
                 <div className="p-2">
                     <IconButton icon={<Bars3Icon className="w-6 h-6" />} />
                 </div>
-                <div className="flex-1 draggable"></div>
+                <div className="flex-1" onMouseDown={() => {
+                    appWindow?.startDragging();
+                }}></div>
             </div>
             <div className="flex flex-col p-2">
                 <MenuItem
                     icon={<MagnifyingGlassIcon className="w-6 h-6" />}
                     title="Search"
-                    href="/search"
+                    href="/search/"
                 />
                 {/* <MenuItem
                     icon={<FireIcon className="w-6 h-6" />}
@@ -96,7 +101,7 @@ function MenuButtons(): JSX.Element {
                 <MenuItem
                     icon={<BookmarkIcon className="w-6 h-6" />}
                     title="My library"
-                    href="/library"
+                    href="/library/"
                 />
             </div>
         </div>
@@ -113,7 +118,7 @@ function List({ list }: { list: List }) {
 
     return (
         <Link
-            href={`/list?id=${encodeURIComponent(list.id!)}`}
+            href={`/list/?id=${encodeURIComponent(list.id!)}`}
             className="hover:bg-zinc-800 transition rounded p-2 -m-2 group flex flex-row items-center gap-2"
         >
             {images.length < 2 ? (

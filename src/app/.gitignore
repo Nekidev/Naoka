@@ -13,9 +13,6 @@
 /.next/
 /out/
 
-# production
-/build
-
 # misc
 .DS_Store
 *.pem
@@ -37,3 +34,5 @@ next-env.d.ts
 
 out/
 .next/
+
+dist/

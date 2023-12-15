@@ -7,9 +7,19 @@
         @apply outline-none;
     }
 
-    html,
     body {
-        @apply bg-zinc-900 text-white/90 select-none;
+        @apply bg-transparent text-white/90 select-none overflow-hidden rounded-none box-border;
+    }
+    body:not(.maximized) {
+        @apply border border-zinc-800 h-screen w-screen rounded;
+    }
+
+    html {
+        @apply bg-transparent rounded overflow-hidden;
+    }
+
+    main {
+        @apply bg-zinc-900;
     }
 
     input::-webkit-outer-spin-button,
@@ -43,12 +53,5 @@
     *, *::after, *::before {
         -webkit-user-drag: none;
         -webkit-app-region: no-drag;
-    }
-}
-
-@layer components {
-    .draggable {
-        @apply active:cursor-grabbing;
-        -webkit-app-region: drag;
     }
 }

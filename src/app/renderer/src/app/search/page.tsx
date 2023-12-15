@@ -441,7 +441,7 @@ function Grid({
     openLibraryEntryModal: any;
 }) {
     return (
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-6 relative gap-4">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-6 relative gap-4 p-4">
             {results.map((media) => (
                 <MediaCard
                     key={media.id}
