@@ -45,7 +45,7 @@ export default function Modal({
                 onClick={closeModal}
             ></div>
             <motion.div
-                className="rounded shadow-2xl"
+                className="rounded shadow-2xl z-10 max-w-[calc(100vw-8rem)] max-h-[calc(100vh-8rem)]"
                 initial={{
                     translateY: 10,
                 }}

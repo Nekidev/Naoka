@@ -6,6 +6,7 @@ const config: Config = {
         process.cwd() + "/renderer/src/components/**/*.{js,ts,jsx,tsx,mdx}",
         process.cwd() + "/renderer/src/app/**/*.{js,ts,jsx,tsx,mdx}",
     ],
+    darkMode: 'class',
     theme: {
         extend: {
             backgroundImage: {

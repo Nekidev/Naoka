@@ -18,10 +18,6 @@
         @apply bg-transparent rounded overflow-hidden;
     }
 
-    main {
-        @apply bg-zinc-900;
-    }
-
     input::-webkit-outer-spin-button,
     input::-webkit-inner-spin-button {
         -webkit-appearance: none;

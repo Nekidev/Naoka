@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import {
     Bars3Icon,
     MagnifyingGlassIcon,
@@ -20,11 +20,28 @@ import styles from "./styles.module.css";
 import { useAppWindow } from "@/utils/window";
 import SideBarContext from "@/contexts/SideBarContext";
 import Tooltip from "../Tooltip";
+import SettingsModal from "../SettingsModal";
 
 export default function SideBar() {
     const [isCreateListModalOpen, setIsCreateListModalOpen] =
         React.useState(false);
+    const [isSettingsModalOpen, setIsSettingsModalOpen] = React.useState(false);
+
     const { isExpanded, setIsExpanded } = React.useContext(SideBarContext);
+
+    React.useEffect(() => {
+        const handleKeyDown = (event: KeyboardEvent) => {
+            if ((event.ctrlKey || event.metaKey) && event.key === "b") {
+                event.preventDefault();
+                setIsExpanded(!isExpanded);
+            }
+        };
+
+        document.addEventListener("keydown", handleKeyDown);
+        return () => {
+            document.removeEventListener("keydown", handleKeyDown);
+        };
+    }, [isExpanded]);
 
     return (
         <div
@@ -37,11 +54,21 @@ export default function SideBar() {
                 isCreateListModalOpen={isCreateListModalOpen}
                 setIsCreateListModalOpen={setIsCreateListModalOpen}
             />
-            <UserProfile />
+            <UserProfile
+                openSettingsModal={() => {
+                    setIsSettingsModalOpen(true);
+                }}
+            />
             <CreateListModal
                 isOpen={isCreateListModalOpen}
                 closeModal={() => {
                     setIsCreateListModalOpen(false);
+                }}
+            />
+            <SettingsModal
+                isOpen={isSettingsModalOpen}
+                closeModal={() => {
+                    setIsSettingsModalOpen(false);
                 }}
             />
         </div>
@@ -59,8 +86,6 @@ function MenuItem({
 }): JSX.Element {
     const pathname = usePathname();
     const { isExpanded, setIsExpanded } = React.useContext(SideBarContext);
-
-    console.log(pathname, href);
 
     return (
         <Tooltip
@@ -273,7 +298,7 @@ function Lists({
     );
 }
 
-function UserProfile() {
+function UserProfile({ openSettingsModal }: { openSettingsModal: () => void }) {
     const { isExpanded, setIsExpanded } = React.useContext(SideBarContext);
 
     return (
@@ -298,7 +323,10 @@ function UserProfile() {
                 )}
             </button>
             <Tooltip label="Settings" enabled={!isExpanded} position="right">
-                <IconButton icon={<Cog6ToothIcon className="w-6 h-6" />} />
+                <IconButton
+                    icon={<Cog6ToothIcon className="w-6 h-6" />}
+                    onClick={openSettingsModal}
+                />
             </Tooltip>
         </div>
     );

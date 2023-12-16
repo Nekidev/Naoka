@@ -23,7 +23,8 @@
 				"unmaximize": true,
 				"unminimize": true,
 				"startDragging": true,
-				"setSize": true
+				"setSize": true,
+				"setTitle": true
 			}
 		},
 		"bundle": {

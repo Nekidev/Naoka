@@ -4,6 +4,7 @@ import React from "react";
 import { Rubik } from "next/font/google";
 import "./globals.css";
 import SideBarContext from "@/contexts/SideBarContext";
+import { useLocalStorage } from "@uidotdev/usehooks";
 
 const rubik = Rubik({ subsets: ["latin"] });
 
@@ -12,12 +13,15 @@ export default function RootLayout({
 }: {
     children: React.ReactNode;
 }) {
-    const [isExpanded, setIsExpanded] = React.useState(
-        false
-    );
+    const [_isExpanded, _setIsExpanded] = useLocalStorage("Naoka:SideBar:Expanded", "true");
+    const [theme, setTheme] = useLocalStorage("Naoka:Settings:Theme", "dark");
+
+    const setIsExpanded = (isExpanded: boolean) => {
+        _setIsExpanded(isExpanded.toString());
+    };
 
     return (
-        <html lang="en">
+        <html lang="en" className={theme}>
             <head>
                 <title>Naoka</title>
             </head>
@@ -29,7 +33,7 @@ export default function RootLayout({
             >
                 <SideBarContext.Provider
                     value={{
-                        isExpanded,
+                        isExpanded: _isExpanded == "true",
                         setIsExpanded,
                     }}
                 >
