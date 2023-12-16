@@ -1,26 +1,29 @@
+import { WebviewWindow } from "@tauri-apps/api/window";
 import React from "react";
 
-
-export async function toggleWindowMaximize(appWindow: any, status: boolean | null = null) {
+export async function toggleWindowMaximize(
+    appWindow: WebviewWindow | undefined,
+    status: boolean | null = null
+) {
     if (status === null) {
-        if (await appWindow.isMaximized()) {
+        if (await appWindow?.isMaximized()) {
             document.body.classList.remove("maximized");
         } else {
             document.body.classList.add("maximized");
         }
-        appWindow.toggleMaximize();
+        appWindow?.toggleMaximize();
     } else {
         if (status) {
             document.body.classList.add("maximized");
-            appWindow.maximize();
+            appWindow?.maximize();
         } else {
             document.body.classList.remove("maximized");
-            appWindow.unmaximize();
+            appWindow?.unmaximize();
         }
     }
 }
 
-export function useMaximized(appWindow: any) {
+export function useMaximized(appWindow: WebviewWindow | undefined) {
     const [isMaximized, setIsMaximized] = React.useState(false);
 
     const update = async () => {
@@ -29,18 +32,20 @@ export function useMaximized(appWindow: any) {
         } else {
             setIsMaximized(false);
         }
-    }
+    };
 
     appWindow?.onResized(() => {
         update();
-    })
+    });
     update();
 
     return isMaximized;
 }
 
-export function useAppWindow() {
-    const [appWindow, setAppWindow] = React.useState<any>();
+export function useAppWindow(): WebviewWindow | undefined {
+    const [appWindow, setAppWindow] = React.useState<
+        WebviewWindow | undefined
+    >();
 
     React.useEffect(() => {
         (async () => {

@@ -19,6 +19,7 @@ import { Mapping, MediaType } from "@/lib/types";
 import styles from "./styles.module.css";
 import { useAppWindow } from "@/utils/window";
 import SideBarContext from "@/contexts/SideBarContext";
+import Tooltip from "../Tooltip";
 
 export default function SideBar() {
     const [isCreateListModalOpen, setIsCreateListModalOpen] =
@@ -59,17 +60,25 @@ function MenuItem({
     const pathname = usePathname();
     const { isExpanded, setIsExpanded } = React.useContext(SideBarContext);
 
+    console.log(pathname, href);
+
     return (
-        <Link
-            href={href}
-            className={
-                "flex flex-row items-center p-2 gap-4 hover:bg-zinc-700 rounded transition cursor-pointer " +
-                (pathname === href ? "bg-zinc-800" : "active:bg-zinc-800")
-            }
+        <Tooltip
+            label={title}
+            position="right"
+            enabled={!isExpanded}
+            className="!w-full"
         >
-            {icon}
-            {isExpanded && <div>{title}</div>}
-        </Link>
+            <Link
+                href={href}
+                className={`flex flex-row items-center p-2 gap-4 hover:bg-zinc-700 rounded transition cursor-pointer w-full flex-1 ${
+                    pathname == href && "bg-zinc-800"
+                }`}
+            >
+                {icon}
+                {isExpanded && <div>{title}</div>}
+            </Link>
+        </Tooltip>
     );
 }
 
@@ -101,8 +110,11 @@ function MenuButtons(): JSX.Element {
                     <IconButton
                         icon={<Bars3Icon className="w-6 h-6" />}
                         onClick={() => {
-                            window.localStorage.setItem("Naoka:SideBar:isExpanded", (!isExpanded).toString());
-                            setIsExpanded(!isExpanded)
+                            window.localStorage.setItem(
+                                "Naoka:SideBar:isExpanded",
+                                (!isExpanded).toString()
+                            );
+                            setIsExpanded(!isExpanded);
                         }}
                     />
                 </div>
@@ -147,7 +159,9 @@ function List({ list }: { list: List }) {
     return (
         <Link
             href={`/app/list/?id=${encodeURIComponent(list.id!)}`}
-            className={`hover:bg-zinc-800 transition rounded group flex flex-row items-center gap-2 -m-2 ${isExpanded ? "p-2" : " p-1 justify-center"}`}
+            className={`hover:bg-zinc-800 transition rounded group flex flex-row items-center gap-2 -m-2 ${
+                isExpanded ? "p-2" : " p-1 justify-center"
+            }`}
         >
             {images.length < 2 ? (
                 <div className="w-8 h-8 rounded bg-zinc-800 flex flex-col items-center justify-center group-hover:bg-zinc-700 transition">
@@ -213,7 +227,9 @@ function Lists({
 
     return (
         <div
-            className={`flex-1 overflow-y-auto border-y border-zinc-900 py-4 px-3 flex flex-col gap-4 ${styles.sidebarLists} ${!isExpanded && "gap-6"}`}
+            className={`flex-1 overflow-y-auto border-y border-zinc-900 py-4 px-3 flex flex-col gap-4 ${
+                styles.sidebarLists
+            } ${!isExpanded && "gap-6"}`}
         >
             {isExpanded ? (
                 <div className="flex flex-row items-center justify-between">
@@ -267,7 +283,7 @@ function UserProfile() {
                 flexDirection: isExpanded ? "row" : "column-reverse",
             }}
         >
-            <button className="flex flex-row items-center gap-4 transition hover:bg-zinc-800 w-full rounded">
+            <button className="flex flex-row items-center gap-4 transition hover:bg-zinc-800 flex-1 rounded">
                 <img
                     src="/icon.jpg"
                     className="h-10 w-10 rounded object-cover object-center"
@@ -281,7 +297,9 @@ function UserProfile() {
                     </div>
                 )}
             </button>
-            <IconButton icon={<Cog6ToothIcon className="w-6 h-6" />} />
+            <Tooltip label="Settings" enabled={!isExpanded} position="right">
+                <IconButton icon={<Cog6ToothIcon className="w-6 h-6" />} />
+            </Tooltip>
         </div>
     );
 }

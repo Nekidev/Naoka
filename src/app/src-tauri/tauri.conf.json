@@ -3,7 +3,7 @@
 	"build": {
 		"beforeBuildCommand": "pnpm build",
 		"beforeDevCommand": "pnpm dev",
-		"devPath": "http://localhost:3000/",
+		"devPath": "http://localhost:3000/app/library/",
 		"distDir": "../renderer/out"
 	},
 	"package": {
@@ -68,14 +68,14 @@
 		"windows": [
 			{
 				"title": "Naoka",
-				"height": 200,
-				"width": 400,
+				"height": 600,
+				"width": 1000,
 				"resizable": true,
 				"fullscreen": false,
 				"decorations": false,
 				"transparent": true,
 				"center": true,
-				"url": "/"
+				"url": "/app/library/"
 			}
 		]
 	}
