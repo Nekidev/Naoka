@@ -114,7 +114,7 @@ function FormModal({
                         className="h-40 bg-center bg-cover opacity-40 absolute top-0 bottom-0 left-0 right-0"
                         style={{
                             backgroundImage: `url(${
-                                mediaCache.bannerUrl || mediaCache.imageUrl
+                                mediaCache.bannerUrl ? mediaCache.bannerUrl : mediaCache.imageUrl
                             })`,
                         }}
                     ></div>

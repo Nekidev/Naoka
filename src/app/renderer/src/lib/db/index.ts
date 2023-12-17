@@ -37,10 +37,26 @@ export interface List {
     accessedAt: Date;
 }
 
+export class ExternalAccount {
+    provider!: APIProvider;
+    username!: string;
+    imageUrl!: string | null;
+    auth!: {
+        accessToken?: string;
+        refreshToken?: string;
+        password?: string;
+    }
+
+    async importLibrary() {
+        // TODO: Import library
+    }
+}
+
 export class NaokaDB extends Dexie {
     mediaCache!: Table<MediaCache>;
     library!: Table<LibraryEntry>;
     lists!: Table<List>;
+    externalAccounts!: Table<ExternalAccount, number>;
 
     constructor() {
         super("Naoka");
@@ -49,7 +65,10 @@ export class NaokaDB extends Dexie {
             mediaCache: "&mapping, type",
             library: "&mapping, type, favorite, status, score",
             lists: "++id, name",
+            externalAccounts: "++id, provider"
         });
+
+        this.externalAccounts.mapToClass(ExternalAccount);
     }
 }
 

@@ -1,3 +1,5 @@
+"use client";
+
 import { AnimatePresence, motion } from "framer-motion";
 import React from "react";
 
@@ -6,12 +8,14 @@ export default function Tooltip({
     enabled = true,
     position = "top",
     className = "",
+    spacing = 1,
     children,
 }: {
     label: string;
     enabled?: boolean;
     position?: "top" | "bottom" | "left" | "right";
     className?: string;
+    spacing?: number;
     children: React.ReactNode;
 }) {
     const [isActive, setIsActive] = React.useState(false);
@@ -21,44 +25,48 @@ export default function Tooltip({
     switch (position) {
         case "top":
             tooltipStyle = {
-                bottom: "calc(100% + 1rem)",
-                left: 0,
-                right: 0,
+                bottom: `calc(100% + ${spacing}rem)`,
+                left: "50%",
+                transform: "translateX(-50%)",
             };
+            break;
         case "bottom":
             tooltipStyle = {
-                top: "calc(100% + 1rem)",
-                left: 0,
-                right: 0,
+                top: `calc(100% + ${spacing}rem)`,
+                left: "50%",
+                transform: "translateX(-50%)",
             };
+            break;
         case "left":
             tooltipStyle = {
-                top: 0,
-                bottom: 0,
-                right: "calc(100% + 1rem)",
+                right: `calc(100% + ${spacing}rem)`,
+                top: "50%",
+                transform: "translateY(-50%)",
             };
+            break;
         case "right":
             tooltipStyle = {
-                top: 0,
-                bottom: 0,
-                left: "calc(100% + 1rem)",
+                left: `calc(100% + ${spacing}rem)`,
+                top: "50%",
+                transform: "translateY(-50%)",
             };
+            break;
     }
 
     const animationHidden = {
         opacity: 0,
         ...(position == "top"
-            ? { y: 10 }
+            ? { y: 10, x: "-50%" }
             : position == "bottom"
-            ? { y: -10 }
+            ? { y: -10, x: "-50%" }
             : position == "left"
-            ? { x: 10 }
-            : { x: -10 }),
+            ? { x: 10, y: "-50%" }
+            : { x: -10, y: "-50%" }),
     };
 
     return (
         <div
-            className={`relative w-fit h-fit flex flex-col items-center justify-center ${className}`}
+            className={`relative w-fit h-fit ${className}`}
             onMouseEnter={() => setIsActive(true)}
             onMouseLeave={() => setIsActive(false)}
         >
@@ -70,9 +78,13 @@ export default function Tooltip({
                         style={tooltipStyle}
                         initial={animationHidden}
                         animate={{
-                            x: 0,
-                            y: 0,
                             opacity: 1,
+                            x: ["top", "bottom"].includes(position)
+                                ? "-50%"
+                                : 0,
+                            y: ["left", "right"].includes(position)
+                                ? "-50%"
+                                : 0,
                         }}
                         exit={animationHidden}
                         transition={{

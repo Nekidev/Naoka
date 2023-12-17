@@ -144,7 +144,7 @@ function MenuButtons(): JSX.Element {
                     />
                 </div>
                 <div
-                    className="flex-1"
+                    className="flex-1 cursor-grab active:cursor-grabbing"
                     onMouseDown={() => {
                         appWindow?.startDragging();
                     }}

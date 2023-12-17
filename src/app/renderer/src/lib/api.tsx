@@ -3,13 +3,14 @@ import { MediaType } from "./types";
 import { db } from "./db";
 
 import { MyAnimeList } from "./providers/myanimelist";
+import { AniList } from "./providers/anilist";
+
 import Dexie from "dexie";
 
-export function getAPI(code: string): BaseAPI {
-    return {
-        myanimelist: new MyAnimeList(),
-    }[code] as BaseAPI;
-}
+export const providers = {
+    myanimelist: new MyAnimeList(),
+    anilist: new AniList(),
+};
 
 export default class API {
     private api!: BaseAPI;
@@ -23,7 +24,7 @@ export default class API {
     }
 
     constructor(code: string) {
-        const api = getAPI(code);
+        const api = providers[code as keyof typeof providers];
 
         if (!api) {
             throw Error("Invalid API code");
@@ -33,10 +34,10 @@ export default class API {
     }
 
     async search(
-        options: { [key: string]: any },
-        type: MediaType
+        type: MediaType,
+        options: { [key: string]: any }
     ): Promise<[Media[], boolean]> {
-        const [results, error] = await this.api.search(options, type);
+        const [results, error] = await this.api.search(type, options);
 
         db.mediaCache
             .bulkPut(

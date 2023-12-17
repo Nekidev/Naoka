@@ -1,7 +1,7 @@
 "use client";
 
 import { useLocalStorage } from "@uidotdev/usehooks";
-import { Select, Setting } from "../components";
+import { Header, Select, Setting } from "../components";
 
 export default function Appearance() {
     const [theme, setTheme] = useLocalStorage("Naoka:Settings:Theme", "dark");
@@ -12,12 +12,10 @@ export default function Appearance() {
 
     return (
         <>
-            <div className="flex flex-col gap-2">
-                <h1 className="text-xl leading-none">Appearance</h1>
-                <div className="text-zinc-400 text-sm">
-                    Customize the app's look and feel.
-                </div>
-            </div>
+            <Header
+                title="Appearance"
+                subtitle="Customize the app's look and feel."
+            />
             <Setting
                 title="Theme"
                 subtitle="This feature is experimental. Keep it in dark mode if you want everything to look nice."
@@ -35,7 +33,7 @@ export default function Appearance() {
                     value={language}
                     onChange={(e) => setLanguage(e.target.value)}
                 >
-                    <option value="en">🇺🇸 English</option>
+                    <option value="en-US">🇺🇸 English</option>
                 </Select>
             </Setting>
         </>

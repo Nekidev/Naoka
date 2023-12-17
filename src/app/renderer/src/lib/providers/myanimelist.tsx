@@ -419,8 +419,8 @@ export class MyAnimeList extends BaseAPI {
     }
 
     async search(
+        type: MediaType,
         options: { [key: string]: any },
-        type: MediaType
     ): Promise<[Media[], boolean]> {
         let result: [Media[], boolean];
 

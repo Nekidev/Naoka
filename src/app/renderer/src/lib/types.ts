@@ -8,7 +8,7 @@ export type LibraryStatus =
     | "dropped"
     | "completed";
 
-export type APIProvider = "myanimelist";
+export type APIProvider = "myanimelist" | "anilist";
 
 // Provider:MediaType:ID
 export type Mapping = `${APIProvider}:${MediaType}:${string}`;

@@ -78,10 +78,10 @@ export class BaseAPI {
     };
 
     async search(
+        type: MediaType,
         options: {
             [key: string]: any;
         },
-        type: MediaType
     ): Promise<[Media[], boolean]> {
         /*
         Returns a tuple of an array of Anime objects and a boolean indicating if there was an error.

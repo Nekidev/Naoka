@@ -32,7 +32,7 @@ import AddToListModal from "@/components/AddToListModal";
 export default function Search() {
     const [searchType, setSearchType] = React.useState<MediaType>("anime");
 
-    const api = new API("myanimelist");
+    const api = new API("anilist");
 
     const [displayMode, setDisplayMode] = React.useState<"list" | "grid">(
         "list"
@@ -67,8 +67,8 @@ export default function Search() {
 
         try {
             const [res, error] = await api.search(
+                searchType,
                 { query, sortBy: sortByRef.current?.value || null, ...filters },
-                searchType
             );
             if (error) {
                 console.log("API wrapper returned an error:", error);

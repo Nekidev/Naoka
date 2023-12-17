@@ -2,8 +2,10 @@
 
 import { AnimatePresence } from "framer-motion";
 import Modal from "../Modal";
-import { PaintBrushIcon } from "@heroicons/react/24/outline";
+import { CloudIcon, PaintBrushIcon } from "@heroicons/react/24/outline";
 import React from "react";
+
+import Connections from "./tabs/connections";
 import Appearance from "./tabs/appearance";
 
 export default function SettingsModal({
@@ -19,17 +21,29 @@ export default function SettingsModal({
         <AnimatePresence>
             {isOpen && (
                 <Modal closeModal={closeModal}>
-                    <div className="rounded bg-zinc-800 w-screen max-w-4xl overflow-hidden flex flex-row items-stretch border border-zinc-800">
-                        <div className="p-2 w-60 bg-zinc-900 flex flex-col items-stretch h-96">
+                    <div className="rounded bg-zinc-800 w-[calc(100vw-8rem)] max-w-4xl overflow-x-hidden overflow-y-auto flex flex-row items-stretch border border-zinc-800 h-96">
+                        <div className="p-2 w-60 bg-zinc-900 flex flex-col items-stretch sticky top-0 left-0 bottom-0 overflow-y-auto">
                             <Tab
                                 label="Appearance"
                                 icon={<PaintBrushIcon className="h-6 w-6" />}
                                 active={tab === "appearance"}
                                 onClick={() => setTab("appearance")}
                             />
+                            <Tab
+                                label="Connections"
+                                icon={<CloudIcon className="h-6 w-6" />}
+                                active={tab === "connections"}
+                                onClick={() => setTab("connections")}
+                            />
                         </div>
-                        <div className="flex-1 p-4 overflow-y-hidden flex flex-col gap-6">
-                            {tab == "appearance" ? <Appearance /> : ""}
+                        <div className="flex-1 p-4 flex flex-col gap-6">
+                            {tab == "appearance" ? (
+                                <Appearance />
+                            ) : tab == "connections" ? (
+                                <Connections />
+                            ) : (
+                                ""
+                            )}
                         </div>
                     </div>
                 </Modal>

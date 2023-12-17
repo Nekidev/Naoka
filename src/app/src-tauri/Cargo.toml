@@ -2,7 +2,7 @@
 name = "app"
 version = "0.1.0"
 description = "A desktop app for anime and manga tracking."
-authors = ["Nyeki"]
+authors = ["Nyeki <hello@nyeki.dev>"]
 license = ""
 repository = ""
 default-run = "app"
