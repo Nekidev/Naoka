@@ -36,7 +36,7 @@ export default function SettingsModal({
                                 onClick={() => setTab("connections")}
                             />
                         </div>
-                        <div className="flex-1 p-4 flex flex-col gap-6">
+                        <div className="flex-1 p-4 flex flex-col gap-6 min-h-fit">
                             {tab == "appearance" ? (
                                 <Appearance />
                             ) : tab == "connections" ? (

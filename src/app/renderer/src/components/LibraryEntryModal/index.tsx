@@ -109,7 +109,7 @@ function FormModal({
     return (
         <>
             <Modal closeModal={closeModal}>
-                <div className="w-screen max-w-3xl bg-zinc-800 relative rounded overflow-x-hidden overflow-y-auto">
+                <div className="w-screen max-w-3xl max-h-[calc(100vh-8rem)] bg-zinc-800 relative rounded overflow-x-hidden overflow-y-auto">
                     <div
                         className="h-40 bg-center bg-cover opacity-40 absolute top-0 bottom-0 left-0 right-0"
                         style={{

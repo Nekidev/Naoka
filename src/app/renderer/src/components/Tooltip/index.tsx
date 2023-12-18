@@ -66,7 +66,7 @@ export default function Tooltip({
 
     return (
         <div
-            className={`relative w-fit h-fit ${className}`}
+            className={`relative ${className}`}
             onMouseEnter={() => setIsActive(true)}
             onMouseLeave={() => setIsActive(false)}
         >

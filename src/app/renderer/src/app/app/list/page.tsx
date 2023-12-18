@@ -12,7 +12,7 @@ import {
     XMarkIcon,
 } from "@heroicons/react/24/outline";
 import { useLiveQuery } from "dexie-react-hooks";
-import { useRouter, useSearchParams } from "next/navigation";
+import { notFound, useRouter, useSearchParams } from "next/navigation";
 import React from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import ConfirmModal from "@/components/ConfirmModal";
@@ -26,6 +26,10 @@ export default function List() {
     const list = useLiveQuery(
         () =>
             db.lists.get(parseInt(id!)).then(async (list) => {
+                if (!list) {
+                    notFound();
+                }
+
                 let itemCaches = await db.mediaCache.bulkGet([...list!.items]);
 
                 return {

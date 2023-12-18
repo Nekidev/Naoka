@@ -83,5 +83,5 @@ export function Select({
 }
 
 export function Separator() {
-    return <div className="h-px bg-zinc-700 -m-4"></div>
+    return <div className="h-px bg-zinc-700 -mx-4 -my-2"></div>
 }

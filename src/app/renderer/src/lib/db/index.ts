@@ -1,3 +1,4 @@
+import { Data } from "dataclass";
 import Dexie, { Table } from "dexie";
 import { IntRange } from "@/utils/types";
 import { MediaType, Mapping, LibraryStatus, APIProvider } from "../types";
@@ -37,15 +38,16 @@ export interface List {
     accessedAt: Date;
 }
 
-export class ExternalAccount {
-    provider!: APIProvider;
-    username!: string;
-    imageUrl!: string | null;
-    auth!: {
+export class ExternalAccount extends Data {
+    id?: number;
+    provider: APIProvider = "myanimelist";
+    username: string = "Anonymous";
+    imageUrl: string | null = null;
+    auth: {
         accessToken?: string;
         refreshToken?: string;
         password?: string;
-    }
+    } = {};
 
     async importLibrary() {
         // TODO: Import library
@@ -65,7 +67,7 @@ export class NaokaDB extends Dexie {
             mediaCache: "&mapping, type",
             library: "&mapping, type, favorite, status, score",
             lists: "++id, name",
-            externalAccounts: "++id, provider"
+            externalAccounts: "++id, provider",
         });
 
         this.externalAccounts.mapToClass(ExternalAccount);

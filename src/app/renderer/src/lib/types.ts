@@ -1,3 +1,5 @@
+import { providers } from "./api";
+
 export type MediaType = "anime" | "manga";
 
 export type LibraryStatus =
@@ -8,7 +10,7 @@ export type LibraryStatus =
     | "dropped"
     | "completed";
 
-export type APIProvider = "myanimelist" | "anilist";
+export type APIProvider = keyof typeof providers;
 
 // Provider:MediaType:ID
 export type Mapping = `${APIProvider}:${MediaType}:${string}`;

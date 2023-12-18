@@ -1,4 +1,5 @@
 import type { Config } from "tailwindcss";
+import colors from "tailwindcss/colors";
 
 const config: Config = {
     content: [
@@ -19,6 +20,12 @@ const config: Config = {
             },
             spacing: {
                 14: "3.5rem"
+            },
+            colors: {
+                zinc: {
+                    850: "#202023",
+                    ...colors.zinc
+                }
             }
         },
     },

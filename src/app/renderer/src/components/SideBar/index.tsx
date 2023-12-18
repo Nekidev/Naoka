@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
     Bars3Icon,
@@ -21,6 +20,7 @@ import { useAppWindow } from "@/utils/window";
 import SideBarContext from "@/contexts/SideBarContext";
 import Tooltip from "../Tooltip";
 import SettingsModal from "../SettingsModal";
+import Link from "../Link";
 
 export default function SideBar() {
     const [isCreateListModalOpen, setIsCreateListModalOpen] =
