@@ -35,48 +35,22 @@
 
 ## Key Features
 
-* LivePreview - Make changes, See changes
-  - Instantly see what your Markdown documents look like in HTML as you create them.
-* Sync Scrolling
-  - While you type, LivePreview will automatically scroll to the current location you're editing.
-* GitHub Flavored Markdown  
-* Syntax highlighting
-* [KaTeX](https://khan.github.io/KaTeX/) Support
-* Dark/Light mode
-* Toolbar for basic Markdown formatting
-* Supports multiple cursors
-* Save the Markdown preview as PDF
-* Emoji support in preview :tada:
-* App will keep alive in tray for quick usage
-* Full screen mode
-  - Write distraction free.
-* Cross platform
-  - Windows, macOS and Linux ready.
-
+* **Nice UI** - There's a lot of effort put on making everything look nice. 
+* **Offline library** - No need for a wi-fi connection to update your lists.
+* **Lists** - Create lists and save your favorite anime/manga into them. You can even add both anime and manga to the same list!
+* **Sync your library** - Import from and export your library to AniList, MyAnimeList, and Kitsu (more coming soon).
 
 ## Download
 
-You can [download](https://github.com/naoka-dev/Naoka/releases/tag/latest) the latest installable version of Naoka for Windows, ~~macOS and Linux~~.
-
-## Credits
-
-This app uses the following open source packages:
-
-- [Tauri](http://tauri.app/)
-- [Node.js](https://nodejs.org/)
+You can [download](https://github.com/naoka-dev/Naoka/releases/tag/latest) the latest installable version of Naoka for Windows, ~~macOS and Linux (soon)~~.
 
 ## Related
 
-[Taiga](https://taiga.moe/) - Naoka is inspired in this app, so you probably want to check it out!
+[Taiga](https://taiga.moe/) - Naoka is inspired in this app, so you probably want to check it out too!
 
 ## Support
 
 [![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/F1F7S2JB8)
-
-## You may also like...
-
-- [Nekos API](https://nekosapi.com) - An anime art API
-- [Nekos.Land](https://nekos.land) - A client for Nekos API
 
 ## License
 
@@ -84,7 +58,7 @@ MIT
 
 ---
 
-> [nyeki.dve](https://nyeki.dev) &nbsp;&middot;&nbsp;
+> [nyeki.dev](https://nyeki.dev) &nbsp;&middot;&nbsp;
 > GitHub [@Nekidev](https://github.com/Nekidev) &nbsp;&middot;&nbsp;
 > Twitter [@Nekidev](https://twitter.com/Nekidev)
 
