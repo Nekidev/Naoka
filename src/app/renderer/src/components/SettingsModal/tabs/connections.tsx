@@ -10,6 +10,7 @@ import FormModal from "@/components/FormModal";
 import React from "react";
 import { CheckCircleIcon } from "@heroicons/react/20/solid";
 import { MediaType } from "@/lib/types";
+import { notify } from "@/lib/notifications";
 
 export default function Connections() {
     const accounts = useLiveQuery(() => db.externalAccounts.toArray());
@@ -261,9 +262,11 @@ function Account({ account }: { account: ExternalAccount }) {
                     const api = new API(account.provider);
                     api.importList(type as MediaType, account, !!override).then(
                         () => {
-                            console.log(
-                                "Happy happy happy! (du du du du du du) Happy happy happy happy! (du du du du du du du du du du)"
-                            );
+                            notify({
+                                title: `Imported ${account.username}'s ${type} list`,
+                                body: `Your list has been successfully imported from ${provider.title}.`,
+                                icon: "/16x16.png",
+                            })
                         }
                     );
                 }}

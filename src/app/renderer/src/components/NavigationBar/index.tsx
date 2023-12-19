@@ -9,17 +9,28 @@ import {
     StopIcon,
     XMarkIcon,
 } from "@heroicons/react/24/outline";
-import { toggleWindowMaximize, useAppWindow, useMaximized } from "@/utils/window";
-import SideBarContext from "@/contexts/SideBarContext";
+import {
+    toggleWindowMaximize,
+    useAppWindow,
+    useMaximized,
+} from "@/utils/window";
+import { useLocalStorage } from "@uidotdev/usehooks";
 
 export default function NavigationBar(): JSX.Element {
     const appWindow = useAppWindow();
     const isMaximized = useMaximized(appWindow);
 
-    const { isExpanded, setIsExpanded } = React.useContext(SideBarContext);
+    const [isExpanded, setIsExpanded] = useLocalStorage(
+        "Naoka:SideBar:Expanded",
+        "true"
+    );
 
     return (
-        <div className={`fixed top-0 left-0 right-0 flex flex-row items-center justify-between pointer-events-none z-50 ${isExpanded ? "ml-60" : "ml-14"}`}>
+        <div
+            className={`fixed top-0 left-0 right-0 flex flex-row items-center justify-between pointer-events-none z-50 ${
+                isExpanded == "true" ? "ml-60" : "ml-14"
+            }`}
+        >
             <div className="flex flex-row items-center gap-4 p-4 pointer-events-auto">
                 <button
                     className="text-white/70 hover:text-white"

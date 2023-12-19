@@ -3,8 +3,7 @@
 import React from "react";
 import { Rubik } from "next/font/google";
 import "./globals.css";
-import SideBarContext from "@/contexts/SideBarContext";
-import { useLocalStorage } from "@uidotdev/usehooks";
+import { useIsClient, useLocalStorage } from "@uidotdev/usehooks";
 
 const rubik = Rubik({ subsets: ["latin"] });
 
@@ -13,12 +12,16 @@ export default function RootLayout({
 }: {
     children: React.ReactNode;
 }) {
-    const [_isExpanded, _setIsExpanded] = useLocalStorage("Naoka:SideBar:Expanded", "true");
-    const [theme, setTheme] = useLocalStorage("Naoka:Settings:Theme", "dark");
+    const isClient = useIsClient();
 
-    const setIsExpanded = (isExpanded: boolean) => {
-        _setIsExpanded(isExpanded.toString());
-    };
+    // Otherwise some client hooks will fail when hydrating server-side
+    if (!isClient) return <html><body></body></html>;
+
+    return <Layout>{children}</Layout>;
+}
+
+function Layout({ children }: { children: React.ReactNode }) {
+    const [theme, setTheme] = useLocalStorage("Naoka:Settings:Theme", "dark");
 
     return (
         <html lang="en" className={theme}>
@@ -31,14 +34,7 @@ export default function RootLayout({
                     e.preventDefault();
                 }}
             >
-                <SideBarContext.Provider
-                    value={{
-                        isExpanded: _isExpanded == "true",
-                        setIsExpanded,
-                    }}
-                >
-                    {children}
-                </SideBarContext.Provider>
+                {children}
             </body>
         </html>
     );

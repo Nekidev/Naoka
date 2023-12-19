@@ -17,23 +17,26 @@ import { List, MediaCache, db } from "@/lib/db";
 import { Mapping, MediaType } from "@/lib/types";
 import styles from "./styles.module.css";
 import { useAppWindow } from "@/utils/window";
-import SideBarContext from "@/contexts/SideBarContext";
 import Tooltip from "../Tooltip";
 import SettingsModal from "../SettingsModal";
 import Link from "../Link";
+import { useLocalStorage } from "@uidotdev/usehooks";
 
 export default function SideBar() {
     const [isCreateListModalOpen, setIsCreateListModalOpen] =
         React.useState(false);
     const [isSettingsModalOpen, setIsSettingsModalOpen] = React.useState(false);
 
-    const { isExpanded, setIsExpanded } = React.useContext(SideBarContext);
+    const [isExpanded, setIsExpanded] = useLocalStorage(
+        "Naoka:SideBar:Expanded",
+        "true"
+    );
 
     React.useEffect(() => {
         const handleKeyDown = (event: KeyboardEvent) => {
             if ((event.ctrlKey || event.metaKey) && event.key === "b") {
                 event.preventDefault();
-                setIsExpanded(!isExpanded);
+                setIsExpanded(isExpanded == "false" ? "true" : "false");
             }
         };
 
@@ -46,7 +49,7 @@ export default function SideBar() {
     return (
         <div
             className={`${
-                isExpanded ? "w-60" : "w-14"
+                isExpanded == "true" ? "w-60" : "w-14"
             } bg-zinc-950 flex flex-col`}
         >
             <MenuButtons />
@@ -85,13 +88,16 @@ function MenuItem({
     href: string;
 }): JSX.Element {
     const pathname = usePathname();
-    const { isExpanded, setIsExpanded } = React.useContext(SideBarContext);
+    const [isExpanded, setIsExpanded] = useLocalStorage(
+        "Naoka:SideBar:Expanded",
+        "true"
+    );
 
     return (
         <Tooltip
             label={title}
             position="right"
-            enabled={!isExpanded}
+            enabled={isExpanded == "false"}
             className="!w-full"
         >
             <Link
@@ -101,7 +107,7 @@ function MenuItem({
                 }`}
             >
                 {icon}
-                {isExpanded && <div>{title}</div>}
+                {isExpanded == "true" && <div>{title}</div>}
             </Link>
         </Tooltip>
     );
@@ -126,7 +132,10 @@ function IconButton({
 
 function MenuButtons(): JSX.Element {
     const appWindow = useAppWindow();
-    const { isExpanded, setIsExpanded } = React.useContext(SideBarContext);
+    const [isExpanded, setIsExpanded] = useLocalStorage(
+        "Naoka:SideBar:Expanded",
+        "true"
+    );
 
     return (
         <div className="pb-2">
@@ -137,9 +146,11 @@ function MenuButtons(): JSX.Element {
                         onClick={() => {
                             window.localStorage.setItem(
                                 "Naoka:SideBar:isExpanded",
-                                (!isExpanded).toString()
+                                isExpanded == "true" ? "false" : "true"
                             );
-                            setIsExpanded(!isExpanded);
+                            setIsExpanded(
+                                isExpanded == "false" ? "true" : "false"
+                            );
                         }}
                     />
                 </div>
@@ -179,13 +190,16 @@ function List({ list }: { list: List }) {
             ? `${list.items.length} item${list.items.length > 1 ? "s" : ""}`
             : "No items";
 
-    const { isExpanded, setIsExpanded } = React.useContext(SideBarContext);
+    const [isExpanded, setIsExpanded] = useLocalStorage(
+        "Naoka:SideBar:Expanded",
+        "true"
+    );
 
     return (
         <Link
             href={`/app/list/?id=${encodeURIComponent(list.id!)}`}
             className={`hover:bg-zinc-800 transition rounded group flex flex-row items-center gap-2 -m-2 ${
-                isExpanded ? "p-2" : " p-1 justify-center"
+                isExpanded == "true" ? "p-2" : " p-1 justify-center"
             }`}
         >
             {images.length < 2 ? (
@@ -204,7 +218,7 @@ function List({ list }: { list: List }) {
                     />
                 </div>
             )}
-            {isExpanded && (
+            {isExpanded == "true" && (
                 <div className="flex-1 flex flex-col items-start">
                     <div className="text-sm text-zinc-200 line-clamp-1">
                         {title}
@@ -225,7 +239,10 @@ function Lists({
     isCreateListModalOpen: boolean;
     setIsCreateListModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
 }): JSX.Element {
-    const { isExpanded, setIsExpanded } = React.useContext(SideBarContext);
+    const [isExpanded, setIsExpanded] = useLocalStorage(
+        "Naoka:SideBar:Expanded",
+        "true"
+    );
 
     const lists = useLiveQuery(() =>
         db.lists.toArray(async (lists) => {
@@ -254,9 +271,9 @@ function Lists({
         <div
             className={`flex-1 overflow-y-auto border-y border-zinc-900 py-4 px-3 flex flex-col gap-4 ${
                 styles.sidebarLists
-            } ${!isExpanded && "gap-6"}`}
+            } ${isExpanded == "false" && "gap-6"}`}
         >
-            {isExpanded ? (
+            {isExpanded == "true" ? (
                 <div className="flex flex-row items-center justify-between">
                     <div className="uppercase text-white/50 text-xs">
                         My lists
@@ -279,7 +296,7 @@ function Lists({
                         <List key={list.id} list={list} />
                     ))
                 ) : (
-                    isExpanded && (
+                    isExpanded == "true" && (
                         <div className="flex-1 flex flex-col justify-center items-center text-zinc-300 text-sm">
                             <div className="mb-1">(⩾﹏⩽)</div>
                             <div>There's nothing here!</div>
@@ -299,13 +316,16 @@ function Lists({
 }
 
 function UserProfile({ openSettingsModal }: { openSettingsModal: () => void }) {
-    const { isExpanded, setIsExpanded } = React.useContext(SideBarContext);
+    const [isExpanded, setIsExpanded] = useLocalStorage(
+        "Naoka:SideBar:Expanded",
+        "true"
+    );
 
     return (
         <div
             className="p-2 relative flex items-center gap-2"
             style={{
-                flexDirection: isExpanded ? "row" : "column-reverse",
+                flexDirection: isExpanded == "true" ? "row" : "column-reverse",
             }}
         >
             <button className="flex flex-row items-center gap-4 transition hover:bg-zinc-800 flex-1 rounded">
@@ -313,7 +333,7 @@ function UserProfile({ openSettingsModal }: { openSettingsModal: () => void }) {
                     src="/icon.jpg"
                     className="h-10 w-10 rounded object-cover object-center"
                 />
-                {isExpanded && (
+                {isExpanded == "true" && (
                     <div className="flex flex-col gap-1 flex-1 items-start">
                         <div className="leading-none text-sm">Nyeki.py</div>
                         <div className="text-xs text-white/50 leading-none">
@@ -322,7 +342,7 @@ function UserProfile({ openSettingsModal }: { openSettingsModal: () => void }) {
                     </div>
                 )}
             </button>
-            <Tooltip label="Settings" enabled={!isExpanded} position="right">
+            <Tooltip label="Settings" enabled={isExpanded == "false"} position="right">
                 <IconButton
                     icon={<Cog6ToothIcon className="w-6 h-6" />}
                     onClick={openSettingsModal}
