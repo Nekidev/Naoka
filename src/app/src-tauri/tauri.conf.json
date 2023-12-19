@@ -13,6 +13,18 @@
 	"tauri": {
 		"allowlist": {
 			"all": false,
+			"notification": {
+				"all": true
+			},
+			"http": {
+				"all": true,
+				"request": true,
+				"scope": [
+					"https://graphql.anilist.co/*",
+					"https://api.myanimelist.net/v2/*",
+					"https://api.jikan.moe/*"
+				]
+			},
 			"window": {
 				"all": false,
 				"close": true,

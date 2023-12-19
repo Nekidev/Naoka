@@ -1,9 +1,11 @@
 import { BaseAPI, Config, Media } from "@/lib/providers";
 import { MediaType } from "../types";
 import { serializeURL } from "@/utils";
-import { ExternalAccount } from "../db";
+import { ExternalAccount, LibraryEntry, MediaCache, db } from "../db";
+import { fetch } from "@tauri-apps/api/http";
+import { IntRange } from "@/utils/types";
 
-function timeToSeconds(timeString) {
+function timeToSeconds(timeString: string) {
     // Splitting the string to extract numbers and units
     const parts = timeString.split(" ");
 
@@ -34,6 +36,28 @@ function timeToSeconds(timeString) {
     }
 
     return totalSeconds;
+}
+
+function convertStatusToNaokaStatus(status: string) {
+    switch (status) {
+        case "watching":
+            return "in_progress"
+        
+        case "completed":
+            return "completed"
+        
+        case "on_hold":
+            return "paused"
+        
+        case "dropped":
+            return "dropped"
+
+        case "plan_to_watch":
+            return "planned"
+        
+        default:
+            return "not_started"
+    }
 }
 
 export class MyAnimeList extends BaseAPI {
@@ -309,6 +333,7 @@ export class MyAnimeList extends BaseAPI {
             },
         },
     };
+    private clientID = "bd5f6c8d2ebafac1378531805137ada3";
 
     private mediaFromAnimeJSON(anime: any): Media {
         return new Media(
@@ -349,15 +374,14 @@ export class MyAnimeList extends BaseAPI {
 
         url += `&${serializeURL(options)}`;
 
-        const res = await fetch(url);
+        const res = await fetch<any>(url);
 
         if (res.ok === false) {
             console.log(res);
             return [[], true];
         }
 
-        const data = await res.json();
-        let animes: Media[] = data.data.map((anime: any) =>
+        let animes: Media[] = res.data.data.map((anime: any) =>
             this.mediaFromAnimeJSON(anime)
         );
 
@@ -371,14 +395,13 @@ export class MyAnimeList extends BaseAPI {
     }): Promise<[Media | null, boolean]> {
         let url = `https://api.jikan.moe/v4/anime/${id}/full`;
 
-        const res = await fetch(url);
+        const res = await fetch<any>(url);
 
         if (res.ok === false) {
             return [null, true];
         }
 
-        const data = await res.json();
-        let anime = this.mediaFromAnimeJSON(data.data);
+        let anime = this.mediaFromAnimeJSON(res.data.data);
 
         return [anime, false];
     }
@@ -422,15 +445,14 @@ export class MyAnimeList extends BaseAPI {
 
         url += `&${serializeURL(options)}`;
 
-        const res = await fetch(url);
+        const res = await fetch<any>(url);
 
         if (res.ok === false) {
             console.log(res);
             return [[], true];
         }
 
-        const data = await res.json();
-        let mangas: Media[] = data.data.map((manga: any) =>
+        let mangas: Media[] = res.data.data.map((manga: any) =>
             this.mediaFromMangaJSON(manga)
         );
 
@@ -444,14 +466,13 @@ export class MyAnimeList extends BaseAPI {
     }): Promise<[Media | null, boolean]> {
         let url = `https://api.jikan.moe/v4/manga/${id}/full`;
 
-        const res = await fetch(url);
+        const res = await fetch<any>(url);
 
         if (res.ok === false) {
             return [null, true];
         }
 
-        const data = await res.json();
-        let manga = this.mediaFromMangaJSON(data.data);
+        let manga = this.mediaFromMangaJSON(res.data.data);
 
         return [manga, false];
     }
@@ -462,10 +483,71 @@ export class MyAnimeList extends BaseAPI {
     ) {
         let url = `https://api.myanimelist.net/v2/users/${encodeURIComponent(
             account.username
-        )}/animelist?fields=list_status{status,score,num_episodes_watched,is_rewatching,start_date,finish_date,priority,num_times_rewatched,rewatch_value,tags,comments}`;
-        let clientID = "bd5f6c8d2ebafac1378531805137ada3";
+        )}/animelist?limit=1000&fields=list_status{status,score,num_episodes_watched,is_rewatching,start_date,finish_date,priority,num_times_rewatched,rewatch_value,tags,comments},start_date,end_date,nsfw,genres,media_type,num_episodes,rating,average_episode_duration`;
 
-        console.log("Importing anime list from MyAnimeList");
+        const res = await fetch<any>(url, {
+            method: "GET",
+            headers: {
+                "X-Mal-Client-ID": this.clientID,
+            }
+        })
+
+        if (res.ok === false) {
+            console.log(res);
+            return;
+        }
+
+        let newMediaCache: MediaCache[] = [];
+        let newLibraryEntries: LibraryEntry[] = [];
+
+        for (const entry of res.data.data) {
+            console.log(res.data);
+
+            newMediaCache.push({
+                type: "anime",
+                title: entry.node.title,
+                imageUrl: entry.node.main_picture?.large,
+                bannerUrl: null,
+                episodes: entry.node.num_episodes,
+                chapters: null,
+                volumes: null,
+                startDate: entry.node.start_date
+                    ? new Date(entry.node.start_date)
+                    : null,
+                finishDate: entry.node.end_date
+                    ? new Date(entry.node.end_date)
+                    : null,
+                genres: entry.node.genres.map((genre: any) => genre.name),
+                duration: null,
+                isAdult: entry.node.rating ? entry.node.rating[0] === "r" : false,
+                mapping: `myanimelist:anime:${entry.node.id.toString()}`,
+            });
+
+            newLibraryEntries.push({
+                type: "anime",
+                favorite: false,
+                status: convertStatusToNaokaStatus(entry.list_status.status),
+                score: entry.list_status.score * 10 as IntRange<1, 100>,
+                episodeProgress: entry.list_status.num_episodes_watched,
+                restarts: entry.list_status.num_times_rewatched,
+                startDate: entry.list_status.start_date ? new Date(entry.list_status.start_date) : null,
+                finishDate: entry.list_status.finish_date ? new Date(entry.list_status.finish_date) : null,
+                notes: entry.list_status.comments,
+                mapping: `myanimelist:anime:${entry.node.id.toString()}`
+            });
+        }
+
+        await db.mediaCache.bulkPut(newMediaCache);
+
+        if (override) {
+            await db.library.bulkPut(newLibraryEntries);
+        } else {
+            try {
+                await db.library.bulkAdd(newLibraryEntries);
+            } catch(e) {
+                console.log(e);
+            }
+        }
     }
 
     private async importMangaList(

@@ -17,7 +17,7 @@ tauri-build = { version = "1.5.0", features = [] }
 [dependencies]
 serde_json = "1.0"
 serde = { version = "1.0", features = ["derive"] }
-tauri = { version = "1.5.3", features = [ "window-set-title", "window-set-size", "window-unmaximize", "window-hide", "window-close", "window-minimize", "window-maximize", "window-show", "window-start-dragging", "window-unminimize"] }
+tauri = { version = "1.5.3", features = [ "notification-all", "http-all", "window-set-title", "window-set-size", "window-unmaximize", "window-hide", "window-close", "window-minimize", "window-maximize", "window-show", "window-start-dragging", "window-unminimize"] }
 
 [features]
 # this feature is used for production builds or when `devPath` points to the filesystem and the built-in dev server is disabled.
