@@ -236,7 +236,7 @@ export default function Library() {
                                 mediaTypeFilters.length > 0 ||
                                 debouncedQuery.length > 0) && (
                                 <div className="opacity-50 text-xs">
-                                    (Maybe your filters are wrong)
+                                    (Try clearing your filters)
                                 </div>
                             )}
                         </div>

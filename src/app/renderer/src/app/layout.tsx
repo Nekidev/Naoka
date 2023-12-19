@@ -26,7 +26,7 @@ export default function RootLayout({
                 <title>Naoka</title>
             </head>
             <body
-                className={`${rubik.className} flex flex-row w-screen`}
+                className={`${rubik.className}`}
                 onContextMenu={(e) => {
                     e.preventDefault();
                 }}

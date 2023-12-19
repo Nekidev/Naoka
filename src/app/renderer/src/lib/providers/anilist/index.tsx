@@ -50,6 +50,8 @@ function normalizeMediaStatus(status: string): string {
 export class AniList extends BaseAPI {
     title: string = "AniList";
     config: Config = {
+        mediaTypes: ["anime", "manga"],
+        importableListTypes: [],
         search: {
             anime: {
                 sortBy: [
@@ -99,34 +101,34 @@ export class AniList extends BaseAPI {
                                 },
                                 {
                                     label: "TV",
-                                    value: "TV"
+                                    value: "TV",
                                 },
                                 {
                                     label: "TV Short",
-                                    value: "TV_SHORT"
+                                    value: "TV_SHORT",
                                 },
                                 {
                                     label: "Movie",
-                                    value: "MOVIE"
+                                    value: "MOVIE",
                                 },
                                 {
                                     label: "Special",
-                                    value: "SPECIAL"
+                                    value: "SPECIAL",
                                 },
                                 {
                                     label: "OVA",
-                                    value: "OVA"
+                                    value: "OVA",
                                 },
                                 {
                                     label: "ONA",
-                                    value: "ONA"
+                                    value: "ONA",
                                 },
                                 {
                                     label: "Music",
-                                    value: "MUSIC"
+                                    value: "MUSIC",
                                 },
-                            ]
-                        }
+                            ],
+                        },
                     },
                     {
                         type: "select",
@@ -294,7 +296,7 @@ export class AniList extends BaseAPI {
                               season: options.season,
                           }
                         : {}),
-                        ...(options.format != ""
+                    ...(options.format != ""
                         ? {
                               format: options.format,
                           }
@@ -315,8 +317,8 @@ export class AniList extends BaseAPI {
     }
 
     async getMedia(
-        { id }: { id: string },
-        type: MediaType
+        type: MediaType,
+        { id }: { id: string }
     ): Promise<[Media | null, boolean]> {
         const {
             data: { Media: data },

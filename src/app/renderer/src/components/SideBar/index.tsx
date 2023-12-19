@@ -47,7 +47,7 @@ export default function SideBar() {
         <div
             className={`${
                 isExpanded ? "w-60" : "w-14"
-            } h-screen bg-zinc-950 flex flex-col`}
+            } bg-zinc-950 flex flex-col`}
         >
             <MenuButtons />
             <Lists

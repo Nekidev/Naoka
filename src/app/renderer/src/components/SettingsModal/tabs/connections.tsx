@@ -1,6 +1,6 @@
 "use client";
 
-import { providers } from "@/lib/api";
+import API, { providers } from "@/lib/api";
 import { Header, Separator, Setting } from "../components";
 import Tooltip from "@/components/Tooltip";
 import { ExternalAccount, db } from "@/lib/db";
@@ -9,6 +9,7 @@ import { XMarkIcon } from "@heroicons/react/24/outline";
 import FormModal from "@/components/FormModal";
 import React from "react";
 import { CheckCircleIcon } from "@heroicons/react/20/solid";
+import { MediaType } from "@/lib/types";
 
 export default function Connections() {
     const accounts = useLiveQuery(() => db.externalAccounts.toArray());
@@ -19,6 +20,12 @@ export default function Connections() {
                 title="Connections"
                 subtitle="Syncronize your library with external accounts."
             />
+            <div className="bg-yellow-400/20 border border-yellow-400/50 rounded p-2 text-sm text-yellow-400">
+                <div>
+                    Automatic syncing and list exporting are not yet supported.
+                    They'll be added in the future, so stay tuned!
+                </div>
+            </div>
             <Setting
                 title="Link a new account"
                 orientation="vertical"
@@ -103,7 +110,29 @@ function ProviderButton({
 function Account({ account }: { account: ExternalAccount }) {
     const provider = providers[account.provider];
 
-    const [isFormModalOpen, setIsFormModalOpen] = React.useState(false);
+    const [isConnectAccountModalOpen, setIsConnectAccountModalOpen] =
+        React.useState(false);
+    const [
+        isSelectListTypeImportModalOpen,
+        setIsSelectListTypeImportModalOpen,
+    ] = React.useState(false);
+
+    function Button({
+        children,
+        ...props
+    }: {
+        children: React.ReactNode;
+        [key: string]: any;
+    }) {
+        return (
+            <button
+                className="leading-none text-sm p-2 rounded bg-zinc-700/50 hover:bg-zinc-600/50 transition text-zinc-300 disabled:cursor-default disabled:opacity-50 disabled:hover:bg-zinc-700/50"
+                {...props}
+            >
+                {children}
+            </button>
+        );
+    }
 
     return (
         <>
@@ -130,23 +159,40 @@ function Account({ account }: { account: ExternalAccount }) {
                     </button>
                 </div>
                 <div className="bg-zinc-850 p-2">
-                    <div className="flex flex-row items-center text-sm leading-none gap-2">
-                        <button
-                            className="leading-none text-sm p-2 rounded bg-zinc-700/50 hover:bg-zinc-600/50 transition text-zinc-300"
-                            onClick={() => {
-                                setIsFormModalOpen(true);
-                            }}
-                        >
-                            {account.username.length > 0
-                                ? "Reconnect"
-                                : "Connect"}
-                        </button>
+                    <div className="flex flex-row items-center justify-between text-sm leading-none gap-4">
+                        <div className="flex flex-row items-center gap-2">
+                            <Button
+                                onClick={() => {
+                                    setIsConnectAccountModalOpen(true);
+                                }}
+                            >
+                                {account.username.length > 0
+                                    ? "Reconnect"
+                                    : "Connect"}
+                            </Button>
+                        </div>
+                        <div className="flex flex-row items-center gap-2">
+                            <Button
+                                disabled={
+                                    account.username === "" ||
+                                    provider.config.importableListTypes
+                                        .length === 0
+                                }
+                                onClick={(e: any) => {
+                                    if (e.target.disabled) return;
+                                    setIsSelectListTypeImportModalOpen(true);
+                                }}
+                            >
+                                Import
+                            </Button>
+                            <Button disabled={true}>Export</Button>
+                        </div>
                     </div>
                 </div>
             </div>
             <FormModal
-                isOpen={isFormModalOpen}
-                closeModal={() => setIsFormModalOpen(false)}
+                isOpen={isConnectAccountModalOpen}
+                closeModal={() => setIsConnectAccountModalOpen(false)}
                 title={"Connect to " + provider.title}
                 subtitle={"Link your account to import your lists"}
                 fields={[
@@ -161,6 +207,65 @@ function Account({ account }: { account: ExternalAccount }) {
                     await db.externalAccounts.update(account.id!, {
                         username,
                     });
+                }}
+            />
+            <FormModal
+                isOpen={isSelectListTypeImportModalOpen}
+                closeModal={() => setIsSelectListTypeImportModalOpen(false)}
+                title="Select the list to import"
+                subtitle={`Select your list from ${provider.title}`}
+                fields={[
+                    {
+                        type: "radiogroup",
+                        name: "type",
+                        options: [
+                            ...(provider.config.importableListTypes.includes(
+                                "anime"
+                            )
+                                ? [
+                                      {
+                                          value: "anime",
+                                          title: "Anime list",
+                                          description: `Import your anime list from ${provider.title}`,
+                                      },
+                                  ]
+                                : []),
+                            ...(provider.config.importableListTypes.includes(
+                                "manga"
+                            )
+                                ? [
+                                      {
+                                          value: "manga",
+                                          title: "Manga list",
+                                          description: `Import your manga list from ${provider.title}`,
+                                      },
+                                  ]
+                                : []),
+                        ],
+                    },
+                    { type: "separator" },
+                    {
+                        type: "checkboxcardgroup",
+                        name: "override",
+                        options: [
+                            {
+                                value: "override",
+                                title: "Override current entries",
+                                description:
+                                    "If the lists conflict, override the local library.",
+                            },
+                        ],
+                    },
+                ]}
+                onSubmit={({ type, override }) => {
+                    const api = new API(account.provider);
+                    api.importList(type as MediaType, account, !!override).then(
+                        () => {
+                            console.log(
+                                "Happy happy happy! (du du du du du du) Happy happy happy happy! (du du du du du du du du du du)"
+                            );
+                        }
+                    );
                 }}
             />
         </>

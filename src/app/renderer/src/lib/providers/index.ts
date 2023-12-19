@@ -1,3 +1,4 @@
+import { ExternalAccount } from "../db";
 import { MediaType, Mapping } from "../types";
 
 interface Input {
@@ -48,6 +49,8 @@ interface SearchConfig {
 }
 
 export interface Config {
+    mediaTypes: MediaType[];
+    importableListTypes: MediaType[];
     search: {
         anime?: SearchConfig;
         manga?: SearchConfig;
@@ -66,35 +69,47 @@ export class Media {
         readonly genres: string[],
         readonly startDate: Date | null,
         readonly endDate: Date | null,
+        readonly episodes: number | null,
+        readonly chapters: number | null,
+        readonly volumes: number | null,
+        readonly duration: number | null,
         readonly isAdult: boolean,
         readonly mappings: Mapping[]
     ) {}
 }
 
 export class BaseAPI {
-    title: string = "site";
-    config: Config = {
-        search: {},
-    };
+    title!: string;
+    config!: Config;
 
     async search(
         type: MediaType,
         options: {
             [key: string]: any;
-        },
+        }
     ): Promise<[Media[], boolean]> {
         /*
-        Returns a tuple of an array of Anime objects and a boolean indicating if there was an error.
+        Returns a tuple of an array of Anime objects and a boolean indicating
+        if there was an error.
         */
         throw Error("Not implemented");
     }
 
     async getMedia(
-        { id }: { id: string },
-        type: MediaType
+        type: MediaType,
+        { id }: { id: string }
     ): Promise<[Media | null, boolean]> {
         /*
-        Returns a tuple of a Media object and a boolean indicating if there was an error.
+        Returns a tuple of a Media object and a boolean indicating if there was
+        an error.
+        */
+        throw Error("Not implemented");
+    }
+
+    async importList(type: MediaType, account: ExternalAccount, override: boolean = false) {
+        /*
+        Imports the list from the external account (only `type` items) and
+        creates necesary mediaCache items.
         */
         throw Error("Not implemented");
     }

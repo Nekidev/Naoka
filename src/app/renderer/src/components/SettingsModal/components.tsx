@@ -45,7 +45,11 @@ export function Setting({
                 <div className="text-zinc-200 flex flex-row items-center gap-2">
                     <span>{title}</span>
                     {info && (
-                        <Tooltip label="More accounts will be added soon." position="right" spacing={.5}>
+                        <Tooltip
+                            label="More accounts will be added soon."
+                            position="right"
+                            spacing={0.5}
+                        >
                             <InformationCircleIcon className="h-4 w-4 stroke-2" />
                         </Tooltip>
                     )}
@@ -83,5 +87,5 @@ export function Select({
 }
 
 export function Separator() {
-    return <div className="h-px bg-zinc-700 -mx-4 -my-2"></div>
+    return <div className="h-px bg-zinc-700 -mx-4 -my-2 shrink-0"></div>;
 }

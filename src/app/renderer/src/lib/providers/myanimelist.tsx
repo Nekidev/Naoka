@@ -1,10 +1,46 @@
 import { BaseAPI, Config, Media } from "@/lib/providers";
 import { MediaType } from "../types";
 import { serializeURL } from "@/utils";
+import { ExternalAccount } from "../db";
+
+function timeToSeconds(timeString) {
+    // Splitting the string to extract numbers and units
+    const parts = timeString.split(" ");
+
+    let totalSeconds = 0;
+
+    // Looping through each part to convert it to seconds
+    for (let i = 0; i < parts.length; i += 2) {
+        const value = parseInt(parts[i]); // Extracting the numeric value
+        const unit = parts[i + 1]; // Extracting the unit
+
+        // Converting units to seconds and adding to the total
+        switch (unit) {
+            case "hr":
+            case "hrs":
+                totalSeconds += value * 3600; // 1 hour = 3600 seconds
+                break;
+            case "min":
+            case "mins":
+                totalSeconds += value * 60; // 1 minute = 60 seconds
+                break;
+            case "sec":
+            case "secs":
+                totalSeconds += value; // seconds remain the same
+                break;
+            default:
+                break;
+        }
+    }
+
+    return totalSeconds;
+}
 
 export class MyAnimeList extends BaseAPI {
     title: string = "MyAnimeList";
     config: Config = {
+        mediaTypes: ["anime", "manga"],
+        importableListTypes: ["anime", "manga"],
         search: {
             anime: {
                 sortBy: [
@@ -288,9 +324,11 @@ export class MyAnimeList extends BaseAPI {
             anime.genres.map((genre: any) => genre.name),
             anime.aired.from ? new Date(anime.aired.from) : null,
             anime.aired.to ? new Date(anime.aired.to) : null,
-            anime.rating
-                ? ["R+", "Rx"].includes(anime.rating.slice(0, 2))
-                : false,
+            anime.episodes,
+            null,
+            null,
+            timeToSeconds(anime.duration),
+            anime.rating ? anime.rating[0] == "R" : false,
             [`myanimelist:anime:${anime.mal_id.toString()}`]
         );
     }
@@ -359,12 +397,12 @@ export class MyAnimeList extends BaseAPI {
             manga.genres.map((genre: any) => genre.name),
             manga.published.from ? new Date(manga.published.from) : null,
             manga.published.to ? new Date(manga.published.to) : null,
-            manga.rating
-                ? ["R+", "Rx"].includes(manga.rating.slice(0, 2))
-                : false,
-            [
-                `myanimelist:manga:${manga.mal_id.toString()}`,
-            ]
+            null,
+            manga.chapters,
+            manga.volumes,
+            null,
+            false,
+            [`myanimelist:manga:${manga.mal_id.toString()}`]
         );
     }
 
@@ -418,9 +456,26 @@ export class MyAnimeList extends BaseAPI {
         return [manga, false];
     }
 
+    private async importAnimeList(
+        account: ExternalAccount,
+        override: boolean = false
+    ) {
+        let url = `https://api.myanimelist.net/v2/users/${encodeURIComponent(
+            account.username
+        )}/animelist?fields=list_status{status,score,num_episodes_watched,is_rewatching,start_date,finish_date,priority,num_times_rewatched,rewatch_value,tags,comments}`;
+        let clientID = "bd5f6c8d2ebafac1378531805137ada3";
+
+        console.log("Importing anime list from MyAnimeList");
+    }
+
+    private async importMangaList(
+        account: ExternalAccount,
+        override: boolean = false
+    ) {}
+
     async search(
         type: MediaType,
-        options: { [key: string]: any },
+        options: { [key: string]: any }
     ): Promise<[Media[], boolean]> {
         let result: [Media[], boolean];
 
@@ -442,8 +497,8 @@ export class MyAnimeList extends BaseAPI {
     }
 
     async getMedia(
-        { id }: { id: string },
-        type: MediaType
+        type: MediaType,
+        { id }: { id: string }
     ): Promise<[Media | null, boolean]> {
         switch (type) {
             case "anime":
@@ -454,6 +509,22 @@ export class MyAnimeList extends BaseAPI {
 
             default:
                 return [null, true];
+        }
+    }
+
+    async importList(
+        type: MediaType,
+        account: ExternalAccount,
+        override: boolean = false
+    ) {
+        switch (type) {
+            case "anime":
+                await this.importAnimeList(account, override);
+                break;
+
+            case "manga":
+                await this.importMangaList(account, override);
+                break;
         }
     }
 }

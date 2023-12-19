@@ -8,6 +8,14 @@ export interface MediaCache {
     title: string;
     imageUrl: string | null;
     bannerUrl: string | null;
+    episodes: number | null;
+    chapters: number | null;
+    volumes: number | null;
+    startDate: Date | null;
+    finishDate: Date | null;
+    isAdult: boolean | null;
+    genres: string[] | null;
+    duration: number | null;
     mapping: Mapping;
 }
 

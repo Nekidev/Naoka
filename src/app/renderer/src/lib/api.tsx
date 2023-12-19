@@ -1,6 +1,6 @@
 import { BaseAPI, Media } from "./providers";
-import { MediaType } from "./types";
-import { db } from "./db";
+import { APIProvider, MediaType } from "./types";
+import { ExternalAccount, db } from "./db";
 
 import { MyAnimeList } from "./providers/myanimelist";
 import { AniList } from "./providers/anilist";
@@ -23,8 +23,8 @@ export default class API {
         return this.api.title;
     }
 
-    constructor(code: string) {
-        const api = providers[code as keyof typeof providers];
+    constructor(code: APIProvider) {
+        const api = providers[code];
 
         if (!api) {
             throw Error("Invalid API code");
@@ -47,6 +47,14 @@ export default class API {
                         title: value.title,
                         imageUrl: value.imageUrl,
                         bannerUrl: value.bannerUrl,
+                        episodes: value.episodes,
+                        chapters: value.chapters,
+                        volumes: value.volumes,
+                        startDate: value.startDate,
+                        finishDate: value.endDate,
+                        genres: value.genres,
+                        duration: value.duration,
+                        isAdult: value.isAdult,
                         mapping: value.mappings[0],
                     };
                 })
@@ -64,9 +72,13 @@ export default class API {
     }
 
     async getMedia(
-        { id }: { id: string },
-        type: MediaType
+        type: MediaType,
+        { id }: { id: string }
     ): Promise<[Media | null, boolean]> {
-        return await this.api.getMedia({ id }, type);
+        return await this.api.getMedia(type, { id });
+    }
+
+    async importList(type: MediaType, account: ExternalAccount, override: boolean = false) {
+        this.api.importList(type, account, override);
     }
 }

@@ -25,7 +25,7 @@ export default function Appearance() {
                     onChange={(e) => setTheme(e.target.value)}
                 >
                     <option value="dark">Dark</option>
-                    <option value="light">Light</option>
+                    <option value="light" disabled>Light</option>
                 </Select>
             </Setting>
             <Setting title="Langauge" subtitle="Hello! Hola! こんいちは!">
