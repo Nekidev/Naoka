@@ -59,9 +59,7 @@ export default class API {
                     };
                 })
             )
-            .then((lastKey) => {
-                console.log("Added to mediaCache up to:", lastKey);
-            })
+            .then((lastKey) => {})
             .catch(Dexie.BulkError, (error) => {
                 console.error(
                     `Failed to add ${error.failures.length} items to mediaCache. The other results were successfully added.`

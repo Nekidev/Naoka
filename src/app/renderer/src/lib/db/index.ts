@@ -56,10 +56,6 @@ export class ExternalAccount extends Data {
         refreshToken?: string;
         password?: string;
     } = {};
-
-    async importLibrary() {
-        // TODO: Import library
-    }
 }
 
 export class NaokaDB extends Dexie {

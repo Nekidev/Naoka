@@ -42,6 +42,10 @@ query Search(
                 day
             }
             isAdult
+            episodes
+            chapters
+            volumes
+            duration
         }
     }
 }`;

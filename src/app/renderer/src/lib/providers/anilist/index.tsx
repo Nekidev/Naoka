@@ -246,10 +246,10 @@ export class AniList extends BaseAPI {
                       `${media.endDate.year}-${media.endDate.month}-${media.endDate.day}`
                   )
                 : null,
-            null,
-            null,
-            null,
-            null,
+            media.episodes,
+            media.chapters,
+            media.volumes,
+            media.duration,
             media.isAdult,
             [
                 `anilist:${

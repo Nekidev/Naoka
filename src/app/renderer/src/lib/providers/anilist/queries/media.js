@@ -25,6 +25,10 @@ query Media($id: Int, $type: MediaType) {
             day
         }
         isAdult
+        episodes
+        chapters
+        volumes
+        duration
     }
 }
 `;

@@ -41,22 +41,22 @@ function timeToSeconds(timeString: string) {
 function convertStatusToNaokaStatus(status: string) {
     switch (status) {
         case "watching":
-            return "in_progress"
-        
+            return "in_progress";
+
         case "completed":
-            return "completed"
-        
+            return "completed";
+
         case "on_hold":
-            return "paused"
-        
+            return "paused";
+
         case "dropped":
-            return "dropped"
+            return "dropped";
 
         case "plan_to_watch":
-            return "planned"
-        
+            return "planned";
+
         default:
-            return "not_started"
+            return "not_started";
     }
 }
 
@@ -377,7 +377,6 @@ export class MyAnimeList extends BaseAPI {
         const res = await fetch<any>(url);
 
         if (res.ok === false) {
-            console.log(res);
             return [[], true];
         }
 
@@ -448,7 +447,6 @@ export class MyAnimeList extends BaseAPI {
         const res = await fetch<any>(url);
 
         if (res.ok === false) {
-            console.log(res);
             return [[], true];
         }
 
@@ -489,11 +487,10 @@ export class MyAnimeList extends BaseAPI {
             method: "GET",
             headers: {
                 "X-Mal-Client-ID": this.clientID,
-            }
-        })
+            },
+        });
 
         if (res.ok === false) {
-            console.log(res);
             return;
         }
 
@@ -501,8 +498,7 @@ export class MyAnimeList extends BaseAPI {
         let newLibraryEntries: LibraryEntry[] = [];
 
         for (const entry of res.data.data) {
-            console.log(res.data);
-
+            // Cannot use the mediaFromMangaJSON because that function is for Jikan
             newMediaCache.push({
                 type: "anime",
                 title: entry.node.title,
@@ -518,8 +514,10 @@ export class MyAnimeList extends BaseAPI {
                     ? new Date(entry.node.end_date)
                     : null,
                 genres: entry.node.genres.map((genre: any) => genre.name),
-                duration: null,
-                isAdult: entry.node.rating ? entry.node.rating[0] === "r" : false,
+                duration: Math.round(entry.node.average_episode_duration / 60),
+                isAdult: entry.node.rating
+                    ? entry.node.rating[0] === "r"
+                    : false,
                 mapping: `myanimelist:anime:${entry.node.id.toString()}`,
             });
 
@@ -527,13 +525,17 @@ export class MyAnimeList extends BaseAPI {
                 type: "anime",
                 favorite: false,
                 status: convertStatusToNaokaStatus(entry.list_status.status),
-                score: entry.list_status.score * 10 as IntRange<1, 100>,
+                score: (entry.list_status.score * 10) as IntRange<1, 100>,
                 episodeProgress: entry.list_status.num_episodes_watched,
                 restarts: entry.list_status.num_times_rewatched,
-                startDate: entry.list_status.start_date ? new Date(entry.list_status.start_date) : null,
-                finishDate: entry.list_status.finish_date ? new Date(entry.list_status.finish_date) : null,
+                startDate: entry.list_status.start_date
+                    ? new Date(entry.list_status.start_date)
+                    : null,
+                finishDate: entry.list_status.finish_date
+                    ? new Date(entry.list_status.finish_date)
+                    : null,
                 notes: entry.list_status.comments,
-                mapping: `myanimelist:anime:${entry.node.id.toString()}`
+                mapping: `myanimelist:anime:${entry.node.id.toString()}`,
             });
         }
 
@@ -544,8 +546,8 @@ export class MyAnimeList extends BaseAPI {
         } else {
             try {
                 await db.library.bulkAdd(newLibraryEntries);
-            } catch(e) {
-                console.log(e);
+            } catch (e) {
+                null;
             }
         }
     }
@@ -553,7 +555,83 @@ export class MyAnimeList extends BaseAPI {
     private async importMangaList(
         account: ExternalAccount,
         override: boolean = false
-    ) {}
+    ) {
+        let url = `https://api.myanimelist.net/v2/users/${encodeURIComponent(
+            account.username
+        )}/mangalist?limit=1000&fields=list_status{status,score,num_chapters_read,num_volumes_read,is_rereading,start_date,finish_date,priority,num_times_reread,reread_value,tags,comments},start_date,end_date,nsfw,genres,media_type,num_chapters,num_volumes`;
+
+        const res = await fetch<any>(url, {
+            method: "GET",
+            headers: {
+                "X-Mal-Client-ID": this.clientID,
+            },
+        });
+
+        if (res.ok === false) {
+            return;
+        }
+
+        let newMediaCache: MediaCache[] = [];
+        let newLibraryEntries: LibraryEntry[] = [];
+
+        for (const entry of res.data.data) {
+            // Cannot use the mediaFromMangaJSON because that function is for Jikan
+            newMediaCache.push({
+                type: "manga",
+                title: entry.node.title,
+                imageUrl: entry.node.main_picture?.large,
+                bannerUrl: null,
+                episodes: null,
+                chapters: entry.node.num_chapters,
+                volumes: entry.node.num_volumes,
+                startDate: entry.node.start_date
+                    ? new Date(entry.node.start_date)
+                    : null,
+                finishDate: entry.node.end_date
+                    ? new Date(entry.node.end_date)
+                    : null,
+                genres: entry.node.genres.map((genre: any) => genre.name),
+                duration: null,
+                isAdult: entry.node.rating
+                    ? entry.node.rating[0] === "r"
+                    : false,
+                mapping: `myanimelist:anime:${entry.node.id.toString()}`,
+            });
+
+            newLibraryEntries.push({
+                type: "manga",
+                favorite: false,
+                status: convertStatusToNaokaStatus(entry.list_status.status),
+                score: (entry.list_status.score * 10) as IntRange<1, 100>,
+                chapterProgress: entry.list_status.num_chapters_read,
+                volumeProgress: entry.list_status.num_volumes_read,
+                restarts: entry.list_status.num_times_reread,
+                startDate: entry.list_status.start_date
+                    ? new Date(entry.list_status.start_date)
+                    : null,
+                finishDate: entry.list_status.finish_date
+                    ? new Date(entry.list_status.finish_date)
+                    : null,
+                notes: entry.list_status.comments,
+                mapping: `myanimelist:manga:${entry.node.id.toString()}`,
+            });
+        }
+
+        await db.mediaCache.bulkPut(newMediaCache);
+
+        if (override) {
+            await db.library.bulkPut(newLibraryEntries);
+        } else {
+            try {
+                // Will only add items that don't exist. If there is one or
+                // more items that already exist, it will throw an error but
+                // still add the rest of the items.
+                await db.library.bulkAdd(newLibraryEntries);
+            } catch (e) {
+                null;
+            }
+        }
+    }
 
     async search(
         type: MediaType,
@@ -571,7 +649,6 @@ export class MyAnimeList extends BaseAPI {
                 break;
 
             default:
-                console.log("API got an invalid media type:", type);
                 result = [[], true];
         }
 

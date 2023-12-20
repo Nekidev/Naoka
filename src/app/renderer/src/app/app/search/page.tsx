@@ -71,13 +71,11 @@ export default function Search() {
                 { query, sortBy: sortByRef.current?.value || null, ...filters },
             );
             if (error) {
-                console.log("API wrapper returned an error:", error);
                 setError("Oops! An error occurred :/");
             } else {
                 setResults(res);
             }
         } catch (e) {
-            console.log(e);
             setError("Oops! An error occurred :/");
         }
 
