@@ -32,6 +32,8 @@ export default function Library() {
 
     const libraryEntries = useLiveQuery(() => {
         return db.library.toArray(async (array: LibraryEntry[]) => {
+            console.log(array);
+
             let result = [];
 
             for (let entry of array) {
@@ -43,12 +45,14 @@ export default function Library() {
                             mediaTypeFilters.includes("manga")) &&
                             !mediaTypeFilters.includes(entry.type))
                     ) {
+                        console.log(entry.mapping + " failed in mediaTypeFilters");
                         continue;
                     }
                 }
 
                 if (statusFilters.length > 0) {
                     if (!statusFilters.includes(entry.status)) {
+                        console.log(entry.mapping + " failed in statusFilters");
                         continue;
                     }
                 }
@@ -61,8 +65,10 @@ export default function Library() {
                     !entry.media?.title
                         .toLowerCase()
                         .includes(query.toLowerCase())
-                )
+                ) {
+                    console.log(entry.mapping + " failed in query filter");
                     continue;
+                }
 
                 result.push(entry);
             }

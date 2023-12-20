@@ -216,6 +216,7 @@ function FormModal({
                                         libraryEntry?.episodeProgress || 0
                                     }
                                     min={0}
+                                    max={mediaCache.episodes}
                                     name="episodeProgress"
                                 />
                             </LibraryEntryInput>
@@ -226,6 +227,7 @@ function FormModal({
                                         libraryEntry?.chapterProgress || 0
                                     }
                                     min={0}
+                                    max={mediaCache.chapters}
                                     name="chapterProgress"
                                 />
                             </LibraryEntryInput>
@@ -265,6 +267,7 @@ function FormModal({
                                         libraryEntry?.volumeProgress || 0
                                     }
                                     min={0}
+                                    max={mediaCache.volumes}
                                     name="volumeProgress"
                                 />
                             </LibraryEntryInput>
@@ -276,7 +279,7 @@ function FormModal({
                             <TextArea
                                 rows={1}
                                 name="notes"
-                                defaulValue={libraryEntry?.notes}
+                                defaultValue={libraryEntry?.notes}
                             />
                         </LibraryEntryInput>
                         {mediaType == "manga" && (
@@ -566,7 +569,7 @@ function TextArea({ ...props }: { [key: string]: any }) {
                 autoComplete="off"
                 className="rounded p-2 bg-zinc-900 w-full text-sm outline-none peer placeholder:text-zinc-400 resize-y"
                 {...props}
-            ></textarea>
+            />
         </div>
     );
 }

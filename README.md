@@ -30,7 +30,7 @@
     <a href="#license">License</a>
 </p>
 
-![screenshot](https://raw.githubusercontent.com/amitmerchant1990/electron-markdownify/master/app/img/markdownify.gif)
+![screenshot](https://raw.githubusercontent.com/naoka-dev/naoka/main/assets/library-screenshot.jpeg)
 
 ## Key Features
 

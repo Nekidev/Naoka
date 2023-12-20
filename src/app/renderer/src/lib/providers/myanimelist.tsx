@@ -40,6 +40,7 @@ function timeToSeconds(timeString: string) {
 
 function convertStatusToNaokaStatus(status: string) {
     switch (status) {
+        case "reading":
         case "watching":
             return "in_progress";
 
@@ -52,6 +53,7 @@ function convertStatusToNaokaStatus(status: string) {
         case "dropped":
             return "dropped";
 
+        case "plan_to_read":
         case "plan_to_watch":
             return "planned";
 
@@ -593,9 +595,9 @@ export class MyAnimeList extends BaseAPI {
                 genres: entry.node.genres.map((genre: any) => genre.name),
                 duration: null,
                 isAdult: entry.node.rating
-                    ? entry.node.rating[0] === "r"
+                    ? entry.node.nsfw === "black"
                     : false,
-                mapping: `myanimelist:anime:${entry.node.id.toString()}`,
+                mapping: `myanimelist:manga:${entry.node.id.toString()}`,
             });
 
             newLibraryEntries.push({
@@ -628,6 +630,7 @@ export class MyAnimeList extends BaseAPI {
                 // still add the rest of the items.
                 await db.library.bulkAdd(newLibraryEntries);
             } catch (e) {
+                console.log(e);
                 null;
             }
         }
