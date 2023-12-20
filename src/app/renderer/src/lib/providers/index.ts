@@ -78,6 +78,12 @@ export class Media {
     ) {}
 }
 
+export interface User {
+    id: string;
+    username: string;
+    imageUrl: string;
+}
+
 export class BaseAPI {
     title!: string;
     config!: Config;
@@ -110,6 +116,13 @@ export class BaseAPI {
         /*
         Imports the list from the external account (only `type` items) and
         creates necesary mediaCache items.
+        */
+        throw Error("Not implemented");
+    }
+
+    async getUser(account: ExternalAccount): Promise<User> {
+        /*
+        Returns basic user data from the external account.
         */
         throw Error("Not implemented");
     }

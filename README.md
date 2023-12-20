@@ -23,9 +23,7 @@
 
 <p align="center">
     <a href="#key-features">Key Features</a> •
-    <a href="#how-to-use">How To Use</a> •
     <a href="#download">Download</a> •
-    <a href="#credits">Credits</a> •
     <a href="#related">Related</a> •
     <a href="#license">License</a>
 </p>
@@ -61,8 +59,16 @@ You can [download](https://github.com/naoka-dev/Naoka/releases/tag/latest) the l
 
 [![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/F1F7S2JB8)
 
----
+## Credits
 
-> [nyeki.dev](https://nyeki.dev) &nbsp;&middot;&nbsp;
-> GitHub [@Nekidev](https://github.com/Nekidev) &nbsp;&middot;&nbsp;
-> Twitter [@Nekidev](https://twitter.com/Nekidev)
+<table>
+  <tr>
+    <td style="align:center;">
+      <a href="https://github.com/Nekidev">
+        <img src="https://avatars.githubusercontent.com/u/84998222?s=256&v=4" height="100" width="100" alt="Nekidev's avatar" />
+        <br>
+        <span>Nekidev</span>
+      </a>
+    </td>
+  </tr>
+</table>

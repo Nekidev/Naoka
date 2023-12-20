@@ -1,4 +1,4 @@
-import { BaseAPI, Config, Media } from "@/lib/providers";
+import { BaseAPI, Config, Media, User } from "@/lib/providers";
 import { MediaType } from "../types";
 import { serializeURL } from "@/utils";
 import { ExternalAccount, LibraryEntry, MediaCache, db } from "../db";
@@ -688,5 +688,28 @@ export class MyAnimeList extends BaseAPI {
                 await this.importMangaList(account, override);
                 break;
         }
+    }
+
+    async getUser(account: ExternalAccount): Promise<User> {
+        const url = `https://api.myanimelist.net/v2/users/${encodeURIComponent(
+            account.username
+        )}?fields=id,name,picture`;
+
+        const res = await fetch<any>(url, {
+            method: "GET",
+            headers: {
+                "X-MAL-CLIENT-ID": this.clientID,
+            },
+        });
+
+        if (res.ok === false) {
+            throw Error("Failed to get user");
+        }
+
+        return {
+            id: res.data.id,
+            username: res.data.name,
+            imageUrl: res.data.picture,
+        };
     }
 }

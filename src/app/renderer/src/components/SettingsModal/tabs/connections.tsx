@@ -208,6 +208,7 @@ function Account({ account }: { account: ExternalAccount }) {
                     await db.externalAccounts.update(account.id!, {
                         username,
                     });
+                    
                 }}
             />
             <FormModal

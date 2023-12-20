@@ -1,4 +1,4 @@
-import { BaseAPI, Media } from "./providers";
+import { BaseAPI, Media, User } from "./providers";
 import { APIProvider, MediaType } from "./types";
 import { ExternalAccount, db } from "./db";
 
@@ -69,14 +69,18 @@ export default class API {
         return [results, error];
     }
 
-    async getMedia(
+    getMedia(
         type: MediaType,
         { id }: { id: string }
     ): Promise<[Media | null, boolean]> {
-        return await this.api.getMedia(type, { id });
+        return this.api.getMedia(type, { id });
     }
 
-    async importList(type: MediaType, account: ExternalAccount, override: boolean = false) {
-        this.api.importList(type, account, override);
+    importList(type: MediaType, account: ExternalAccount, override: boolean = false) {
+        return this.api.importList(type, account, override);
+    }
+
+    getUser(account: ExternalAccount): Promise<User> {
+        return this.api.getUser(account);
     }
 }
