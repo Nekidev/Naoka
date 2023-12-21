@@ -1,4 +1,4 @@
-const query = `
+export default `
 query Search(
     $query: String,
     $sort: MediaSort,
@@ -49,5 +49,3 @@ query Search(
         }
     }
 }`;
-
-export default query;

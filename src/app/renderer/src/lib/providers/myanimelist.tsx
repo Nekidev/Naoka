@@ -1,7 +1,7 @@
-import { BaseAPI, Config, Media, User } from "@/lib/providers";
+import { BaseAPI, Config, Media } from "@/lib/providers";
 import { MediaType } from "../types";
 import { serializeURL } from "@/utils";
-import { ExternalAccount, LibraryEntry, MediaCache, db } from "../db";
+import { ExternalAccount, LibraryEntry, MediaCache, UserData, db } from "../db";
 import { fetch } from "@tauri-apps/api/http";
 import { IntRange } from "@/utils/types";
 
@@ -482,7 +482,7 @@ export class MyAnimeList extends BaseAPI {
         override: boolean = false
     ) {
         let url = `https://api.myanimelist.net/v2/users/${encodeURIComponent(
-            account.username
+            account.auth!.username!
         )}/animelist?limit=1000&fields=list_status{status,score,num_episodes_watched,is_rewatching,start_date,finish_date,priority,num_times_rewatched,rewatch_value,tags,comments},start_date,end_date,nsfw,genres,media_type,num_episodes,rating,average_episode_duration`;
 
         const res = await fetch<any>(url, {
@@ -559,7 +559,7 @@ export class MyAnimeList extends BaseAPI {
         override: boolean = false
     ) {
         let url = `https://api.myanimelist.net/v2/users/${encodeURIComponent(
-            account.username
+            account.auth!.username!
         )}/mangalist?limit=1000&fields=list_status{status,score,num_chapters_read,num_volumes_read,is_rereading,start_date,finish_date,priority,num_times_reread,reread_value,tags,comments},start_date,end_date,nsfw,genres,media_type,num_chapters,num_volumes`;
 
         const res = await fetch<any>(url, {
@@ -690,26 +690,22 @@ export class MyAnimeList extends BaseAPI {
         }
     }
 
-    async getUser(account: ExternalAccount): Promise<User> {
-        const url = `https://api.myanimelist.net/v2/users/${encodeURIComponent(
-            account.username
-        )}?fields=id,name,picture`;
+    async getUser(account: ExternalAccount): Promise<UserData> {
+        const url = `https://api.jikan.moe/v4/users/${encodeURIComponent(account.auth!.username!)}/full`;
 
-        const res = await fetch<any>(url, {
-            method: "GET",
-            headers: {
-                "X-MAL-CLIENT-ID": this.clientID,
-            },
-        });
+        const res = await fetch<any>(url);
 
         if (res.ok === false) {
             throw Error("Failed to get user");
         }
 
+        const data = res.data.data;
+        console.log(data);
+
         return {
-            id: res.data.id,
-            username: res.data.name,
-            imageUrl: res.data.picture,
+            id: data.mal_id.toString(),
+            name: data.username,
+            imageUrl: data.images.webp.image_url,
         };
     }
 }

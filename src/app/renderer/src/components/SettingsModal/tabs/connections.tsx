@@ -43,7 +43,7 @@ export default function Connections() {
                                         ? accounts.filter(
                                               (account: ExternalAccount) =>
                                                   account.provider === key &&
-                                                  account.username.length > 0
+                                                  account.user
                                           ).length > 0
                                         : false
                                 }
@@ -88,9 +88,6 @@ function ProviderButton({
                     await db.externalAccounts.add(
                         ExternalAccount.create({
                             provider: code,
-                            username: "",
-                            imageUrl: null,
-                            auth: {},
                         })
                     );
                 }}
@@ -109,7 +106,7 @@ function ProviderButton({
 }
 
 function Account({ account }: { account: ExternalAccount }) {
-    const provider = providers[account.provider];
+    const api = new API(account.provider);
 
     const [isConnectAccountModalOpen, setIsConnectAccountModalOpen] =
         React.useState(false);
@@ -145,9 +142,7 @@ function Account({ account }: { account: ExternalAccount }) {
                             className="rounded h-6 w-6 object-center object-cover"
                         />
                         <div className="text-zinc-300">
-                            {account.username.length > 0
-                                ? account.username
-                                : provider.title}
+                            {account.user?.name || account.auth?.username || api.title}
                         </div>
                     </div>
                     <button
@@ -167,7 +162,7 @@ function Account({ account }: { account: ExternalAccount }) {
                                     setIsConnectAccountModalOpen(true);
                                 }}
                             >
-                                {account.username.length > 0
+                                {account.auth?.username
                                     ? "Reconnect"
                                     : "Connect"}
                             </Button>
@@ -175,8 +170,8 @@ function Account({ account }: { account: ExternalAccount }) {
                         <div className="flex flex-row items-center gap-2">
                             <Button
                                 disabled={
-                                    account.username === "" ||
-                                    provider.config.importableListTypes
+                                    !account.auth?.username ||
+                                    api.config.importableListTypes
                                         .length === 0
                                 }
                                 onClick={(e: any) => {
@@ -194,52 +189,70 @@ function Account({ account }: { account: ExternalAccount }) {
             <FormModal
                 isOpen={isConnectAccountModalOpen}
                 closeModal={() => setIsConnectAccountModalOpen(false)}
-                title={"Connect to " + provider.title}
+                title={"Connect to " + api.title}
                 subtitle={"Link your account to import your lists"}
                 fields={[
                     {
                         name: "username",
                         label: "Username",
                         type: "text",
-                        defaultValue: account.username,
+                        defaultValue: account.auth?.username || "",
                     },
                 ]}
-                onSubmit={async ({ username }) => {
-                    await db.externalAccounts.update(account.id!, {
+                onSubmit={({ username }) => {
+                    const oldAuth = account.auth;
+                    const newAuth = {
+                        ...(oldAuth || {}),
                         username,
+                    };
+
+                    db.externalAccounts.update(account.id!, {
+                        auth: newAuth,
+                    }).then(() => {
+                        account.auth = newAuth;
+                        api.getUser(account).then((user) => {
+                            db.externalAccounts.update(account.id!, {
+                                user
+                            });
+                        }).catch((e) => {
+                            console.log(e);
+                            // Revert changes
+                            db.externalAccounts.update(account.id!, {
+                                auth: oldAuth
+                            })
+                        })
                     });
-                    
                 }}
             />
             <FormModal
                 isOpen={isSelectListTypeImportModalOpen}
                 closeModal={() => setIsSelectListTypeImportModalOpen(false)}
                 title="Select the list to import"
-                subtitle={`Select your list from ${provider.title}`}
+                subtitle={`Select your list from ${api.title}`}
                 fields={[
                     {
                         type: "radiogroup",
                         name: "type",
                         options: [
-                            ...(provider.config.importableListTypes.includes(
+                            ...(api.config.importableListTypes.includes(
                                 "anime"
                             )
                                 ? [
                                       {
                                           value: "anime",
                                           title: "Anime list",
-                                          description: `Import your anime list from ${provider.title}`,
+                                          description: `Import your anime list from ${api.title}`,
                                       },
                                   ]
                                 : []),
-                            ...(provider.config.importableListTypes.includes(
+                            ...(api.config.importableListTypes.includes(
                                 "manga"
                             )
                                 ? [
                                       {
                                           value: "manga",
                                           title: "Manga list",
-                                          description: `Import your manga list from ${provider.title}`,
+                                          description: `Import your manga list from ${api.title}`,
                                       },
                                   ]
                                 : []),
@@ -260,14 +273,13 @@ function Account({ account }: { account: ExternalAccount }) {
                     },
                 ]}
                 onSubmit={({ type, override }) => {
-                    const api = new API(account.provider);
                     api.importList(type as MediaType, account, !!override).then(
                         () => {
                             notify({
-                                title: `Imported ${account.username}'s ${type} list`,
-                                body: `Your list has been successfully imported from ${provider.title}.`,
+                                title: `Imported ${account.user!.name}'s ${type} list`,
+                                body: `Your list has been successfully imported from ${api.title}.`,
                                 icon: "/16x16.png",
-                            })
+                            });
                         }
                     );
                 }}

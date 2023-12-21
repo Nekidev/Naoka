@@ -1,6 +1,6 @@
-import { BaseAPI, Media, User } from "./providers";
+import { BaseAPI, Media } from "./providers";
 import { APIProvider, MediaType } from "./types";
-import { ExternalAccount, db } from "./db";
+import { ExternalAccount, UserData, db } from "./db";
 
 import { MyAnimeList } from "./providers/myanimelist";
 import { AniList } from "./providers/anilist";
@@ -80,7 +80,7 @@ export default class API {
         return this.api.importList(type, account, override);
     }
 
-    getUser(account: ExternalAccount): Promise<User> {
+    getUser(account: ExternalAccount): Promise<UserData> {
         return this.api.getUser(account);
     }
 }

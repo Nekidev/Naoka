@@ -1,4 +1,4 @@
-const query = `
+export default `
 query Media($id: Int, $type: MediaType) {
     Media(id: $id, type: $type) {
         id
@@ -32,5 +32,3 @@ query Media($id: Int, $type: MediaType) {
     }
 }
 `;
-
-export default query;

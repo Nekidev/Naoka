@@ -46,16 +46,22 @@ export interface List {
     accessedAt: Date;
 }
 
+export interface UserData {
+    id: string;
+    name: string;
+    imageUrl: string;
+}
+
 export class ExternalAccount extends Data {
     id?: number;
     provider: APIProvider = "myanimelist";
-    username: string = "Anonymous";
-    imageUrl: string | null = null;
-    auth: {
+    auth?: {
         accessToken?: string;
         refreshToken?: string;
+        username?: string;
         password?: string;
-    } = {};
+    };
+    user?: UserData;
 }
 
 export class NaokaDB extends Dexie {

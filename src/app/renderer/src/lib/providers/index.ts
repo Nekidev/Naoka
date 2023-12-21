@@ -1,4 +1,4 @@
-import { ExternalAccount } from "../db";
+import { ExternalAccount, UserData } from "../db";
 import { MediaType, Mapping } from "../types";
 
 interface Input {
@@ -78,12 +78,6 @@ export class Media {
     ) {}
 }
 
-export interface User {
-    id: string;
-    username: string;
-    imageUrl: string;
-}
-
 export class BaseAPI {
     title!: string;
     config!: Config;
@@ -120,7 +114,7 @@ export class BaseAPI {
         throw Error("Not implemented");
     }
 
-    async getUser(account: ExternalAccount): Promise<User> {
+    async getUser(account: ExternalAccount): Promise<UserData> {
         /*
         Returns basic user data from the external account.
         */

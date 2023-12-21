@@ -288,7 +288,7 @@ function Lists({
                     </div>
                 </div>
             ) : (
-                <RectangleStackIcon className="h-6 w-6 text-white/50" />
+                <RectangleStackIcon className="h-6 w-6 text-white/50 shrink-0" />
             )}
             {lists ? (
                 lists.length > 0 ? (
