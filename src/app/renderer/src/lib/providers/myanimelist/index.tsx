@@ -17,29 +17,26 @@ import { IntRange } from "@/utils/types";
 import config from "./config";
 
 function normalizeTime(timeString: string) {
-    // Splitting the string to extract numbers and units
     const parts = timeString.split(" ");
 
     let totalSeconds = 0;
 
-    // Looping through each part to convert it to seconds
     for (let i = 0; i < parts.length; i += 2) {
-        const value = parseInt(parts[i]); // Extracting the numeric value
-        const unit = parts[i + 1]; // Extracting the unit
+        const value = parseInt(parts[i]);
+        const unit = parts[i + 1];
 
-        // Converting units to seconds and adding to the total
         switch (unit) {
             case "hr":
             case "hrs":
-                totalSeconds += value * 3600; // 1 hour = 3600 seconds
+                totalSeconds += value * 3600;
                 break;
             case "min":
             case "mins":
-                totalSeconds += value * 60; // 1 minute = 60 seconds
+                totalSeconds += value * 60;
                 break;
             case "sec":
             case "secs":
-                totalSeconds += value; // seconds remain the same
+                totalSeconds += value;
                 break;
             default:
                 break;
