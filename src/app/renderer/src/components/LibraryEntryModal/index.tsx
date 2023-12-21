@@ -56,7 +56,7 @@ function FormModal({
     );
     const isFavorite = libraryEntry?.favorite || false;
 
-    const mediaCache = useLiveQuery(() => db.mediaCache.get({ mapping }));
+    const mediaCache = useLiveQuery(() => db.media.get({ mapping }));
 
     const formRef = React.useRef<HTMLFormElement>(null);
 
@@ -114,7 +114,9 @@ function FormModal({
                         className="h-40 bg-center bg-cover opacity-40 absolute top-0 bottom-0 left-0 right-0"
                         style={{
                             backgroundImage: `url(${
-                                mediaCache.bannerUrl ? mediaCache.bannerUrl : mediaCache.imageUrl
+                                mediaCache.bannerUrl
+                                    ? mediaCache.bannerUrl
+                                    : mediaCache.imageUrl
                             })`,
                         }}
                     ></div>

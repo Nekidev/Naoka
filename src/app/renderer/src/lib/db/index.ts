@@ -3,20 +3,91 @@ import Dexie, { Table } from "dexie";
 import { IntRange } from "@/utils/types";
 import { MediaType, Mapping, LibraryStatus, APIProvider } from "../types";
 
-export interface MediaCache {
+export enum MediaGenre {
+    Action = "action",
+    Adventure = "adventure",
+    Comedy = "comedy",
+    Drama = "drama",
+    Ecchi = "ecchi",
+    Erotica = "erotica",
+    Fantasy = "fantasy",
+    Hentai = "hentai",
+    Horror = "horror",
+    MahouShoujo = "mahou_shoujo",
+    Mecha = "mecha",
+    Music = "music",
+    Mistery = "mistery",
+    Psychological = "psychological",
+    Romance = "romance",
+    SciFi = "sci_fi",
+    SliceOfLife = "slice_of_life",
+    Sports = "sports",
+    Supernatural = "supernatural",
+    Suspense = "suspense",
+    Thriller = "thriller",
+    Yaoi = "yaoi",
+    Yuri = "yuri",
+}
+
+export enum MediaFormat {
+    Tv = "tv",
+    TvShort = "tv_short",
+    Movie = "movie",
+    Special = "special",
+    Ova = "ova",
+    Ona = "ona",
+    Music = "music",
+    Manga = "manga",
+    Novel = "novel",
+    LightNovel = "light_novel",
+    OneShot = "one_shot",
+    Doujinshi = "doujinshi",
+    Manhwa = "manhwa",
+    Manhua = "manhua",
+    Oel = "oel",
+}
+
+export enum MediaStatus {
+    NotStarted = "not_started",
+    InProgress = "in_progress",
+    Hiatus = "hiatus",
+    Cancelled = "cancelled",
+    Finished = "finished",
+}
+
+export enum MediaRating {
+    G = "g",
+    PG = "pg",
+    PG13 = "pg_13",
+    R = "r",
+    RPlus = "r_plus",
+    Rx = "rx",
+}
+
+export interface Media {
     type: MediaType;
-    title: string;
+    title: {
+        romaji: string | null;
+        english: string | null;
+        native: string | null;
+    };
     imageUrl: string | null;
     bannerUrl: string | null;
-    episodes: number | null;
-    chapters: number | null;
-    volumes: number | null;
+    episodes?: number | null;
+    chapters?: number | null;
+    volumes?: number | null;
     startDate: Date | null;
     finishDate: Date | null;
-    isAdult: boolean | null;
-    genres: string[] | null;
+    genres: MediaGenre[];
+    format: MediaFormat;
+    status: MediaStatus | null;
+    rating: MediaRating | null;
     duration: number | null;
     mapping: Mapping;
+}
+
+interface Mappings {
+    mappings: Mapping[];
 }
 
 export interface LibraryEntry {
@@ -32,14 +103,14 @@ export interface LibraryEntry {
     finishDate: Date | null;
     notes: string;
     mapping: Mapping;
-    media?: MediaCache;
+    media?: Media;
 }
 
 export interface List {
     id?: number;
     name: string;
     items: Mapping[];
-    itemCaches?: MediaCache[];
+    itemCaches?: Media[];
     syncedProviders: APIProvider[];
     updatedAt: Date;
     createdAt: Date;
@@ -65,7 +136,8 @@ export class ExternalAccount extends Data {
 }
 
 export class NaokaDB extends Dexie {
-    mediaCache!: Table<MediaCache>;
+    media!: Table<Media>;
+    mappings!: Table<Mappings>;
     library!: Table<LibraryEntry>;
     lists!: Table<List>;
     externalAccounts!: Table<ExternalAccount, number>;
@@ -74,7 +146,8 @@ export class NaokaDB extends Dexie {
         super("Naoka");
 
         this.version(1).stores({
-            mediaCache: "&mapping, type",
+            media: "&mapping, type",
+            mappings: "++id, *mappings",
             library: "&mapping, type, favorite, status, score",
             lists: "++id, name",
             externalAccounts: "++id, provider",

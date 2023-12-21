@@ -3,7 +3,7 @@
 import EditListModal from "@/components/EditListModal";
 import LibraryEntryModal from "@/components/LibraryEntryModal";
 import { LeftNavSpacer, VerticalNavSpacer } from "@/components/NavigationBar";
-import { List, MediaCache, db } from "@/lib/db";
+import { List, Media, db } from "@/lib/db";
 import { Mapping, MediaType } from "@/lib/types";
 import {
     PencilIcon,
@@ -30,7 +30,7 @@ export default function List() {
                     notFound();
                 }
 
-                let itemCaches = await db.mediaCache.bulkGet([...list!.items]);
+                let itemCaches = await db.media.bulkGet([...list!.items]);
 
                 return {
                     ...list,
@@ -75,7 +75,7 @@ export default function List() {
 
     function countItemsByMedia(mediaType: MediaType) {
         return list!.itemCaches!.filter(
-            (v: MediaCache | undefined) => v!.type === mediaType
+            (v: Media | undefined) => v!.type === mediaType
         ).length;
     }
 
@@ -178,7 +178,7 @@ export default function List() {
                 </div>
                 {list.items.length > 0 ? (
                     <div className="p-2 gap-x-4 grid grid-cols-3 relative">
-                        {list.itemCaches!.map((item: MediaCache) => (
+                        {list.itemCaches!.map((item: Media) => (
                             <MediaItem
                                 list={list}
                                 media={item}
@@ -237,7 +237,7 @@ function MediaItem({
     openLibraryEntryModal,
 }: {
     list: List;
-    media: MediaCache;
+    media: Media;
     openLibraryEntryModal: any;
 }) {
     const [isConfirmModalOpen, setIsConfirmModalOpen] = React.useState(false);

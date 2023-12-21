@@ -1,4 +1,4 @@
-import { BaseAPI, Media } from "./providers";
+import { BaseProvider } from "./providers";
 import { APIProvider, MediaType } from "./types";
 import { ExternalAccount, UserData, db } from "./db";
 
@@ -13,14 +13,14 @@ export const providers = {
 };
 
 export default class API {
-    private api!: BaseAPI;
+    private api!: BaseProvider;
 
     get config() {
         return this.api.config;
     }
 
-    get title() {
-        return this.api.title;
+    get name() {
+        return this.api.name;
     }
 
     constructor(code: APIProvider) {
@@ -39,7 +39,7 @@ export default class API {
     ): Promise<[Media[], boolean]> {
         const [results, error] = await this.api.search(type, options);
 
-        db.mediaCache
+        db.media
             .bulkPut(
                 results.map((value: Media, index: number) => {
                     return {
@@ -76,7 +76,11 @@ export default class API {
         return this.api.getMedia(type, { id });
     }
 
-    importList(type: MediaType, account: ExternalAccount, override: boolean = false) {
+    importList(
+        type: MediaType,
+        account: ExternalAccount,
+        override: boolean = false
+    ) {
         return this.api.importList(type, account, override);
     }
 

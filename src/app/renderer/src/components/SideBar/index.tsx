@@ -13,7 +13,7 @@ import {
 import React from "react";
 import CreateListModal from "../CreateListModal";
 import { useLiveQuery } from "dexie-react-hooks";
-import { List, MediaCache, db } from "@/lib/db";
+import { List, Media, db } from "@/lib/db";
 import { Mapping, MediaType } from "@/lib/types";
 import styles from "./styles.module.css";
 import { useAppWindow } from "@/utils/window";
@@ -254,9 +254,9 @@ function Lists({
                 );
             }
 
-            const itemCaches: MediaCache[] = (await db.mediaCache.bulkGet([
+            const itemCaches: Media[] = (await db.media.bulkGet([
                 ...new Set(itemCacheMappings),
-            ])) as MediaCache[];
+            ])) as Media[];
 
             return lists.map((list) => {
                 list.itemCaches = itemCaches.filter((v) =>
@@ -342,7 +342,11 @@ function UserProfile({ openSettingsModal }: { openSettingsModal: () => void }) {
                     </div>
                 )}
             </button>
-            <Tooltip label="Settings" enabled={isExpanded == "false"} position="right">
+            <Tooltip
+                label="Settings"
+                enabled={isExpanded == "false"}
+                position="right"
+            >
                 <IconButton
                     icon={<Cog6ToothIcon className="w-6 h-6" />}
                     onClick={openSettingsModal}

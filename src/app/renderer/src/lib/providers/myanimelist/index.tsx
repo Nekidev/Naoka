@@ -1,11 +1,22 @@
-import { BaseAPI, Config, Media } from "@/lib/providers";
-import { MediaType } from "../types";
+import { BaseProvider, Config } from "@/lib/providers";
+import { MediaType } from "../../types";
 import { serializeURL } from "@/utils";
-import { ExternalAccount, LibraryEntry, MediaCache, UserData, db } from "../db";
+import {
+    ExternalAccount,
+    MediaGenre,
+    LibraryEntry,
+    Media,
+    MediaStatus,
+    UserData,
+    db,
+    MediaFormat,
+    MediaRating,
+} from "../../db";
 import { fetch } from "@tauri-apps/api/http";
 import { IntRange } from "@/utils/types";
+import config from "./config";
 
-function timeToSeconds(timeString: string) {
+function normalizeTime(timeString: string) {
     // Splitting the string to extract numbers and units
     const parts = timeString.split(" ");
 
@@ -38,7 +49,29 @@ function timeToSeconds(timeString: string) {
     return totalSeconds;
 }
 
-function convertStatusToNaokaStatus(status: string) {
+function normalizeGenre(genre: string): MediaGenre | undefined {
+    // TODO: Add missing genres to the enum and map them
+    const map = {
+        action: MediaGenre.Action,
+        adventure: MediaGenre.Adventure,
+        "boys love": MediaGenre.Yaoi,
+        comedy: MediaGenre.Comedy,
+        drama: MediaGenre.Drama,
+        fantasy: MediaGenre.Fantasy,
+        "girls love": MediaGenre.Yuri,
+        horror: MediaGenre.Horror,
+        mistery: MediaGenre.Mistery,
+        romance: MediaGenre.Romance,
+        "sci-fi": MediaGenre.SciFi,
+        "slice of life": MediaGenre.SliceOfLife,
+        supernatural: MediaGenre.Supernatural,
+        suspense: MediaGenre.Suspense,
+    };
+
+    return map[genre.toLowerCase() as keyof typeof map];
+}
+
+function normalizeLibraryStatus(status: string) {
     switch (status) {
         case "reading":
         case "watching":
@@ -62,302 +95,75 @@ function convertStatusToNaokaStatus(status: string) {
     }
 }
 
-export class MyAnimeList extends BaseAPI {
-    title: string = "MyAnimeList";
-    config: Config = {
-        mediaTypes: ["anime", "manga"],
-        importableListTypes: ["anime", "manga"],
-        search: {
-            anime: {
-                sortBy: [
-                    {
-                        label: "Relevance",
-                        value: "",
-                    },
-                    {
-                        label: "Popularity",
-                        value: "popularity",
-                    },
-                    {
-                        label: "Rank",
-                        value: "rank",
-                    },
-                    {
-                        label: "Rating",
-                        value: "score",
-                    },
-                    {
-                        label: "Title",
-                        value: "title",
-                    },
-                    {
-                        label: "Episodes",
-                        value: "episodes",
-                    },
-                    {
-                        label: "Start date",
-                        value: "start_date",
-                    },
-                    {
-                        label: "End date",
-                        value: "end_date",
-                    },
-                ],
-                filters: [
-                    {
-                        type: "select",
-                        value: {
-                            name: "type",
-                            label: "Show type",
-                            values: [
-                                {
-                                    label: "All",
-                                    value: "",
-                                },
-                                {
-                                    label: "TV",
-                                    value: "tv",
-                                },
-                                {
-                                    label: "Movie",
-                                    value: "movie",
-                                },
-                                {
-                                    label: "OVA",
-                                    value: "ova",
-                                },
-                                {
-                                    label: "Special",
-                                    value: "special",
-                                },
-                                {
-                                    label: "ONA",
-                                    value: "ona",
-                                },
-                                {
-                                    label: "Music",
-                                    value: "music",
-                                },
-                            ],
-                        },
-                    },
-                    {
-                        type: "select",
-                        value: {
-                            name: "rating",
-                            label: "Age rating",
-                            values: [
-                                {
-                                    label: "All",
-                                    value: "",
-                                },
-                                {
-                                    label: "G - All ages",
-                                    value: "g",
-                                },
-                                {
-                                    label: "PG - Children",
-                                    value: "pg",
-                                },
-                                {
-                                    label: "PG-13 - Teens 13 or older",
-                                    value: "pg13",
-                                },
-                                {
-                                    label: "R - 17+ (violence & profanity)",
-                                    value: "r17",
-                                },
-                                {
-                                    label: "R+ - Mild Nudity",
-                                    value: "r",
-                                },
-                                {
-                                    label: "Rx - Hentai",
-                                    value: "rx",
-                                },
-                            ],
-                        },
-                    },
-                    {
-                        type: "select",
-                        value: {
-                            name: "status",
-                            label: "Status",
-                            values: [
-                                {
-                                    label: "All",
-                                    value: "",
-                                },
-                                {
-                                    label: "Upcoming",
-                                    value: "upcoming",
-                                },
-                                {
-                                    label: "Airing",
-                                    value: "airing",
-                                },
-                                {
-                                    label: "Complete",
-                                    value: "complete",
-                                },
-                            ],
-                        },
-                    },
-                    {
-                        type: "checkbox",
-                        value: {
-                            name: "sfw",
-                            label: "Filter NSFW results",
-                            defaultValue: true,
-                        },
-                    },
-                ],
-            },
-            manga: {
-                sortBy: [
-                    {
-                        label: "Relevance",
-                        value: "",
-                    },
-                    {
-                        label: "Popularity",
-                        value: "popularity",
-                    },
-                    {
-                        label: "Rank",
-                        value: "rank",
-                    },
-                    {
-                        label: "Rating",
-                        value: "score",
-                    },
-                    {
-                        label: "Title",
-                        value: "title",
-                    },
-                    {
-                        label: "Chapters",
-                        value: "chapters",
-                    },
-                    {
-                        label: "Volumes",
-                        value: "volumes",
-                    },
-                    {
-                        label: "Start date",
-                        value: "start_date",
-                    },
-                    {
-                        label: "End date",
-                        value: "end_date",
-                    },
-                ],
-                filters: [
-                    {
-                        type: "select",
-                        value: {
-                            name: "type",
-                            label: "Type",
-                            values: [
-                                {
-                                    label: "All",
-                                    value: "",
-                                },
-                                {
-                                    label: "Manga",
-                                    value: "manga",
-                                },
-                                {
-                                    label: "Light novel",
-                                    value: "lightnovel",
-                                },
-                                {
-                                    label: "One shot",
-                                    value: "oneshot",
-                                },
-                                {
-                                    label: "Doujinshi",
-                                    value: "doujin",
-                                },
-                                {
-                                    label: "Manhwa",
-                                    value: "manhwa",
-                                },
-                                {
-                                    label: "Manhua",
-                                    value: "manhua",
-                                },
-                            ],
-                        },
-                    },
-                    {
-                        type: "select",
-                        value: {
-                            name: "status",
-                            label: "Status",
-                            values: [
-                                {
-                                    label: "All",
-                                    value: "",
-                                },
-                                {
-                                    label: "Upcoming",
-                                    value: "upcoming",
-                                },
-                                {
-                                    label: "Publishing",
-                                    value: "publishing",
-                                },
-                                {
-                                    label: "Hiatus",
-                                    value: "hiatus",
-                                },
-                                {
-                                    label: "Discontinued",
-                                    value: "discontinued",
-                                },
-                                {
-                                    label: "Complete",
-                                    value: "complete",
-                                },
-                            ],
-                        },
-                    },
-                    {
-                        type: "checkbox",
-                        value: {
-                            name: "sfw",
-                            label: "Filter NSFW results",
-                            defaultValue: true,
-                        },
-                    },
-                ],
-            },
-        },
-    };
+function normalizeStatus(status: string): MediaStatus | undefined {
+    return {
+        "not yet started": MediaStatus.NotStarted,
+        "currently airing": MediaStatus.InProgress,
+        "finished airing": MediaStatus.Finished,
+    }[status.toLowerCase()];
+}
+
+function normalizeFormat(format: string): MediaFormat | undefined {
+    return {
+        "tv": MediaFormat.Tv,
+        "movie": MediaFormat.Movie,
+        "special": MediaFormat.Special,
+        "ova": MediaFormat.Ova,
+        "ona": MediaFormat.Ona,
+        "music": MediaFormat.Music,
+    }[format.toLowerCase()];
+}
+
+function normalizeRating(rating: string): MediaRating | undefined {
+    return {
+        "g": MediaRating.G,
+        "pg": MediaRating.PG,
+        "pg-13": MediaRating.PG13,
+        "r": MediaRating.R,
+        "r+": MediaRating.RPlus,
+        "rx": MediaRating.Rx,
+    }[rating.toLowerCase().split("-")[0]];
+}
+
+export class MyAnimeList extends BaseProvider {
+    name: string = "MyAnimeList";
+    config: Config = config;
+
     private clientID = "bd5f6c8d2ebafac1378531805137ada3";
 
-    private mediaFromAnimeJSON(anime: any): Media {
-        return new Media(
-            "anime",
-            anime.mal_id,
-            anime.titles.find((title: { type: string; title: string }) => {
-                return title.type === "Default";
-            }).title,
-            anime.images.webp.large_image_url,
-            null,
-            anime.type,
-            anime.status,
-            anime.genres.map((genre: any) => genre.name),
-            anime.aired.from ? new Date(anime.aired.from) : null,
-            anime.aired.to ? new Date(anime.aired.to) : null,
-            anime.episodes,
-            null,
-            null,
-            timeToSeconds(anime.duration),
-            anime.rating ? anime.rating[0] == "R" : false,
-            [`myanimelist:anime:${anime.mal_id.toString()}`]
-        );
+    private animeToInteralValue(anime: any): Media {
+        return {
+            type: "anime",
+            title: {
+                romaji: anime.titles.find(
+                    (value: { type: string; title: string }) =>
+                        value.type === "Default"
+                ),
+                english: anime.titles.find(
+                    (value: { type: string; title: string }) =>
+                        value.type === "English"
+                ),
+                native: anime.titles.find(
+                    (value: { type: string; title: string }) =>
+                        value.type === "Japanese"
+                ),
+            },
+            imageUrl: anime.images.webp.large_image_url,
+            bannerUrl: null,
+            episodes: anime.episodes,
+            startDate: anime.airing.from ? new Date(anime.airing.from) : null,
+            finishDate: anime.airing.to ? new Date(anime.airing.to) : null,
+            genres: anime.genres
+                .map((value: { name: string }) => normalizeGenre(value.name))
+                .filter((genre: string | undefined) => !!genre),
+            status: normalizeStatus(anime.status) || null,
+            format: normalizeFormat(anime.type) || MediaFormat.Tv,
+            duration: anime.duration
+                ? normalizeTime(anime.duration)
+                : null,
+            rating: normalizeRating(anime.rating) || null,
+            mapping: `myanimelist:anime:${anime.mal_id}`
+        };
     }
 
     private async searchAnime(options: {
@@ -496,7 +302,7 @@ export class MyAnimeList extends BaseAPI {
             return;
         }
 
-        let newMediaCache: MediaCache[] = [];
+        let newMediaCache: Media[] = [];
         let newLibraryEntries: LibraryEntry[] = [];
 
         for (const entry of res.data.data) {
@@ -526,7 +332,7 @@ export class MyAnimeList extends BaseAPI {
             newLibraryEntries.push({
                 type: "anime",
                 favorite: false,
-                status: convertStatusToNaokaStatus(entry.list_status.status),
+                status: normalizeLibraryStatus(entry.list_status.status),
                 score: (entry.list_status.score * 10) as IntRange<1, 100>,
                 episodeProgress: entry.list_status.num_episodes_watched,
                 restarts: entry.list_status.num_times_rewatched,
@@ -541,7 +347,7 @@ export class MyAnimeList extends BaseAPI {
             });
         }
 
-        await db.mediaCache.bulkPut(newMediaCache);
+        await db.media.bulkPut(newMediaCache);
 
         if (override) {
             await db.library.bulkPut(newLibraryEntries);
@@ -573,7 +379,7 @@ export class MyAnimeList extends BaseAPI {
             return;
         }
 
-        let newMediaCache: MediaCache[] = [];
+        let newMediaCache: Media[] = [];
         let newLibraryEntries: LibraryEntry[] = [];
 
         for (const entry of res.data.data) {
@@ -603,7 +409,7 @@ export class MyAnimeList extends BaseAPI {
             newLibraryEntries.push({
                 type: "manga",
                 favorite: false,
-                status: convertStatusToNaokaStatus(entry.list_status.status),
+                status: normalizeLibraryStatus(entry.list_status.status),
                 score: (entry.list_status.score * 10) as IntRange<1, 100>,
                 chapterProgress: entry.list_status.num_chapters_read,
                 volumeProgress: entry.list_status.num_volumes_read,
@@ -619,7 +425,7 @@ export class MyAnimeList extends BaseAPI {
             });
         }
 
-        await db.mediaCache.bulkPut(newMediaCache);
+        await db.media.bulkPut(newMediaCache);
 
         if (override) {
             await db.library.bulkPut(newLibraryEntries);
@@ -691,7 +497,9 @@ export class MyAnimeList extends BaseAPI {
     }
 
     async getUser(account: ExternalAccount): Promise<UserData> {
-        const url = `https://api.jikan.moe/v4/users/${encodeURIComponent(account.auth!.username!)}/full`;
+        const url = `https://api.jikan.moe/v4/users/${encodeURIComponent(
+            account.auth!.username!
+        )}/full`;
 
         const res = await fetch<any>(url);
 

@@ -45,7 +45,9 @@ export default function Library() {
                             mediaTypeFilters.includes("manga")) &&
                             !mediaTypeFilters.includes(entry.type))
                     ) {
-                        console.log(entry.mapping + " failed in mediaTypeFilters");
+                        console.log(
+                            entry.mapping + " failed in mediaTypeFilters"
+                        );
                         continue;
                     }
                 }
@@ -57,7 +59,7 @@ export default function Library() {
                     }
                 }
 
-                entry.media = await db.mediaCache.get({
+                entry.media = await db.media.get({
                     mapping: entry.mapping,
                 });
 

@@ -1,5 +1,5 @@
-import { ExternalAccount, LibraryEntry, MediaCache, UserData, db } from "@/lib/db";
-import { BaseAPI, Config, Media } from "..";
+import { ExternalAccount, LibraryEntry, Media, UserData, db } from "@/lib/db";
+import { BaseProvider, Config, Media } from "..";
 import { LibraryStatus, MediaType } from "../../types";
 import userQuery from "./queries/user";
 import mediaQuery from "./queries/media";
@@ -74,7 +74,7 @@ function normalizeLibraryStatus(status: string): LibraryStatus {
     }
 }
 
-export class AniList extends BaseAPI {
+export class AniList extends BaseProvider {
     title: string = "AniList";
     config: Config = {
         mediaTypes: ["anime", "manga"],
@@ -378,7 +378,9 @@ export class AniList extends BaseAPI {
     }
 
     async getUser(account: ExternalAccount): Promise<UserData> {
-        const { data: { User: data } } = await fetch("https://graphql.anilist.co", {
+        const {
+            data: { User: data },
+        } = await fetch("https://graphql.anilist.co", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -399,26 +401,25 @@ export class AniList extends BaseAPI {
         };
     }
 
-    async importList(type: MediaType, account: ExternalAccount, override?: boolean): Promise<void> {
+    async importList(
+        type: MediaType,
+        account: ExternalAccount,
+        override?: boolean
+    ): Promise<void> {
         let hasNextPage = true;
         let page = 1;
 
-        let newMediaCache: MediaCache[] = [];
+        let newMediaCache: Media[] = [];
         let newLibraryEntries: LibraryEntry[] = [];
 
         while (hasNextPage) {
             const {
                 data: {
                     User: {
-                        mediaListOptions: {
-                            scoreFormat
-                        }
+                        mediaListOptions: { scoreFormat },
                     },
-                    Page: {
-                        pageInfo,
-                        mediaList: data
-                    }
-                }
+                    Page: { pageInfo, mediaList: data },
+                },
             } = await fetch("https://graphql.anilist.co", {
                 method: "POST",
                 headers: {
@@ -430,7 +431,7 @@ export class AniList extends BaseAPI {
                     variables: {
                         username: account.auth!.username!,
                         type: type.toUpperCase(),
-                        page
+                        page,
                     },
                 }),
             }).then((res) => res.json());
@@ -444,7 +445,7 @@ export class AniList extends BaseAPI {
                 case "POINT_100":
                     scoreMultiplier = 1;
                     break;
-                
+
                 case "POINT_10":
                 case "POINT_10_DECIMAL":
                     scoreMultiplier = 10;
@@ -470,35 +471,58 @@ export class AniList extends BaseAPI {
                     title: media.title.romaji,
                     imageUrl: media.coverImage.extraLarge,
                     bannerUrl: media.bannerImage,
-                    startDate: media.startDate ? new Date(`${media.startDate.year}-${media.startDate.month}-${media.startDate.day}`) : null,
-                    finishDate: media.endDate ? new Date(`${media.endDate.year}-${media.endDate.month}-${media.endDate.day}`) : null,
+                    startDate: media.startDate
+                        ? new Date(
+                              `${media.startDate.year}-${media.startDate.month}-${media.startDate.day}`
+                          )
+                        : null,
+                    finishDate: media.endDate
+                        ? new Date(
+                              `${media.endDate.year}-${media.endDate.month}-${media.endDate.day}`
+                          )
+                        : null,
                     episodes: media.episodes,
                     chapters: media.chapters,
                     volumes: media.volumes,
                     duration: media.duration,
                     genres: media.genres,
                     isAdult: media.isAdult,
-                    mapping: `anilist:${media.type.toLowerCase() as MediaType}:${media.id.toString()}`,
+                    mapping: `anilist:${
+                        media.type.toLowerCase() as MediaType
+                    }:${media.id.toString()}`,
                 });
 
                 newLibraryEntries.push({
                     type: media.type.toLowerCase(),
                     favorite: false,
                     status: normalizeLibraryStatus(entry.status),
-                    score: Math.min(entry.score * scoreMultiplier, 100) as IntRange<1,100>,
+                    score: Math.min(
+                        entry.score * scoreMultiplier,
+                        100
+                    ) as IntRange<1, 100>,
                     restarts: entry.repeats,
-                    startDate: entry.startDate ? new Date(`${entry.startDate.year}-${entry.startDate.month}-${entry.startDate.day}`) : null,
-                    finishDate: entry.endDate ? new Date(`${entry.endDate.year}-${entry.endDate.month}-${entry.endDate.day}`) : null,
+                    startDate: entry.startDate
+                        ? new Date(
+                              `${entry.startDate.year}-${entry.startDate.month}-${entry.startDate.day}`
+                          )
+                        : null,
+                    finishDate: entry.endDate
+                        ? new Date(
+                              `${entry.endDate.year}-${entry.endDate.month}-${entry.endDate.day}`
+                          )
+                        : null,
                     episodeProgress: entry.progress,
                     chapterProgress: entry.progress,
                     volumeProgress: entry.progressVolumes,
                     notes: entry.notes,
-                    mapping: `anilist:${media.type.toLowerCase() as MediaType}:${media.id.toString()}`,
-                })
+                    mapping: `anilist:${
+                        media.type.toLowerCase() as MediaType
+                    }:${media.id.toString()}`,
+                });
             }
         }
 
-        await db.mediaCache.bulkPut(newMediaCache);
+        await db.media.bulkPut(newMediaCache);
 
         if (override) {
             await db.library.bulkPut(newLibraryEntries);

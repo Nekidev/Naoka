@@ -1,4 +1,4 @@
-import { ExternalAccount, UserData } from "../db";
+import { ExternalAccount, LibraryEntry, Media, UserData } from "../db";
 import { MediaType, Mapping } from "../types";
 
 interface Input {
@@ -8,7 +8,7 @@ interface Input {
 
 export interface SelectInput extends Input {
     icon?: JSX.Element;
-    values: {
+    options: {
         label: string;
         value: string;
     }[];
@@ -50,70 +50,93 @@ interface SearchConfig {
 
 export interface Config {
     mediaTypes: MediaType[];
-    importableListTypes: MediaType[];
+    syncing?: {
+        auth: {
+            type: "oauth" | "basic" | "client" | "none";
+        };
+        import?: {
+            // Importable list types. If not specified, the top-level `mediaType`
+            // will be used instead.
+            mediaTypes?: MediaType[];
+        };
+        export?: {
+            // Importable list types. If not specified, the top-level `mediaType`
+            // will be used instead.
+            mediaTypes?: MediaType[];
+        };
+    };
     search: {
         anime?: SearchConfig;
         manga?: SearchConfig;
     };
 }
 
-export class Media {
-    constructor(
-        readonly type: MediaType,
-        readonly id: string,
-        readonly title: string,
-        readonly imageUrl: string,
-        readonly bannerUrl: string | null,
-        readonly format: string,
-        readonly status: string,
-        readonly genres: string[],
-        readonly startDate: Date | null,
-        readonly endDate: Date | null,
-        readonly episodes: number | null,
-        readonly chapters: number | null,
-        readonly volumes: number | null,
-        readonly duration: number | null,
-        readonly isAdult: boolean,
-        readonly mappings: Mapping[]
-    ) {}
+export enum ImportMethod {
+    // Keep the current library entry
+    Keep,
+
+    // Keep the new library entry
+    Overwrite,
+
+    // Keep the lastest library entry
+    Latest,
 }
 
-export class BaseAPI {
-    title!: string;
+export class BaseProvider {
+    name!: string;
     config!: Config;
 
+    /**
+     * Search for media
+     * @param {MediaType} type    The type of the media to search for
+     * @param {Object}    options Query, filters, etc. Variates depending on
+     *                            each provider's configuration
+     * @returns {Promise} The media and all the mappings for each media
+     */
     async search(
         type: MediaType,
         options: {
             [key: string]: any;
         }
-    ): Promise<[Media[], boolean]> {
-        /*
-        Returns a tuple of an array of Anime objects and a boolean indicating
-        if there was an error.
-        */
+    ): Promise<{ media: Media[]; mappings: Mapping[] }> {
         throw Error("Not implemented");
     }
 
+    /**
+     * Returns a media by it's ID
+     * @param {MediaType} type The type of the media to get
+     * @param {string}    id   The ID of the media to get
+     * @returns {Promise} The media and all mappings for that media
+     */
     async getMedia(
         type: MediaType,
-        { id }: { id: string }
-    ): Promise<[Media | null, boolean]> {
-        /*
-        Returns a tuple of a Media object and a boolean indicating if there was
-        an error.
-        */
+        id: string
+    ): Promise<{ media: Media; mappings: Mapping[] }> {
         throw Error("Not implemented");
     }
 
-    async importList(type: MediaType, account: ExternalAccount, override: boolean = false) {
-        /*
-        Imports the list from the external account (only `type` items) and
-        creates necesary mediaCache items.
-        */
+    /**
+     * Returns all library entries for a given account
+     * @param {MediaType}       type    The media type of the library
+     * @param {ExternalAccount} account The account to get the library from
+     * @returns {Promise} The library entries, the media, and all mappings for each media
+     */
+    async getLibrary(
+        type: MediaType,
+        account: ExternalAccount
+    ): Promise<{
+        media: Media[];
+        entries: LibraryEntry[];
+        mappings: Mapping[];
+    }> {
         throw Error("Not implemented");
     }
 
+    /**
+     * Get details of a given account
+     * @param {ExternalAccount} account The account to get the details from
+     * @returns {Promise} The account details
+     */
     async getUser(account: ExternalAccount): Promise<UserData> {
         /*
         Returns basic user data from the external account.
