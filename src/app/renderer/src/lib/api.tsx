@@ -1,11 +1,9 @@
-import { BaseProvider } from "./providers";
+import { BaseProvider, ImportMethod } from "./providers";
 import { Provider, MediaType } from "./types";
-import { ExternalAccount, UserData, db } from "./db";
+import { ExternalAccount, Media, UserData } from "./db";
 
 import { MyAnimeList } from "./providers/myanimelist";
 import { AniList } from "./providers/anilist";
-
-import Dexie from "dexie";
 
 export const providers = {
     myanimelist: new MyAnimeList(),
@@ -36,52 +34,30 @@ export default class API {
     async search(
         type: MediaType,
         options: { [key: string]: any }
-    ): Promise<[Media[], boolean]> {
-        const [results, error] = await this.api.search(type, options);
+    ): Promise<Media[]> {
+        // TODO: Update mappings in the mappings DB table and update media in the media DB table
+        const { media, mappings } = await this.api.search(type, options);
 
-        db.media
-            .bulkPut(
-                results.map((value: Media, index: number) => {
-                    return {
-                        type: value.type,
-                        title: value.title,
-                        imageUrl: value.imageUrl,
-                        bannerUrl: value.bannerUrl,
-                        episodes: value.episodes,
-                        chapters: value.chapters,
-                        volumes: value.volumes,
-                        startDate: value.startDate,
-                        finishDate: value.endDate,
-                        genres: value.genres,
-                        duration: value.duration,
-                        isAdult: value.isAdult,
-                        mapping: value.mappings[0],
-                    };
-                })
-            )
-            .then((lastKey) => {})
-            .catch(Dexie.BulkError, (error) => {
-                console.error(
-                    `Failed to add ${error.failures.length} items to mediaCache. The other results were successfully added.`
-                );
-            });
-
-        return [results, error];
+        return media;
     }
 
-    getMedia(
+    async getMedia(
         type: MediaType,
-        { id }: { id: string }
-    ): Promise<[Media | null, boolean]> {
-        return this.api.getMedia(type, { id });
+        id: string
+    ): Promise<Media> {
+        // TODO: Update mappings in the mappings DB table and media in the media DB table
+        const { media, mappings } = await this.api.getMedia(type, id);
+
+        return media;
     }
 
-    importList(
+    async importList(
         type: MediaType,
         account: ExternalAccount,
-        override: boolean = false
+        override: ImportMethod = ImportMethod.Latest
     ) {
-        return this.api.importList(type, account, override);
+        // TODO: Save entries to library and update mappings and media in the DB
+        const { media, mappings, entries } = await this.api.getLibrary(type, account);
     }
 
     getUser(account: ExternalAccount): Promise<UserData> {
