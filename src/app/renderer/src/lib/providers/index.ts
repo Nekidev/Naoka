@@ -88,6 +88,7 @@ export class BaseProvider {
 
     /**
      * Search for media
+     * 
      * @param {MediaType} type    The type of the media to search for
      * @param {Object}    options Query, filters, etc. Variates depending on
      *                            each provider's configuration
@@ -104,6 +105,7 @@ export class BaseProvider {
 
     /**
      * Returns a media by it's ID
+     * 
      * @param {MediaType} type The type of the media to get
      * @param {string}    id   The ID of the media to get
      * @returns {Promise} The media and all mappings for that media
@@ -117,6 +119,7 @@ export class BaseProvider {
 
     /**
      * Returns all library entries for a given account
+     * 
      * @param {MediaType}       type    The media type of the library
      * @param {ExternalAccount} account The account to get the library from
      * @returns {Promise} The library entries, the media, and all mappings for each media
@@ -134,6 +137,7 @@ export class BaseProvider {
 
     /**
      * Get details of a given account
+     * 
      * @param {ExternalAccount} account The account to get the details from
      * @returns {Promise} The account details
      */
