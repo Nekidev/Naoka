@@ -1,11 +1,10 @@
-import { ExternalAccount, LibraryEntry, Media, UserData, db } from "@/lib/db";
-import { BaseProvider, Config, Media } from "..";
+import { ExternalAccount, LibraryEntry, UserData, db } from "@/lib/db";
+import { BaseProvider } from "..";
 import { LibraryStatus, MediaType } from "../../types";
 import userQuery from "./queries/user";
 import mediaQuery from "./queries/media";
 import searchQuery from "./queries/search";
 import libraryQuery from "./queries/library";
-import { IntRange } from "@/utils/types";
 import config from "./config";
 
 function normalizeMediaFormat(format: string): string {
@@ -77,7 +76,7 @@ function normalizeLibraryStatus(status: string): LibraryStatus {
 
 export class AniList extends BaseProvider {
     name: string = "AniList";
-    config: Config = config;
+    config = config;
 
     mediaFromMediaJSON(media: any): Media {
         return new Media(
