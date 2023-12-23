@@ -1,7 +1,6 @@
 import { Data } from "dataclass";
 import Dexie, { Table } from "dexie";
-import { IntRange } from "@/utils/types";
-import { MediaType, Mapping, LibraryStatus, APIProvider } from "../types";
+import { MediaType, Mapping, LibraryStatus, Provider } from "../types";
 
 export enum MediaGenre {
     Action = "action",
@@ -79,10 +78,10 @@ export interface Media {
     startDate: Date | null;
     finishDate: Date | null;
     genres: MediaGenre[];
-    format: MediaFormat;
+    format: MediaFormat | null;
     status: MediaStatus | null;
-    rating: MediaRating | null;
-    duration: number | null;
+    rating?: MediaRating | null;
+    duration?: number | null;
     mapping: Mapping;
 }
 
@@ -94,7 +93,7 @@ export interface LibraryEntry {
     type: MediaType;
     favorite: boolean;
     status: LibraryStatus;
-    score: IntRange<1, 100>;
+    score: number;
     episodeProgress?: number;
     chapterProgress?: number;
     volumeProgress?: number;
@@ -103,18 +102,14 @@ export interface LibraryEntry {
     finishDate: Date | null;
     notes: string;
     mapping: Mapping;
-    media?: Media;
+    updatedAt: Date;
 }
 
 export interface List {
     id?: number;
     name: string;
     items: Mapping[];
-    itemCaches?: Media[];
-    syncedProviders: APIProvider[];
-    updatedAt: Date;
-    createdAt: Date;
-    accessedAt: Date;
+    syncedProviders: Provider[];
 }
 
 export interface UserData {
@@ -125,7 +120,7 @@ export interface UserData {
 
 export class ExternalAccount extends Data {
     id?: number;
-    provider: APIProvider = "myanimelist";
+    provider: Provider = "myanimelist";
     auth?: {
         accessToken?: string;
         refreshToken?: string;

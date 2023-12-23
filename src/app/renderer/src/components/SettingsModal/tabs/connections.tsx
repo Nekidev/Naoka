@@ -215,7 +215,6 @@ function Account({ account }: { account: ExternalAccount }) {
                                 user
                             });
                         }).catch((e) => {
-                            console.log(e);
                             // Revert changes
                             db.externalAccounts.update(account.id!, {
                                 auth: oldAuth

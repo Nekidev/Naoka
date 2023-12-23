@@ -1,5 +1,5 @@
 import { BaseProvider } from "./providers";
-import { APIProvider, MediaType } from "./types";
+import { Provider, MediaType } from "./types";
 import { ExternalAccount, UserData, db } from "./db";
 
 import { MyAnimeList } from "./providers/myanimelist";
@@ -23,7 +23,7 @@ export default class API {
         return this.api.name;
     }
 
-    constructor(code: APIProvider) {
+    constructor(code: Provider) {
         const api = providers[code];
 
         if (!api) {

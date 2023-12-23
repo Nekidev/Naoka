@@ -98,7 +98,7 @@ export class BaseProvider {
         options: {
             [key: string]: any;
         }
-    ): Promise<{ media: Media[]; mappings: Mapping[] }> {
+    ): Promise<{ media: Media[]; mappings: Mapping[][] }> {
         throw Error("Not implemented");
     }
 
@@ -127,7 +127,7 @@ export class BaseProvider {
     ): Promise<{
         media: Media[];
         entries: LibraryEntry[];
-        mappings: Mapping[];
+        mappings: Mapping[][];
     }> {
         throw Error("Not implemented");
     }

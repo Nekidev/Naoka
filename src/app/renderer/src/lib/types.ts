@@ -10,7 +10,7 @@ export type LibraryStatus =
     | "dropped"
     | "completed";
 
-export type APIProvider = keyof typeof providers;
+export type Provider = keyof typeof providers;
 
 // Provider:MediaType:ID
-export type Mapping = `${APIProvider}:${MediaType}:${string}`;
+export type Mapping = `${Provider}:${MediaType}:${string}`;
