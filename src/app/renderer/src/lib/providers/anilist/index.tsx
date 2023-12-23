@@ -78,7 +78,7 @@ export class AniList extends BaseProvider {
     name: string = "AniList";
     config = config;
 
-    mediaFromMediaJSON(media: any): Media {
+    mediaToInternalValue(media: any): Media {
         return new Media(
             media.type.toLowerCase(),
             media.id,
@@ -166,7 +166,7 @@ export class AniList extends BaseProvider {
         }
 
         let media: Media[] = data.map((m: any) => {
-            return this.mediaFromMediaJSON(m);
+            return this.mediaToInternalValue(m);
         });
 
         return [media, false];
@@ -197,7 +197,7 @@ export class AniList extends BaseProvider {
             return [null, true];
         }
 
-        let media = this.mediaFromMediaJSON(data.Media);
+        let media = this.mediaToInternalValue(data.Media);
 
         return [media, false];
     }
@@ -226,7 +226,7 @@ export class AniList extends BaseProvider {
         };
     }
 
-    async importList(
+    async getLibrary(
         type: MediaType,
         account: ExternalAccount,
         override?: boolean
