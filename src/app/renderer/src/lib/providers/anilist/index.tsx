@@ -1,6 +1,6 @@
-import { ExternalAccount, LibraryEntry, UserData, db } from "@/lib/db";
+import { ExternalAccount, LibraryEntry, Media, UserData, db } from "@/lib/db";
 import { BaseProvider } from "..";
-import { LibraryStatus, MediaType } from "../../types";
+import { LibraryStatus, Mapping, MediaType } from "../../types";
 import userQuery from "./queries/user";
 import mediaQuery from "./queries/media";
 import searchQuery from "./queries/search";
@@ -78,7 +78,10 @@ export class AniList extends BaseProvider {
     name: string = "AniList";
     config = config;
 
-    mediaToInternalValue(media: any): Media {
+    mediaToInternalValue(media: any): {
+        media: Media;
+        mappings: Mapping[];
+    } {
         return new Media(
             media.type.toLowerCase(),
             media.id,
@@ -120,7 +123,10 @@ export class AniList extends BaseProvider {
     async search(
         type: MediaType,
         options: { [key: string]: any }
-    ): Promise<[Media[], boolean]> {
+    ): Promise<{
+        media: Media[];
+        mappings: Mapping[][];
+    }> {
         const {
             data: {
                 Page: { media: data },
@@ -174,8 +180,11 @@ export class AniList extends BaseProvider {
 
     async getMedia(
         type: MediaType,
-        { id }: { id: string }
-    ): Promise<[Media | null, boolean]> {
+        id: string
+    ): Promise<{
+        media: Media;
+        mappings: Mapping[];
+    }> {
         const {
             data: { Media: data },
         } = await fetch("https://graphql.anilist.co", {
@@ -229,8 +238,11 @@ export class AniList extends BaseProvider {
     async getLibrary(
         type: MediaType,
         account: ExternalAccount,
-        override?: boolean
-    ): Promise<void> {
+    ): Promise<{
+        media: Media[];
+        mappings: Mapping[][];
+        entries: LibraryEntry[];
+    }> {
         let hasNextPage = true;
         let page = 1;
 
