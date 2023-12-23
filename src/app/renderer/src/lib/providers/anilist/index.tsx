@@ -346,20 +346,5 @@ export class AniList extends BaseProvider {
                 });
             }
         }
-
-        await db.media.bulkPut(newMediaCache);
-
-        if (override) {
-            await db.library.bulkPut(newLibraryEntries);
-        } else {
-            try {
-                // Will only add items that don't exist. If there is one or
-                // more items that already exist, it will throw an error but
-                // still add the rest of the items.
-                await db.library.bulkAdd(newLibraryEntries);
-            } catch (e) {
-                null;
-            }
-        }
     }
 }
