@@ -1,4 +1,13 @@
-import { ExternalAccount, LibraryEntry, Media, MediaFormat, MediaGenre, MediaStatus, UserData, db } from "@/lib/db";
+import {
+    ExternalAccount,
+    LibraryEntry,
+    Media,
+    MediaFormat,
+    MediaGenre,
+    MediaStatus,
+    UserData,
+    db,
+} from "@/lib/db";
 import { BaseProvider } from "..";
 import { LibraryStatus, Mapping, MediaType } from "../../types";
 import userQuery from "./queries/user";
@@ -26,8 +35,8 @@ function normalizeGenre(genre: string): MediaGenre | undefined {
         "slice of life": MediaGenre.SliceOfLife,
         sports: MediaGenre.Sports,
         supernatural: MediaGenre.Supernatural,
-        thriller: MediaGenre.Thriller
-    }[genre.toLowerCase()]
+        thriller: MediaGenre.Thriller,
+    }[genre.toLowerCase()];
 }
 
 function normalizeMediaFormat(format: string): MediaFormat | undefined {
@@ -41,18 +50,18 @@ function normalizeMediaFormat(format: string): MediaFormat | undefined {
         music: MediaFormat.Music,
         manga: MediaFormat.Manga,
         novel: MediaFormat.Novel,
-        one_shot: MediaFormat.OneShot
-    }[format.toLowerCase()]
+        one_shot: MediaFormat.OneShot,
+    }[format.toLowerCase()];
 }
 
 function normalizeMediaStatus(status: string): MediaStatus | undefined {
     return {
-        "finished": MediaStatus.Finished,
-        "releasing": MediaStatus.InProgress,
-        "not_yet_released": MediaStatus.NotStarted,
-        "cancelled": MediaStatus.Cancelled,
-        "hiatus": MediaStatus.Hiatus       
-    }[status.toLowerCase()]
+        finished: MediaStatus.Finished,
+        releasing: MediaStatus.InProgress,
+        not_yet_released: MediaStatus.NotStarted,
+        cancelled: MediaStatus.Cancelled,
+        hiatus: MediaStatus.Hiatus,
+    }[status.toLowerCase()];
 }
 
 function normalizeLibraryStatus(status: string): LibraryStatus {
@@ -106,24 +115,30 @@ export class AniList extends BaseProvider {
                           `${media.endDate.year}-${media.endDate.month}-${media.endDate.day}`
                       )
                     : null,
-                genres: media.genres.map((genre: string) => normalizeGenre(genre)).filter((genre: MediaGenre | undefined) => !!genre),
+                genres: media.genres
+                    .map((genre: string) => normalizeGenre(genre))
+                    .filter((genre: MediaGenre | undefined) => !!genre),
                 format: normalizeMediaFormat(media.format) || null,
                 status: normalizeMediaStatus(media.status) || null,
                 episodes: media.episodes,
                 chapters: media.chapters,
                 volumes: media.volumes,
                 duration: media.duration,
-                mapping: `anilist:${media.type.toLowerCase() as MediaType}:${media.id.toString()}`,
+                mapping: `anilist:${
+                    media.type.toLowerCase() as MediaType
+                }:${media.id.toString()}`,
             },
             mappings: [
-                `anilist:${media.type.toLowerCase() as MediaType}:${media.id.toString()}`,
+                `anilist:${
+                    media.type.toLowerCase() as MediaType
+                }:${media.id.toString()}`,
                 ...[
                     media.idMal &&
                         `myanimelist:${
                             media.type.toLowerCase() as MediaType
                         }:${media.idMal.toString()}`,
                 ],
-            ]
+            ],
         };
     }
 
@@ -179,8 +194,8 @@ export class AniList extends BaseProvider {
         }
 
         let mappings: Mapping[][] = [];
-        let media: Media[] = data.map((m: any) => {
-            const { media, mappings: m } = this.mediaToInternalValue(m);
+        let media: Media[] = data.map((v: any) => {
+            const { media, mappings: m } = this.mediaToInternalValue(v);
             mappings.push(m);
             return media;
         });
@@ -216,12 +231,10 @@ export class AniList extends BaseProvider {
         }).then((res) => res.json());
 
         if (!data) {
-            return [null, true];
+            throw Error("Failed to get media");
         }
 
-        let media = this.mediaToInternalValue(data.Media);
-
-        return [media, false];
+        return this.mediaToInternalValue(data.Media);
     }
 
     async getUser(account: ExternalAccount): Promise<UserData> {
@@ -259,7 +272,8 @@ export class AniList extends BaseProvider {
         let hasNextPage = true;
         let page = 1;
 
-        let newMediaCache: Media[] = [];
+        let newMedia: Media[] = [];
+        let newMappings: Mapping[][] = [];
         let newLibraryEntries: LibraryEntry[] = [];
 
         while (hasNextPage) {
@@ -314,42 +328,18 @@ export class AniList extends BaseProvider {
             }
 
             for (const entry of data) {
-                const media = entry.media;
+                const { media, mappings } = this.mediaToInternalValue(
+                    entry.media
+                );
 
-                newMediaCache.push({
-                    type: media.type.toLowerCase(),
-                    title: media.title.romaji,
-                    imageUrl: media.coverImage.extraLarge,
-                    bannerUrl: media.bannerImage,
-                    startDate: media.startDate
-                        ? new Date(
-                              `${media.startDate.year}-${media.startDate.month}-${media.startDate.day}`
-                          )
-                        : null,
-                    finishDate: media.endDate
-                        ? new Date(
-                              `${media.endDate.year}-${media.endDate.month}-${media.endDate.day}`
-                          )
-                        : null,
-                    episodes: media.episodes,
-                    chapters: media.chapters,
-                    volumes: media.volumes,
-                    duration: media.duration,
-                    genres: media.genres,
-                    isAdult: media.isAdult,
-                    mapping: `anilist:${
-                        media.type.toLowerCase() as MediaType
-                    }:${media.id.toString()}`,
-                });
+                newMedia.push(media);
+                newMappings.push(mappings);
 
                 newLibraryEntries.push({
-                    type: media.type.toLowerCase(),
+                    type: media.type.toLowerCase() as MediaType,
                     favorite: false,
                     status: normalizeLibraryStatus(entry.status),
-                    score: Math.min(
-                        entry.score * scoreMultiplier,
-                        100
-                    ) as IntRange<1, 100>,
+                    score: Math.min(entry.score * scoreMultiplier, 100),
                     restarts: entry.repeats,
                     startDate: entry.startDate
                         ? new Date(
@@ -365,11 +355,16 @@ export class AniList extends BaseProvider {
                     chapterProgress: entry.progress,
                     volumeProgress: entry.progressVolumes,
                     notes: entry.notes,
-                    mapping: `anilist:${
-                        media.type.toLowerCase() as MediaType
-                    }:${media.id.toString()}`,
+                    mapping: media.mapping,
+                    updatedAt: new Date(entry.updatedAt),
                 });
             }
         }
+
+        return {
+            media: newMedia,
+            mappings: newMappings,
+            entries: newLibraryEntries,
+        };
     }
 }
