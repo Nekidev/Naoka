@@ -12,5 +12,6 @@ export const defaultLibraryEntry: LibraryEntry = {
     startDate: null,
     finishDate: null,
     notes: "",
-    mapping: "myanimelist:anime:1"
+    mapping: "myanimelist:anime:1",
+    updatedAt: new Date(),
 }
