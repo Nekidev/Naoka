@@ -33,6 +33,8 @@ query Library($username: String, $type: MediaType, $page: Int) {
                 type
                 title {
                     romaji
+                    native
+                    english
                 }
                 coverImage {
                     extraLarge
