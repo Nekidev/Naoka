@@ -1,11 +1,11 @@
-import { List, db } from "@/lib/db";
-import { allTrim } from "@/utils";
+import { db } from "@/lib/db";
+import { allTrim } from "@/lib/utils";
 import { ExclamationTriangleIcon } from "@heroicons/react/24/outline";
 import { useLiveQuery } from "dexie-react-hooks";
 import { motion, AnimatePresence } from "framer-motion";
 import React from "react";
 import Modal from "../Modal";
-import { Mapping } from "@/lib/types";
+import { List } from "@/lib/db/types";
 
 export default function EditListModal({
     list,
@@ -69,7 +69,7 @@ export default function EditListModal({
                                 type="text"
                                 className="w-full border border-zinc-900 rounded bg-zinc-900 p-2 leading-none outline-none placeholder:text-zinc-400 focus:border-zinc-100 transition"
                                 placeholder="Name"
-                                autoComplete="off"
+                                autoComplete="none"
                                 value={name}
                                 onChange={(e) => {
                                     setName(e.target.value);

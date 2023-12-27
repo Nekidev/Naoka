@@ -1,4 +1,4 @@
-import { motion, AnimatePresence } from "framer-motion";
+import { AnimatePresence } from "framer-motion";
 
 import { useLiveQuery } from "dexie-react-hooks";
 
@@ -12,14 +12,14 @@ import {
     XMarkIcon,
 } from "@heroicons/react/24/outline";
 
-import { LibraryStatus, Mapping, MediaType } from "@/lib/types";
-import { LibraryEntry, db } from "@/lib/db";
+import { db } from "@/lib/db";
 import React from "react";
 import { defaultLibraryEntry } from "@/lib/db/defaults";
 import ImageModal from "../ImageModal";
 import Modal from "../Modal";
 import AddToListModal from "../AddToListModal";
 import ConfirmModal from "../ConfirmModal";
+import { LibraryEntry, LibraryStatus, Mapping, MediaType } from "@/lib/db/types";
 
 export default function LibraryEntryModal({
     mapping,
@@ -96,7 +96,7 @@ function FormModal({
         };
 
         db.library
-            .put(newLibraryEntry as LibraryEntry)
+            .put(newLibraryEntry)
             .then((value) => {})
             .catch((error) => {
                 console.error(error);
@@ -491,7 +491,7 @@ function NumberInput({ ...props }: { [key: string]: any }) {
         <div className="w-full relative">
             <input
                 type="number"
-                autoComplete="off"
+                autoComplete="none"
                 className="rounded p-2 leading-none bg-zinc-900 w-full text-sm outline-none peer h-8"
                 onChange={(e) => {
                     setValue(e.target.value);
@@ -552,7 +552,7 @@ function DateInput({ ...props }: { [key: string]: any }) {
         <div className="w-full relative">
             <input
                 type="date"
-                autoComplete="off"
+                autoComplete="none"
                 className="rounded p-2 leading-none bg-zinc-900 w-full text-sm outline-none peer h-8 placeholder:text-zinc-400"
                 {...props}
             />
@@ -565,7 +565,7 @@ function TextArea({ ...props }: { [key: string]: any }) {
     return (
         <div className="w-full relative">
             <textarea
-                autoComplete="off"
+                autoComplete="none"
                 className="rounded p-2 bg-zinc-900 w-full text-sm outline-none peer placeholder:text-zinc-400 resize-y"
                 {...props}
             />

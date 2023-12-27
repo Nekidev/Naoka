@@ -2,15 +2,15 @@
 
 import { Header, Separator, Setting } from "../components";
 import Tooltip from "@/components/Tooltip";
-import { ExternalAccount, db } from "@/lib/db";
+import { db } from "@/lib/db";
 import { useLiveQuery } from "dexie-react-hooks";
 import { XMarkIcon } from "@heroicons/react/24/outline";
 import FormModal from "@/components/FormModal";
 import React from "react";
 import { CheckCircleIcon } from "@heroicons/react/20/solid";
-import { MediaType } from "@/lib/types";
 import { notify } from "@/lib/notifications";
 import { ProviderAPI, providers } from "@/lib/providers";
+import { ExternalAccount, ImportMethod, MediaType } from "@/lib/db/types";
 
 export default function Connections() {
     const accounts = useLiveQuery(() => db.externalAccounts.toArray());
@@ -237,6 +237,7 @@ function Account({ account }: { account: ExternalAccount }) {
                     {
                         type: "radiogroup",
                         name: "type",
+                        defaultValue: "anime",
                         options: [
                             ...(api.config.syncing?.import?.mediaTypes.includes("anime")
                                 ? [
@@ -262,38 +263,42 @@ function Account({ account }: { account: ExternalAccount }) {
                     {
                         type: "radiogroup",
                         name: "method",
+                        defaultValue: "merge",
                         options: [
                             {
                                 value: "override",
                                 title: "Override local entries",
                                 description:
-                                    "If an entry conflicts, override the local entry.",
+                                    "If an entry conflicts, override the local one.",
                             },
                             {
                                 value: "keep",
                                 title: "Keep local entries",
-                                description: "If an entry conflicts, keep the local entry.",
+                                description: "If an entry conflicts, keep the local one.",
                             },
                             {
-                                value: "merge",
-                                title: "Merge with local entries (recommended)",
-                                description: "If an entry conflicts, keep the latest entry."
+                                value: "latest",
+                                title: "Keep the last updated entry (recommended)",
+                                description: "If an entry conflicts, keep the latest one."
                             }
                         ],
                     },
                 ]}
                 onSubmit={({ type, method }) => {
-                    api.getLibrary(type as MediaType, account).then(
-                        () => {
-                            notify({
-                                title: `Imported ${
-                                    account.user!.name
-                                }'s ${type} list`,
-                                body: `Your list has been successfully imported from ${api.name}.`,
-                                icon: "/16x16.png",
-                            });
-                        }
-                    );
+                    account.importLibrary(type as MediaType, method as ImportMethod).then(() => {
+                        notify({
+                            title: `Imported ${
+                                account.user!.name
+                            }'s ${type} list`,
+                            body: `Your list has been successfully imported from ${api.name}.`,
+                        });
+                    }).catch((e) => {
+                        console.error(e);
+                        notify({
+                            title: `Oops! Your ${api.name} library couldn't be imported`,
+                            body: `Please try again later.`,
+                        })
+                    })
                 }}
             />
         </>

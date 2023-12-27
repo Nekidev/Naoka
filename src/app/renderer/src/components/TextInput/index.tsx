@@ -1,6 +1,13 @@
-import { cn } from "@/utils";
+import { cn } from "@/lib/utils";
 
-export default function TextInput({ name, icon, label, ...props }: { [key: string]: any }) {
+export default function TextInput({
+    name,
+    icon,
+    label,
+    ...props
+}: {
+    [key: string]: any;
+}) {
     return (
         <div className="relative flex-1">
             {icon && (

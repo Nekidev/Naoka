@@ -1,10 +1,11 @@
+import { db } from "../db";
 import { BaseProvider } from "./base";
+import { ExternalAccount, Media, MediaType, Provider, UserData } from "../db/types";
 
 import { AniList } from "./anilist";
 import { MyAnimeList } from "./myanimelist";
+
 import { updateMappings } from "../db/utils";
-import { ExternalAccount, Media, MediaType, Provider, UserData } from "../db/types";
-import { db } from "../db";
 
 // Add new providers here
 export const providers = {

@@ -3,8 +3,7 @@
 import EditListModal from "@/components/EditListModal";
 import LibraryEntryModal from "@/components/LibraryEntryModal";
 import { LeftNavSpacer, VerticalNavSpacer } from "@/components/NavigationBar";
-import { List, Media, db } from "@/lib/db";
-import { Mapping, MediaType } from "@/lib/types";
+import { db } from "@/lib/db";
 import {
     PencilIcon,
     RectangleStackIcon,
@@ -12,16 +11,17 @@ import {
     XMarkIcon,
 } from "@heroicons/react/24/outline";
 import { useLiveQuery } from "dexie-react-hooks";
-import { notFound, useRouter, useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import React from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import ConfirmModal from "@/components/ConfirmModal";
+import { List, Mapping, Media, MediaType } from "@/lib/db/types";
 
 interface ListWithMedia extends List {
     media?: Media[];
 }
 
-export default function List() {
+export default function ListPage() {
     const searchParams = useSearchParams();
     const router = useRouter();
 
@@ -31,7 +31,10 @@ export default function List() {
         () =>
             db.lists.get(parseInt(id!)).then(async (list: List | undefined) => {
                 if (!list) {
-                    notFound();
+                    // Not found. Cannot use notFound() because the page has
+                    // already started rendering.
+                    router.replace("/library/");
+                    return undefined;
                 }
 
                 let media = await db.media.bulkGet([...list!.items]);
@@ -218,7 +221,7 @@ export default function List() {
                 content="Are you sure you want to delete this list? This action cannot be undone."
                 onConfirm={() => {
                     setIsConfirmModalOpen(false);
-                    router.replace("/library");
+                    router.replace("/library/");
                     setTimeout(
                         () => db.lists.where("id").equals(list.id!).delete(),
                         300
@@ -279,7 +282,7 @@ function MediaItem({
             <ConfirmModal
                 isOpen={isConfirmModalOpen}
                 title="Remove from this list"
-                content={`Do you want to remove '${media.title}' from the list?`}
+                content={`Do you want to remove '${media.title.romaji}' from the list?`}
                 onConfirm={async () => {
                     await db.lists.update(list.id!, {
                         items: list.items.filter(

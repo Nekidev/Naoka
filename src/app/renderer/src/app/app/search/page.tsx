@@ -17,7 +17,7 @@ import {
     CheckboxInput as CheckboxInputInterface,
 } from "@/lib/providers/base";
 import { LibraryStatus, Mapping, MediaType } from "@/lib/types";
-import { cn } from "@/utils";
+import { cn } from "@/lib/utils";
 import styles from "./styles.module.css";
 import LibraryEntryModal from "@/components/LibraryEntryModal";
 import { useLiveQuery } from "dexie-react-hooks";

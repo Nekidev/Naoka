@@ -1,5 +1,5 @@
 import { db } from "@/lib/db";
-import { allTrim } from "@/utils";
+import { allTrim } from "@/lib/utils";
 import { ExclamationTriangleIcon } from "@heroicons/react/24/outline";
 import { useLiveQuery } from "dexie-react-hooks";
 import { motion, AnimatePresence } from "framer-motion";
@@ -32,10 +32,6 @@ export default function CreateListModal({
         const listId = await db.lists.add({
             name: name.trim(),
             items: [],
-            syncedProviders: [],
-            updatedAt: new Date(),
-            createdAt: new Date(),
-            accessedAt: new Date(),
         });
 
         return listId;
@@ -62,7 +58,7 @@ export default function CreateListModal({
                                 className="w-full border border-zinc-900 rounded bg-zinc-900 p-2 leading-none outline-none placeholder:text-zinc-400 focus:border-zinc-100 transition"
                                 placeholder="Name"
                                 value={name}
-                                autoComplete="off"
+                                autoComplete="none"
                                 onChange={(e) => {
                                     setName(e.target.value);
                                 }}

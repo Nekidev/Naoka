@@ -70,17 +70,6 @@ export interface Config {
     };
 }
 
-export enum ImportMethod {
-    // Keep the current library entry
-    Keep,
-
-    // Keep the new library entry
-    Overwrite,
-
-    // Keep the lastest library entry
-    Latest,
-}
-
 export class BaseProvider {
     name!: string;
     config!: Config;

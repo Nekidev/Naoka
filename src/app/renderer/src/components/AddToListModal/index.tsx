@@ -1,11 +1,15 @@
-import { Mapping } from "@/lib/types";
 import { AnimatePresence } from "framer-motion";
 import Modal from "../Modal";
-import { List, Media, db } from "@/lib/db";
+import { db } from "@/lib/db";
 import { useLiveQuery } from "dexie-react-hooks";
 import { RectangleStackIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import CreateListModal from "../CreateListModal";
 import React from "react";
+import { List, Mapping, Media } from "@/lib/db/types";
+
+interface ListWithMedia extends List {
+    media: Media[];
+}
 
 export default function AddToListModal({
     mapping,
@@ -31,23 +35,24 @@ function FormModal({
     const media = useLiveQuery(() => db.media.get({ mapping }), [mapping]);
     const lists = useLiveQuery(() =>
         db.lists.toArray(async (lists) => {
-            let itemCacheMappings: Array<Mapping> = [];
+            let mediaMappings: Array<Mapping> = [];
 
             for (const list of lists) {
                 list.items.map((mapping: Mapping) =>
-                    itemCacheMappings.push(mapping)
+                    mediaMappings.push(mapping)
                 );
             }
 
-            const itemCaches: Media[] = (await db.media.bulkGet([
-                ...new Set(itemCacheMappings),
+            const media: Media[] = (await db.media.bulkGet([
+                ...new Set(mediaMappings),
             ])) as Media[];
 
             return lists.map((list) => {
-                list.itemCaches = itemCaches.filter((v) =>
+                const listWithMedia: ListWithMedia = list as ListWithMedia;
+                listWithMedia.media = media.filter((v) =>
                     list.items.includes(v!.mapping)
                 );
-                return list;
+                return listWithMedia;
             });
         })
     );
@@ -75,7 +80,7 @@ function FormModal({
                             />
                             <div className="flex-1 flex flex-col items-start justify-center gap-1">
                                 <div className="leading-none line-clamp-1 text-zinc-300">
-                                    {media?.title}
+                                    {media?.title.romaji}
                                 </div>
                                 <div className="leading-none text-sm text-zinc-400">
                                     {media?.type === "anime"
@@ -89,7 +94,7 @@ function FormModal({
                         lists.length > 0 ? (
                             <div className="p-2 overflow-y-auto shrink flex flex-col justify-stretch border-y border-zinc-700">
                                 {lists.map((list) => (
-                                    <List
+                                    <ListButton
                                         key={list.id}
                                         list={list}
                                         mapping={mapping}
@@ -129,12 +134,12 @@ function FormModal({
     );
 }
 
-function List({
+function ListButton({
     list,
     mapping,
     closeModal,
 }: {
-    list: List;
+    list: ListWithMedia;
     mapping: Mapping;
     closeModal: () => void;
 }) {
@@ -159,11 +164,11 @@ function List({
             ) : (
                 <div className="rounded h-10 w-10 bg-zinc-700 relative">
                     <img
-                        src={list.itemCaches![0].imageUrl!}
+                        src={list.media![0].imageUrl!}
                         className="rounded absolute top-0 left-0 bottom-0 aspect-cover h-full object-center object-cover z-10"
                     />
                     <img
-                        src={list.itemCaches![1].imageUrl!}
+                        src={list.media![1].imageUrl!}
                         className="rounded absolute top-0 right-0 bottom-0 aspect-cover h-full object-center object-cover"
                     />
                 </div>

@@ -1,6 +1,6 @@
 "use client";
 
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import {
     Bars3Icon,
     MagnifyingGlassIcon,
@@ -13,14 +13,18 @@ import {
 import React from "react";
 import CreateListModal from "../CreateListModal";
 import { useLiveQuery } from "dexie-react-hooks";
-import { List, Media, db } from "@/lib/db";
-import { Mapping, MediaType } from "@/lib/types";
+import { db } from "@/lib/db";
 import styles from "./styles.module.css";
-import { useAppWindow } from "@/utils/window";
+import { useAppWindow } from "@/lib/window";
 import Tooltip from "../Tooltip";
 import SettingsModal from "../SettingsModal";
 import Link from "../Link";
 import { useLocalStorage } from "@uidotdev/usehooks";
+import { List, Mapping, Media } from "@/lib/db/types";
+
+interface ListWithMedia extends List {
+    media: Media[];
+}
 
 export default function SideBar() {
     const [isCreateListModalOpen, setIsCreateListModalOpen] =
@@ -182,8 +186,8 @@ function MenuButtons(): JSX.Element {
     );
 }
 
-function List({ list }: { list: List }) {
-    const images = list.itemCaches!.map((v) => v.imageUrl);
+function ListButton({ list }: { list: ListWithMedia }) {
+    const images = list.media.map((v: Media) => v.imageUrl);
     const title = list.name;
     const subtitle =
         list.items.length > 0
@@ -195,16 +199,24 @@ function List({ list }: { list: List }) {
         "true"
     );
 
+    const samePathname = usePathname() == "/app/list/";
+    const sameId = useSearchParams().get("id") == list.id!.toString();
+    const isSelected = samePathname && sameId;
+
     return (
         <Link
             href={`/app/list/?id=${encodeURIComponent(list.id!)}`}
-            className={`hover:bg-zinc-800 transition rounded group flex flex-row items-center gap-2 -m-2 ${
+            className={`hover:bg-zinc-700 transition rounded group flex flex-row items-center gap-2 -m-2 ${
                 isExpanded == "true" ? "p-2" : " p-1 justify-center"
-            }`}
+            } ${isSelected && "bg-zinc-800"}`}
         >
             {images.length < 2 ? (
-                <div className="w-8 h-8 rounded bg-zinc-800 flex flex-col items-center justify-center group-hover:bg-zinc-700 transition">
-                    <RectangleStackIcon className="h-4 w-4 text-zinc-500 stroke-2" />
+                <div
+                    className={`w-8 h-8 rounded flex flex-col items-center justify-center transition group-hover:bg-zinc-600 ${
+                        isSelected ? "bg-zinc-700" : "bg-zinc-800"
+                    }`}
+                >
+                    <RectangleStackIcon className="h-4 w-4 text-zinc-400 stroke-2" />
                 </div>
             ) : (
                 <div className="h-8 w-8 relative">
@@ -244,25 +256,26 @@ function Lists({
         "true"
     );
 
-    const lists = useLiveQuery(() =>
+    const lists: ListWithMedia[] | undefined = useLiveQuery(() =>
         db.lists.toArray(async (lists) => {
-            let itemCacheMappings: Array<Mapping> = [];
+            let mediaMappings: Array<Mapping> = [];
 
             for (const list of lists) {
                 list.items.map((mapping: Mapping) =>
-                    itemCacheMappings.push(mapping)
+                    mediaMappings.push(mapping)
                 );
             }
 
-            const itemCaches: Media[] = (await db.media.bulkGet([
-                ...new Set(itemCacheMappings),
+            const media: Media[] = (await db.media.bulkGet([
+                ...new Set(mediaMappings),
             ])) as Media[];
 
             return lists.map((list) => {
-                list.itemCaches = itemCaches.filter((v) =>
+                const listWithMedia = list as ListWithMedia;
+                listWithMedia.media = media.filter((v) =>
                     list.items.includes(v!.mapping)
                 );
-                return list;
+                return listWithMedia;
             });
         })
     );
@@ -293,7 +306,7 @@ function Lists({
             {lists ? (
                 lists.length > 0 ? (
                     lists.map((list, index) => (
-                        <List key={list.id} list={list} />
+                        <ListButton key={list.id} list={list} />
                     ))
                 ) : (
                     isExpanded == "true" && (

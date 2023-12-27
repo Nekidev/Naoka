@@ -10,10 +10,10 @@ import {
     XMarkIcon,
 } from "@heroicons/react/24/outline";
 import {
-    toggleWindowMaximize,
+    setWindowMaximizedStatus,
     useAppWindow,
     useMaximized,
-} from "@/utils/window";
+} from "@/lib/window";
 import { useLocalStorage } from "@uidotdev/usehooks";
 
 export default function NavigationBar(): JSX.Element {
@@ -63,7 +63,7 @@ export default function NavigationBar(): JSX.Element {
                 </button>
                 <button
                     className="p-2 rounded hover:bg-zinc-800 transition"
-                    onClick={() => toggleWindowMaximize(appWindow)}
+                    onClick={() => setWindowMaximizedStatus(appWindow)}
                 >
                     {isMaximized ? (
                         <Square2StackIcon className="h-4 w-4" />

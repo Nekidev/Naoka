@@ -1,5 +1,6 @@
 import { Data } from "dataclass";
 import { ProviderAPI, providers } from "../providers";
+import { db } from ".";
 
 export type MediaType = "anime" | "manga";
 
@@ -128,7 +129,17 @@ export interface List {
     id?: number;
     name: string;
     items: Mapping[];
-    syncedProviders: Provider[];
+}
+
+export enum ImportMethod {
+    // Keep the current library entry
+    Keep = "keep",
+
+    // Keep the new library entry
+    Overwrite = "overwrite",
+
+    // Keep the lastest library entry
+    Latest = "latest",
 }
 
 export interface UserData {
@@ -156,5 +167,44 @@ export class ExternalAccount extends Data {
     async getData() {
         const api = new ProviderAPI(this.provider);
         return api.getUser(this);
+    }
+
+    async importLibrary(
+        type: MediaType,
+        method: ImportMethod = ImportMethod.Keep
+    ) {
+        const api = new ProviderAPI(this.provider);
+        const { entries } = await api.getLibrary(type, this);
+
+        switch (method) {
+            case ImportMethod.Keep:
+                return await db.library.bulkAdd(entries);
+
+            case ImportMethod.Overwrite:
+                return await db.library.bulkPut(entries);
+
+            case ImportMethod.Latest:
+                const existingEntries = await db.library.bulkGet(
+                    entries.map((e) => e.mapping)
+                );
+                const newEntries = entries.map((newEntry: LibraryEntry) => {
+                    const existingEntry = existingEntries.find(
+                        (e: LibraryEntry | undefined) =>
+                            !!e && e.mapping === newEntry.mapping
+                    );
+
+                    if (!!existingEntry) {
+                        if (existingEntry.updatedAt > newEntry.updatedAt) {
+                            return existingEntry;
+                        } else {
+                            return newEntry;
+                        }
+                    }
+
+                    return newEntry;
+                });
+
+                return await db.library.bulkPut(newEntries);
+        }
     }
 }

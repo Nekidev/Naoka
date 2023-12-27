@@ -1,8 +1,20 @@
 import { BaseProvider, Config } from "@/lib/providers/base";
-import { serializeURL } from "@/utils";
+import { serializeURL } from "@/lib/utils";
 import { fetch } from "@tauri-apps/api/http";
 import config from "./config";
-import { ExternalAccount, LibraryEntry, LibraryStatus, Mapping, Media, MediaFormat, MediaGenre, MediaRating, MediaStatus, MediaType, UserData } from "@/lib/db/types";
+import {
+    ExternalAccount,
+    LibraryEntry,
+    LibraryStatus,
+    Mapping,
+    Media,
+    MediaFormat,
+    MediaGenre,
+    MediaRating,
+    MediaStatus,
+    MediaType,
+    UserData,
+} from "@/lib/db/types";
 
 function normalizeTime(timeString: string) {
     const parts = timeString.split(" ");
@@ -186,10 +198,14 @@ export class MyAnimeList extends BaseProvider {
                 episodes: anime.num_episodes,
                 startDate: anime.start_date ? new Date(anime.start_date) : null,
                 finishDate: anime.end_date ? new Date(anime.end_date) : null,
-                genres: anime.genres.map((genre: any) => normalizeGenre(genre.name)),
+                genres: anime.genres.map((genre: any) =>
+                    normalizeGenre(genre.name)
+                ),
                 status: anime.status ? normalizeMalStatus(anime.status)! : null,
                 format: anime.type ? normalizeFormat(anime.type)! : null,
-                duration: anime.average_episode_duration ? Math.round(anime.average_episode_duration / 60) : null,
+                duration: anime.average_episode_duration
+                    ? Math.round(anime.average_episode_duration / 60)
+                    : null,
                 mapping: `myanimelist:anime:${anime.id.toString()}`,
             },
             mappings: [`myanimelist:anime:${anime.id.toString()}`],
@@ -258,7 +274,9 @@ export class MyAnimeList extends BaseProvider {
                 volumes: manga.volumes,
                 startDate: manga.start_date ? new Date(manga.start_date) : null,
                 finishDate: manga.end_date ? new Date(manga.end_date) : null,
-                genres: manga.genres.map((genre: any) => normalizeGenre(genre.name)),
+                genres: manga.genres.map((genre: any) =>
+                    normalizeGenre(genre.name)
+                ),
                 status: manga.status ? normalizeMalStatus(manga.status)! : null,
                 format: manga.type ? normalizeFormat(manga.type)! : null,
                 mapping: `myanimelist:manga:${manga.id.toString()}`,

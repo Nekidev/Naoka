@@ -1,11 +1,24 @@
-import { WebviewWindow } from "@tauri-apps/api/window";
 import React from "react";
 
-export async function toggleWindowMaximize(
+import { WebviewWindow } from "@tauri-apps/api/window";
+
+export enum MaximixedStatus {
+    Toggle,
+    Maximized,
+    UnMaximized,
+}
+
+/**
+ * Sets the maximized state of the app window.
+ *
+ * @param {WebviewWindow | undefined} appWindow - The app window to toggle.
+ * @param {MaximixedStatus} status - The desired maximize state.
+ */
+export async function setWindowMaximizedStatus(
     appWindow: WebviewWindow | undefined,
-    status: boolean | null = null
+    status: MaximixedStatus = MaximixedStatus.Toggle
 ) {
-    if (status === null) {
+    if (status === MaximixedStatus.Toggle) {
         if (await appWindow?.isMaximized()) {
             document.body.classList.remove("maximized");
         } else {
@@ -13,7 +26,7 @@ export async function toggleWindowMaximize(
         }
         appWindow?.toggleMaximize();
     } else {
-        if (status) {
+        if (status === MaximixedStatus.Maximized) {
             document.body.classList.add("maximized");
             appWindow?.maximize();
         } else {
@@ -23,6 +36,12 @@ export async function toggleWindowMaximize(
     }
 }
 
+/**
+ * Returns a boolean value indicating whether the given appWindow is maximized.
+ *
+ * @param {WebviewWindow | undefined} appWindow - The window to check for maximization.
+ * @return {boolean} The boolean value indicating whether the appWindow is maximized.
+ */
 export function useMaximized(appWindow: WebviewWindow | undefined) {
     const [isMaximized, setIsMaximized] = React.useState(false);
 
@@ -42,6 +61,11 @@ export function useMaximized(appWindow: WebviewWindow | undefined) {
     return isMaximized;
 }
 
+/**
+ * Retrieves the Tauri application window.
+ *
+ * @returns {WebviewWindow | undefined} The application window if found, otherwise undefined.
+ */
 export function useAppWindow(): WebviewWindow | undefined {
     const [appWindow, setAppWindow] = React.useState<
         WebviewWindow | undefined

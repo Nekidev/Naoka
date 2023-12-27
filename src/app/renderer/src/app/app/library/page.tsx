@@ -9,7 +9,7 @@ import {
     XMarkIcon,
 } from "@heroicons/react/24/outline";
 import React from "react";
-import { cn } from "@/utils";
+import { cn } from "@/lib/utils";
 import TextInput from "@/components/TextInput";
 import colors from "tailwindcss/colors";
 import { db, LibraryEntry, Media } from "@/lib/db";
