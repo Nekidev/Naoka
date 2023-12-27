@@ -17,6 +17,10 @@ import React from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import ConfirmModal from "@/components/ConfirmModal";
 
+interface ListWithMedia extends List {
+    media?: Media[];
+}
+
 export default function List() {
     const searchParams = useSearchParams();
     const router = useRouter();
@@ -25,17 +29,17 @@ export default function List() {
 
     const list = useLiveQuery(
         () =>
-            db.lists.get(parseInt(id!)).then(async (list) => {
+            db.lists.get(parseInt(id!)).then(async (list: List | undefined) => {
                 if (!list) {
                     notFound();
                 }
 
-                let itemCaches = await db.media.bulkGet([...list!.items]);
+                let media = await db.media.bulkGet([...list!.items]);
 
                 return {
                     ...list,
-                    itemCaches: itemCaches || [],
-                } as List;
+                    media: media || [],
+                } as ListWithMedia;
             }),
         [id]
     );
@@ -74,7 +78,7 @@ export default function List() {
     }
 
     function countItemsByMedia(mediaType: MediaType) {
-        return list!.itemCaches!.filter(
+        return list!.media!.filter(
             (v: Media | undefined) => v!.type === mediaType
         ).length;
     }
@@ -135,14 +139,14 @@ export default function List() {
                             <div className="h-20 w-20 rounded bg-zinc-700 relative">
                                 <img
                                     src={
-                                        list.itemCaches![0].imageUrl ||
+                                        list.media![0].imageUrl ||
                                         undefined
                                     }
                                     className="absolute top-0 bottom-0 left-0 h-full rounded aspect-cover object-cover object-center z-10"
                                 />
                                 <img
                                     src={
-                                        list.itemCaches![1].imageUrl ||
+                                        list.media![1].imageUrl ||
                                         undefined
                                     }
                                     className="absolute top-0 bottom-0 right-0 h-full rounded aspect-cover object-cover object-center"
@@ -178,7 +182,7 @@ export default function List() {
                 </div>
                 {list.items.length > 0 ? (
                     <div className="p-2 gap-x-4 grid grid-cols-3 relative">
-                        {list.itemCaches!.map((item: Media) => (
+                        {list.media!.map((item: Media) => (
                             <MediaItem
                                 list={list}
                                 media={item}
@@ -251,7 +255,7 @@ function MediaItem({
                 />
                 <div className="flex flex-col flex-1 gap-1">
                     <div className="line-clamp-1 leading-none text-zinc-300">
-                        {media.title}
+                        {media.title.romaji}
                     </div>
                     <div className="text-sm text-zinc-400 leading-none">
                         {media.type == "anime" ? "Anime" : "Manga"}

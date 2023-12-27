@@ -12,12 +12,16 @@ import React from "react";
 import { cn } from "@/utils";
 import TextInput from "@/components/TextInput";
 import colors from "tailwindcss/colors";
-import { db, LibraryEntry } from "@/lib/db";
+import { db, LibraryEntry, Media } from "@/lib/db";
 import { useLiveQuery } from "dexie-react-hooks";
 import { LibraryStatus, Mapping } from "@/lib/types";
 import LibraryEntryModal from "@/components/LibraryEntryModal";
 import { useDebounce } from "@uidotdev/usehooks";
 import { motion, AnimatePresence } from "framer-motion";
+
+interface LibraryEntryWithMedia extends LibraryEntry {
+    media?: Media;
+}
 
 export default function Library() {
     const [mediaTypeFilters, setMediaTypeFilters] = React.useState<
@@ -31,7 +35,7 @@ export default function Library() {
     const debouncedQuery = useDebounce(query, 300);
 
     const libraryEntries = useLiveQuery(() => {
-        return db.library.toArray(async (array: LibraryEntry[]) => {
+        return db.library.toArray(async (array: LibraryEntryWithMedia[]) => {
             let result = [];
 
             for (let entry of array) {
@@ -58,8 +62,14 @@ export default function Library() {
                 });
 
                 if (
-                    !entry.media?.title
-                        .toLowerCase()
+                    !entry.media?.title.native
+                        ?.toLowerCase()
+                        .includes(query.toLowerCase()) &&
+                    !entry.media?.title.romaji
+                        ?.toLowerCase()
+                        .includes(query.toLowerCase()) &&
+                    !entry.media?.title.english
+                        ?.toLowerCase()
                         .includes(query.toLowerCase())
                 ) {
                     continue;
@@ -291,7 +301,7 @@ function LibraryEntryRow({
     entry,
     openModal,
 }: {
-    entry: LibraryEntry;
+    entry: LibraryEntryWithMedia;
     openModal: any;
 }) {
     const statusColors: { [key in LibraryStatus]: string } = {
@@ -317,7 +327,7 @@ function LibraryEntryRow({
             {entry.media ? (
                 <img
                     src={entry.media.imageUrl!}
-                    alt={entry.media.title}
+                    alt={entry.media.title.romaji!}
                     className="w-10 aspect-square rounded object-cover object-center"
                 />
             ) : (
@@ -326,7 +336,7 @@ function LibraryEntryRow({
             <div className="flex flex-col gap-1 justify-center text-zinc-300 group-hover:text-zinc-100 transition">
                 {entry.media ? (
                     <span className="line-clamp-1 leading-none">
-                        {entry.media?.title}
+                        {entry.media?.title.romaji}
                     </span>
                 ) : (
                     <div
