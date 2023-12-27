@@ -12,18 +12,16 @@ import {
     ChevronUpDownIcon,
 } from "@heroicons/react/24/outline";
 import { VerticalNavSpacer, LeftNavSpacer } from "@/components/NavigationBar";
-import {
-    Media,
+import ProviderAPI, {
     SelectInput as SelectInputInterface,
     CheckboxInput as CheckboxInputInterface,
 } from "@/lib/providers";
 import { LibraryStatus, Mapping, MediaType } from "@/lib/types";
-import API from "@/lib/api";
 import { cn } from "@/utils";
 import styles from "./styles.module.css";
 import LibraryEntryModal from "@/components/LibraryEntryModal";
 import { useLiveQuery } from "dexie-react-hooks";
-import { db } from "@/lib/db";
+import { db, Media, MediaRating } from "@/lib/db";
 import { defaultLibraryEntry } from "@/lib/db/defaults";
 import Chip from "@/components/Chip";
 import TextInput from "@/components/TextInput";
@@ -32,7 +30,7 @@ import AddToListModal from "@/components/AddToListModal";
 export default function Search() {
     const [searchType, setSearchType] = React.useState<MediaType>("anime");
 
-    const api = new API("anilist");
+    const api = new ProviderAPI("anilist");
 
     const [displayMode, setDisplayMode] = React.useState<"list" | "grid">(
         "list"
@@ -66,15 +64,12 @@ export default function Search() {
         });
 
         try {
-            const [res, error] = await api.search(
-                searchType,
-                { query, sortBy: sortByRef.current?.value || null, ...filters },
-            );
-            if (error) {
-                setError("Oops! An error occurred :/");
-            } else {
-                setResults(res);
-            }
+            const results = await api.search(searchType, {
+                query,
+                sortBy: sortByRef.current?.value || null,
+                ...filters,
+            });
+            setResults(results);
         } catch (e) {
             setError("Oops! An error occurred :/");
         }
@@ -147,7 +142,7 @@ export default function Search() {
                                     icon={
                                         <MagnifyingGlassIcon className="h-6 w-6" />
                                     }
-                                    label={`Search in ${api.title}`}
+                                    label={`Search in ${api.name}`}
                                     value={query}
                                     onChange={(e: any) =>
                                         setQuery(e.target.value)
@@ -312,7 +307,7 @@ function SelectFilter({
                     {...props}
                     className="py-2 px-2 leading-none rounded outline-none bg-zinc-800 text-sm cursor-pointer appearance-none w-full"
                 >
-                    {values.map((v, i) => (
+                    {values.map((v: any, i: number) => (
                         <option key={i} value={v.value} className="bg-zinc-800">
                             {v.label}
                         </option>
@@ -386,12 +381,12 @@ function ToggleButton({
 
 function MediaCard({ media, onClick }: { media: Media; onClick: any }) {
     const libraryEntry = useLiveQuery(
-        () => db.library.get({ mapping: media.mappings[0] }),
+        () => db.library.get({ mapping: media.mapping }),
         [media],
         {
             ...defaultLibraryEntry,
             type: media.type,
-            mapping: media.mappings[0],
+            mapping: media.mapping,
         }
     );
 
@@ -402,8 +397,8 @@ function MediaCard({ media, onClick }: { media: Media; onClick: any }) {
         >
             <div className="relative">
                 <img
-                    src={media.imageUrl}
-                    alt={media.title}
+                    src={media.imageUrl || undefined}
+                    alt={media.title.romaji || undefined}
                     className="w-full aspect-[2/3] object-cover object-center rounded"
                 />
                 <div className="opacity-0 group-hover:opacity-100 absolute top-0 bottom-0 left-0 right-0 bg-zinc-950/30 transition-all"></div>
@@ -415,10 +410,14 @@ function MediaCard({ media, onClick }: { media: Media; onClick: any }) {
             </div>
             <div className="flex flex-col gap-1 flex-1">
                 <div className="text-sm text-zinc-200 group-hover:text-white line-clamp-2 leading-tight transition">
-                    {media.title}
+                    {media.title.romaji}
                 </div>
                 <div className="text-xs text-zinc-400 line-clamp-1 mt-auto">
-                    {media.isAdult && (
+                    {[MediaRating.RPlus, MediaRating.Rx].includes(
+                        // May be null/undefined but that's fine. The ! is just
+                        // for type checking.
+                        media.rating!
+                    ) && (
                         <>
                             <span className="text-red-500">+18</span> —
                         </>
@@ -442,9 +441,9 @@ function Grid({
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-6 relative gap-4 p-4">
             {results.map((media) => (
                 <MediaCard
-                    key={media.id}
+                    key={media.mapping}
                     media={media}
-                    onClick={() => openLibraryEntryModal(media.mappings[0])}
+                    onClick={() => openLibraryEntryModal(media.mapping)}
                 />
             ))}
         </div>
@@ -461,12 +460,12 @@ function MediaRow({
     addToList: any;
 }) {
     const libraryEntry = useLiveQuery(
-        () => db.library.get({ mapping: media.mappings[0] }),
+        () => db.library.get({ mapping: media.mapping }),
         [media],
         {
             ...defaultLibraryEntry,
             type: media.type,
-            mapping: media.mappings[0],
+            mapping: media.mapping,
         }
     );
 
@@ -474,16 +473,20 @@ function MediaRow({
         <div className="flex flex-row items-center gap-4 rounded group transition py-2 px-2 cursor-pointer relative hover:bg-zinc-800">
             <img
                 className="w-10 rounded aspect-square object-cover object-center"
-                src={media.imageUrl}
-                alt={media.title}
+                src={media.imageUrl || undefined}
+                alt={media.title.romaji || undefined}
             />
             <div className="flex flex-col justify-center flex-1">
                 <div className="text-zinc-200 group-hover:text-white transition text-left line-clamp-1">
-                    {media.title}
+                    {media.title.romaji}
                 </div>
                 <div className="flex flex-row items-center gap-2">
                     <div className="text-xs text-zinc-400 line-clamp-1 text-left">
-                        {media.isAdult && (
+                        {[MediaRating.RPlus, MediaRating.Rx].includes(
+                            // May be null/undefined but that's fine. The ! is just
+                            // for type checking.
+                            media.rating!
+                        ) && (
                             <>
                                 <span className="text-red-500">+18</span> —
                             </>
@@ -507,7 +510,7 @@ function MediaRow({
                         value={libraryEntry?.status || "not_started"}
                         onChange={(e) => {
                             db.library
-                                .update(media.mappings[0], {
+                                .update(media.mapping, {
                                     status: e.target.value,
                                 })
                                 .then((updated) => {
@@ -515,7 +518,7 @@ function MediaRow({
                                         db.library.add({
                                             ...defaultLibraryEntry,
                                             type: media.type,
-                                            mapping: media.mappings[0],
+                                            mapping: media.mapping,
                                             status: e.target
                                                 .value as LibraryStatus,
                                         });
@@ -548,7 +551,7 @@ function MediaRow({
                     className="rounded-full bg-zinc-700 p-1 transition hover:bg-zinc-600"
                     onClick={() => {
                         db.library
-                            .update(media.mappings[0], {
+                            .update(media.mapping, {
                                 favorite: !libraryEntry?.favorite,
                             })
                             .then((updated) => {
@@ -557,7 +560,7 @@ function MediaRow({
                                         .add({
                                             ...defaultLibraryEntry,
                                             type: media.type,
-                                            mapping: media.mappings[0],
+                                            mapping: media.mapping,
                                             favorite: true,
                                         })
                                         .then((value) => {});
@@ -597,10 +600,10 @@ function List({
         <div className="flex flex-col p-2">
             {results.map((result) => (
                 <MediaRow
-                    key={result.id}
+                    key={result.mapping}
                     media={result}
-                    onClick={() => openLibraryEntryModal(result.mappings[0])}
-                    addToList={() => openAddToListModal(result.mappings[0])}
+                    onClick={() => openLibraryEntryModal(result.mapping)}
+                    addToList={() => openAddToListModal(result.mapping)}
                 />
             ))}
         </div>

@@ -1,7 +1,7 @@
 import { Mapping } from "@/lib/types";
 import { AnimatePresence } from "framer-motion";
 import Modal from "../Modal";
-import { List, MediaCache, db } from "@/lib/db";
+import { List, Media, db } from "@/lib/db";
 import { useLiveQuery } from "dexie-react-hooks";
 import { RectangleStackIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import CreateListModal from "../CreateListModal";
@@ -28,7 +28,7 @@ function FormModal({
     mapping: Mapping;
     closeModal: () => void;
 }) {
-    const media = useLiveQuery(() => db.mediaCache.get({ mapping }), [mapping]);
+    const media = useLiveQuery(() => db.media.get({ mapping }), [mapping]);
     const lists = useLiveQuery(() =>
         db.lists.toArray(async (lists) => {
             let itemCacheMappings: Array<Mapping> = [];
@@ -39,9 +39,9 @@ function FormModal({
                 );
             }
 
-            const itemCaches: MediaCache[] = (await db.mediaCache.bulkGet([
+            const itemCaches: Media[] = (await db.media.bulkGet([
                 ...new Set(itemCacheMappings),
-            ])) as MediaCache[];
+            ])) as Media[];
 
             return lists.map((list) => {
                 list.itemCaches = itemCaches.filter((v) =>
@@ -158,8 +158,14 @@ function List({
                 </div>
             ) : (
                 <div className="rounded h-10 w-10 bg-zinc-700 relative">
-                    <img src={list.itemCaches![0].imageUrl!} className="rounded absolute top-0 left-0 bottom-0 aspect-cover h-full object-center object-cover z-10" />
-                    <img src={list.itemCaches![1].imageUrl!} className="rounded absolute top-0 right-0 bottom-0 aspect-cover h-full object-center object-cover" />
+                    <img
+                        src={list.itemCaches![0].imageUrl!}
+                        className="rounded absolute top-0 left-0 bottom-0 aspect-cover h-full object-center object-cover z-10"
+                    />
+                    <img
+                        src={list.itemCaches![1].imageUrl!}
+                        className="rounded absolute top-0 right-0 bottom-0 aspect-cover h-full object-center object-cover"
+                    />
                 </div>
             )}
             <div className="flex-1 flex flex-col items-start justify-center gap-1">

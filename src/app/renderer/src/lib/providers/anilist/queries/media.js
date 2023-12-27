@@ -6,6 +6,8 @@ query Media($id: Int, $type: MediaType) {
         type
         title {
             romaji
+            native
+            english
         }
         coverImage {
             extraLarge
