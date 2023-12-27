@@ -89,6 +89,7 @@ export interface Media {
 }
 
 interface Mappings {
+    id?: number;
     mappings: Mapping[];
 }
 

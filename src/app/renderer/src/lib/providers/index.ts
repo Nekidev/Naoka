@@ -1,4 +1,4 @@
-import { ExternalAccount, LibraryEntry, Media, UserData } from "../db";
+import { ExternalAccount, LibraryEntry, Media, UserData, db } from "../db";
 import { MediaType, Mapping, Provider } from "../types";
 
 import { AniList } from "./anilist";
@@ -184,6 +184,8 @@ export default class ProviderAPI {
     ): Promise<Media[]> {
         // TODO: Update mappings in the mappings DB table and update media in the media DB table
         const { media, mappings } = await this.api.search(type, options);
+
+        db.media.bulkPut(media);
 
         return media;
     }
