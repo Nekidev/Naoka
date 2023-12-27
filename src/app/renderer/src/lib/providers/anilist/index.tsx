@@ -1,4 +1,4 @@
-import { ExternalAccount, LibraryEntry, Media, UserData, db } from "@/lib/db";
+import { ExternalAccount, LibraryEntry, Media, MediaFormat, MediaGenre, MediaStatus, UserData, db } from "@/lib/db";
 import { BaseProvider } from "..";
 import { LibraryStatus, Mapping, MediaType } from "../../types";
 import userQuery from "./queries/user";
@@ -7,48 +7,52 @@ import searchQuery from "./queries/search";
 import libraryQuery from "./queries/library";
 import config from "./config";
 
-function normalizeMediaFormat(format: string): string {
-    switch (format) {
-        case "TV":
-            return "TV";
-        case "TV_SHORT":
-            return "TV Short";
-        case "MOVIE":
-            return "Movie";
-        case "SPECIAL":
-            return "Special";
-        case "OVA":
-            return "OVA";
-        case "ONA":
-            return "ONA";
-        case "MUSIC":
-            return "Music";
-        case "MANGA":
-            return "Manga";
-        case "NOVEL":
-            return "Novel";
-        case "ONE_SHOT":
-            return "One-shot";
-        default:
-            return format;
-    }
+function normalizeGenre(genre: string): MediaGenre | undefined {
+    return {
+        action: MediaGenre.Action,
+        adventure: MediaGenre.Adventure,
+        comedy: MediaGenre.Comedy,
+        drama: MediaGenre.Drama,
+        ecchi: MediaGenre.Ecchi,
+        fantasy: MediaGenre.Fantasy,
+        horror: MediaGenre.Horror,
+        "mahou shoujo": MediaGenre.MahouShoujo,
+        mecha: MediaGenre.Mecha,
+        music: MediaGenre.Music,
+        mistery: MediaGenre.Mistery,
+        psychological: MediaGenre.Psychological,
+        romance: MediaGenre.Romance,
+        "sci-fi": MediaGenre.SciFi,
+        "slice of life": MediaGenre.SliceOfLife,
+        sports: MediaGenre.Sports,
+        supernatural: MediaGenre.Supernatural,
+        thriller: MediaGenre.Thriller
+    }[genre.toLowerCase()]
 }
 
-function normalizeMediaStatus(status: string): string {
-    switch (status) {
-        case "FINISHED":
-            return "Finished";
-        case "RELEASING":
-            return "Releasing";
-        case "NOT_YET_RELEASED":
-            return "Not yet released";
-        case "CANCELLED":
-            return "Cancelled";
-        case "HIATUS":
-            return "Hiatus";
-        default:
-            return status;
-    }
+function normalizeMediaFormat(format: string): MediaFormat | undefined {
+    return {
+        tv: MediaFormat.Tv,
+        tv_short: MediaFormat.TvShort,
+        movie: MediaFormat.Movie,
+        special: MediaFormat.Special,
+        ona: MediaFormat.Ona,
+        ova: MediaFormat.Ova,
+        music: MediaFormat.Music,
+        manga: MediaFormat.Manga,
+        novel: MediaFormat.Novel,
+        one_shot: MediaFormat.OneShot
+    }[format.toLowerCase()]
+}
+
+function normalizeMediaStatus(status: string): MediaStatus | undefined {
+    return {
+        "finished": MediaStatus.Finished,
+        "releasing": MediaStatus.InProgress,
+        "not_yet_released": MediaStatus.NotStarted,
+        "cancelled": MediaStatus.Cancelled,
+        "hiatus": MediaStatus.Hiatus       
+    }[status.toLowerCase()]
 }
 
 function normalizeLibraryStatus(status: string): LibraryStatus {
@@ -82,34 +86,37 @@ export class AniList extends BaseProvider {
         media: Media;
         mappings: Mapping[];
     } {
-        return new Media(
-            media.type.toLowerCase(),
-            media.id,
-            media.title.romaji,
-            media.coverImage.extraLarge,
-            media.bannerImage,
-            normalizeMediaFormat(media.format),
-            normalizeMediaStatus(media.status),
-            media.genres,
-            media.startDate
-                ? new Date(
-                      `${media.startDate.year}-${media.startDate.month}-${media.startDate.day}`
-                  )
-                : null,
-            media.endDate
-                ? new Date(
-                      `${media.endDate.year}-${media.endDate.month}-${media.endDate.day}`
-                  )
-                : null,
-            media.episodes,
-            media.chapters,
-            media.volumes,
-            media.duration,
-            media.isAdult,
-            [
-                `anilist:${
-                    media.type.toLowerCase() as MediaType
-                }:${media.id.toString()}`,
+        return {
+            media: {
+                type: media.type.toLowerCase() as MediaType,
+                title: {
+                    romaji: media.title.romaji,
+                    english: media.title.english,
+                    native: media.title.native,
+                },
+                imageUrl: media.coverImage.extraLarge,
+                bannerUrl: media.bannerImage,
+                startDate: media.startDate
+                    ? new Date(
+                          `${media.startDate.year}-${media.startDate.month}-${media.startDate.day}`
+                      )
+                    : null,
+                finishDate: media.endDate
+                    ? new Date(
+                          `${media.endDate.year}-${media.endDate.month}-${media.endDate.day}`
+                      )
+                    : null,
+                genres: media.genres.map((genre: string) => normalizeGenre(genre)).filter((genre: MediaGenre | undefined) => !!genre),
+                format: normalizeMediaFormat(media.format) || null,
+                status: normalizeMediaStatus(media.status) || null,
+                episodes: media.episodes,
+                chapters: media.chapters,
+                volumes: media.volumes,
+                duration: media.duration,
+                mapping: `anilist:${media.type.toLowerCase() as MediaType}:${media.id.toString()}`,
+            },
+            mappings: [
+                `anilist:${media.type.toLowerCase() as MediaType}:${media.id.toString()}`,
                 ...[
                     media.idMal &&
                         `myanimelist:${
@@ -117,7 +124,7 @@ export class AniList extends BaseProvider {
                         }:${media.idMal.toString()}`,
                 ],
             ]
-        );
+        };
     }
 
     async search(
@@ -237,7 +244,7 @@ export class AniList extends BaseProvider {
 
     async getLibrary(
         type: MediaType,
-        account: ExternalAccount,
+        account: ExternalAccount
     ): Promise<{
         media: Media[];
         mappings: Mapping[][];

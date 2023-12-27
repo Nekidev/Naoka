@@ -23,6 +23,8 @@ query Search(
             type
             title {
                 romaji
+                english
+                native
             }
             coverImage {
                 extraLarge
