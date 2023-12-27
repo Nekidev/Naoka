@@ -1,19 +1,8 @@
 import { BaseProvider, Config } from "@/lib/providers/base";
-import { LibraryStatus, Mapping, MediaType } from "../../types";
 import { serializeURL } from "@/utils";
-import {
-    ExternalAccount,
-    MediaGenre,
-    LibraryEntry,
-    Media,
-    MediaStatus,
-    UserData,
-    db,
-    MediaFormat,
-    MediaRating,
-} from "../../db";
 import { fetch } from "@tauri-apps/api/http";
 import config from "./config";
+import { ExternalAccount, LibraryEntry, LibraryStatus, Mapping, Media, MediaFormat, MediaGenre, MediaRating, MediaStatus, MediaType, UserData } from "@/lib/db/types";
 
 function normalizeTime(timeString: string) {
     const parts = timeString.split(" ");
@@ -73,23 +62,23 @@ function normalizeLibraryStatus(status: string): LibraryStatus {
     switch (status) {
         case "reading":
         case "watching":
-            return "in_progress";
+            return LibraryStatus.InProgress;
 
         case "completed":
-            return "completed";
+            return LibraryStatus.Completed;
 
         case "on_hold":
-            return "paused";
+            return LibraryStatus.Paused;
 
         case "dropped":
-            return "dropped";
+            return LibraryStatus.Dropped;
 
         case "plan_to_read":
         case "plan_to_watch":
-            return "planned";
+            return LibraryStatus.Planned;
 
         default:
-            return "not_started";
+            return LibraryStatus.NotStarted;
     }
 }
 

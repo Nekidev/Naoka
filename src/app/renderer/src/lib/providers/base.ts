@@ -1,8 +1,7 @@
-import { ExternalAccount, LibraryEntry, Media, UserData } from "../db";
-import { MediaType, Mapping } from "../types";
-
 // TODO: Create a forms.ts with all these interfaces so that they can be reused
 // in different components.
+
+import { ExternalAccount, LibraryEntry, Mapping, Media, MediaType, UserData } from "../db/types";
 
 interface Input {
     name: string;
@@ -67,8 +66,7 @@ export interface Config {
         };
     };
     search: {
-        anime?: SearchConfig;
-        manga?: SearchConfig;
+        [key in MediaType]: SearchConfig;
     };
 }
 

@@ -1,19 +1,10 @@
-import {
-    ExternalAccount,
-    LibraryEntry,
-    Media,
-    MediaFormat,
-    MediaGenre,
-    MediaStatus,
-    UserData,
-} from "@/lib/db";
-import { LibraryStatus, Mapping, MediaType } from "../../types";
 import userQuery from "./queries/user";
 import mediaQuery from "./queries/media";
 import searchQuery from "./queries/search";
 import libraryQuery from "./queries/library";
 import config from "./config";
 import { BaseProvider } from "../base";
+import { ExternalAccount, LibraryEntry, LibraryStatus, Mapping, Media, MediaFormat, MediaGenre, MediaStatus, MediaType, UserData } from "@/lib/db/types";
 
 function normalizeGenre(genre: string): MediaGenre | undefined {
     return {
@@ -67,22 +58,22 @@ function normalizeLibraryStatus(status: string): LibraryStatus {
     switch (status.toLowerCase()) {
         case "repeating":
         case "current":
-            return "in_progress";
+            return LibraryStatus.InProgress;
 
         case "planning":
-            return "planned";
+            return LibraryStatus.Planned;
 
         case "completed":
-            return "completed";
+            return LibraryStatus.Completed;
 
         case "dropped":
-            return "dropped";
+            return LibraryStatus.Dropped;
 
         case "paused":
-            return "paused";
+            return LibraryStatus.Paused;
 
         default:
-            return "not_started";
+            return LibraryStatus.NotStarted;
     }
 }
 
