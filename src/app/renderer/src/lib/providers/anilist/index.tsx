@@ -175,14 +175,20 @@ export class AniList extends BaseProvider {
         }).then((res) => res.json());
 
         if (!data) {
-            return [[], true];
+            throw Error("Failed to search");
         }
 
+        let mappings: Mapping[][] = [];
         let media: Media[] = data.map((m: any) => {
-            return this.mediaToInternalValue(m);
+            const { media, mappings: m } = this.mediaToInternalValue(m);
+            mappings.push(m);
+            return media;
         });
 
-        return [media, false];
+        return {
+            media,
+            mappings,
+        };
     }
 
     async getMedia(
