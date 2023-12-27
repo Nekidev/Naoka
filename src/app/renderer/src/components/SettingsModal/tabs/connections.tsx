@@ -142,7 +142,9 @@ function Account({ account }: { account: ExternalAccount }) {
                             className="rounded h-6 w-6 object-center object-cover"
                         />
                         <div className="text-zinc-300">
-                            {account.user?.name || account.auth?.username || api.title}
+                            {account.user?.name ||
+                                account.auth?.username ||
+                                api.title}
                         </div>
                     </div>
                     <button
@@ -171,8 +173,7 @@ function Account({ account }: { account: ExternalAccount }) {
                             <Button
                                 disabled={
                                     !account.auth?.username ||
-                                    api.config.importableListTypes
-                                        .length === 0
+                                    api.config.importableListTypes.length === 0
                                 }
                                 onClick={(e: any) => {
                                     if (e.target.disabled) return;
@@ -206,21 +207,25 @@ function Account({ account }: { account: ExternalAccount }) {
                         username,
                     };
 
-                    db.externalAccounts.update(account.id!, {
-                        auth: newAuth,
-                    }).then(() => {
-                        account.auth = newAuth;
-                        api.getUser(account).then((user) => {
-                            db.externalAccounts.update(account.id!, {
-                                user
-                            });
-                        }).catch((e) => {
-                            // Revert changes
-                            db.externalAccounts.update(account.id!, {
-                                auth: oldAuth
-                            })
+                    db.externalAccounts
+                        .update(account.id!, {
+                            auth: newAuth,
                         })
-                    });
+                        .then(() => {
+                            account.auth = newAuth;
+                            api.getUser(account)
+                                .then((user) => {
+                                    db.externalAccounts.update(account.id!, {
+                                        user,
+                                    });
+                                })
+                                .catch((e) => {
+                                    // Revert changes
+                                    db.externalAccounts.update(account.id!, {
+                                        auth: oldAuth,
+                                    });
+                                });
+                        });
                 }}
             />
             <FormModal
@@ -233,9 +238,7 @@ function Account({ account }: { account: ExternalAccount }) {
                         type: "radiogroup",
                         name: "type",
                         options: [
-                            ...(api.config.importableListTypes.includes(
-                                "anime"
-                            )
+                            ...(api.config.importableListTypes.includes("anime")
                                 ? [
                                       {
                                           value: "anime",
@@ -244,9 +247,7 @@ function Account({ account }: { account: ExternalAccount }) {
                                       },
                                   ]
                                 : []),
-                            ...(api.config.importableListTypes.includes(
-                                "manga"
-                            )
+                            ...(api.config.importableListTypes.includes("manga")
                                 ? [
                                       {
                                           value: "manga",
@@ -272,10 +273,12 @@ function Account({ account }: { account: ExternalAccount }) {
                     },
                 ]}
                 onSubmit={({ type, override }) => {
-                    api.importList(type as MediaType, account, !!override).then(
+                    api.getLibrary(type as MediaType, account, !!override).then(
                         () => {
                             notify({
-                                title: `Imported ${account.user!.name}'s ${type} list`,
+                                title: `Imported ${
+                                    account.user!.name
+                                }'s ${type} list`,
                                 body: `Your list has been successfully imported from ${api.title}.`,
                                 icon: "/16x16.png",
                             });

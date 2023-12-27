@@ -1,4 +1,4 @@
-import { BaseProvider, ImportMethod } from "./providers";
+import { BaseProvider } from "./providers";
 import { Provider, MediaType } from "./types";
 import { ExternalAccount, Media, UserData } from "./db";
 
@@ -41,26 +41,25 @@ export default class API {
         return media;
     }
 
-    async getMedia(
-        type: MediaType,
-        id: string
-    ): Promise<Media> {
+    async getMedia(type: MediaType, id: string): Promise<Media> {
         // TODO: Update mappings in the mappings DB table and media in the media DB table
         const { media, mappings } = await this.api.getMedia(type, id);
 
         return media;
     }
 
-    async importList(
+    async getLibrary(
         type: MediaType,
-        account: ExternalAccount,
-        override: ImportMethod = ImportMethod.Latest
+        account: ExternalAccount
     ) {
         // TODO: Save entries to library and update mappings and media in the DB
-        const { media, mappings, entries } = await this.api.getLibrary(type, account);
+        const { media, mappings, entries } = await this.api.getLibrary(
+            type,
+            account
+        );
     }
 
-    getUser(account: ExternalAccount): Promise<UserData> {
+    async getUser(account: ExternalAccount): Promise<UserData> {
         return this.api.getUser(account);
     }
 }
