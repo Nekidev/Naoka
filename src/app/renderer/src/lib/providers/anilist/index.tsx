@@ -6,15 +6,14 @@ import {
     MediaGenre,
     MediaStatus,
     UserData,
-    db,
 } from "@/lib/db";
-import { BaseProvider } from "..";
 import { LibraryStatus, Mapping, MediaType } from "../../types";
 import userQuery from "./queries/user";
 import mediaQuery from "./queries/media";
 import searchQuery from "./queries/search";
 import libraryQuery from "./queries/library";
 import config from "./config";
+import { BaseProvider } from "../base";
 
 function normalizeGenre(genre: string): MediaGenre | undefined {
     return {
@@ -132,12 +131,13 @@ export class AniList extends BaseProvider {
                 `anilist:${
                     media.type.toLowerCase() as MediaType
                 }:${media.id.toString()}`,
-                ...[
-                    media.idMal &&
-                        `myanimelist:${
-                            media.type.toLowerCase() as MediaType
-                        }:${media.idMal.toString()}`,
-                ],
+                ...(media.idMal
+                    ? [
+                          `myanimelist:${
+                              media.type.toLowerCase() as MediaType
+                          }:${media.idMal.toString()}` as Mapping,
+                      ]
+                    : []),
             ],
         };
     }

@@ -15,7 +15,6 @@ import {
 import { LibraryStatus, Mapping, MediaType } from "@/lib/types";
 import { LibraryEntry, db } from "@/lib/db";
 import React from "react";
-import { IntRange } from "@/utils/types";
 import { defaultLibraryEntry } from "@/lib/db/defaults";
 import ImageModal from "../ImageModal";
 import Modal from "../Modal";
@@ -76,10 +75,7 @@ function FormModal({
             type: mediaType,
             favorite: isFavorite,
             status: formData.get("status") as LibraryStatus,
-            score: parseInt(formData.get("score") as string) as IntRange<
-                1,
-                100
-            >,
+            score: parseInt(formData.get("score") as string),
             episodeProgress:
                 parseInt(formData.get("episodeProgress") as string) || 0,
             chapterProgress:
@@ -95,6 +91,7 @@ function FormModal({
                 : null,
             notes: formData.get("notes") as string,
             mapping: mapping,
+            updatedAt: new Date(),
             ...overrides,
         };
 
@@ -175,7 +172,7 @@ function FormModal({
                                 setIsImageModalOpen(true);
                             }}
                         />
-                        <div className="text-lg flex-1">{mediaCache.title}</div>
+                        <div className="text-lg flex-1">{mediaCache.title.romaji}</div>
                     </div>
                     <form
                         className="p-8 pt-12 grid grid-cols-3 gap-8"

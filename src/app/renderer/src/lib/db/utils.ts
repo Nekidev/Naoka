@@ -16,6 +16,7 @@ import { Mapping } from "../types";
 export async function updateMappings(
     mappings: Mapping[]
 ): Promise<IndexableType> {
+    console.log(mappings);
     const existingEntries = db.mappings.where("mappings").anyOf(mappings);
     const existingEntriesCount = await existingEntries.count();
     const existingEntriesArray = await existingEntries.toArray();
