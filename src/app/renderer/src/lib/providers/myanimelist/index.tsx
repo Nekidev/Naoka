@@ -1,4 +1,4 @@
-import { BaseProvider, Config } from "@/lib/providers";
+import { BaseProvider, Config } from "@/lib/providers/base";
 import { LibraryStatus, Mapping, MediaType } from "../../types";
 import { serializeURL } from "@/utils";
 import {
@@ -148,15 +148,15 @@ export class MyAnimeList extends BaseProvider {
                     romaji: anime.titles.find(
                         (value: { type: string; title: string }) =>
                             value.type === "Default"
-                    ),
+                    )?.title,
                     english: anime.titles.find(
                         (value: { type: string; title: string }) =>
                             value.type === "English"
-                    ),
+                    )?.title,
                     native: anime.titles.find(
                         (value: { type: string; title: string }) =>
                             value.type === "Japanese"
-                    ),
+                    )?.title,
                 },
                 imageUrl: anime.images.webp.large_image_url,
                 bannerUrl: null,
@@ -171,9 +171,9 @@ export class MyAnimeList extends BaseProvider {
                     )
                     .filter((genre: string | undefined) => !!genre),
                 status: normalizeJikanStatus(anime.status) || null,
-                format: normalizeFormat(anime.type) || MediaFormat.Tv,
+                format: anime.type ? normalizeFormat(anime.type)! : null,
                 duration: anime.duration ? normalizeTime(anime.duration) : null,
-                rating: normalizeRating(anime.rating) || null,
+                rating: anime.rating ? normalizeRating(anime.rating) : null,
                 mapping: `myanimelist:anime:${anime.mal_id}`,
             },
             mappings: [`myanimelist:anime:${anime.mal_id}`],
@@ -187,16 +187,20 @@ export class MyAnimeList extends BaseProvider {
         return {
             media: {
                 type: "anime",
-                title: anime.title,
+                title: {
+                    romaji: anime.title,
+                    english: anime.alternative_titles.en,
+                    native: anime.alternative_titles.ja,
+                },
                 imageUrl: anime.main_picture?.large,
                 bannerUrl: null,
                 episodes: anime.num_episodes,
                 startDate: anime.start_date ? new Date(anime.start_date) : null,
                 finishDate: anime.end_date ? new Date(anime.end_date) : null,
-                genres: anime.genres.map((genre: any) => genre.name),
-                status: normalizeMalStatus(anime.status) || null,
-                format: normalizeFormat(anime.type) || null,
-                duration: Math.round(anime.average_episode_duration / 60),
+                genres: anime.genres.map((genre: any) => normalizeGenre(genre.name)),
+                status: anime.status ? normalizeMalStatus(anime.status)! : null,
+                format: anime.type ? normalizeFormat(anime.type)! : null,
+                duration: anime.average_episode_duration ? Math.round(anime.average_episode_duration / 60) : null,
                 mapping: `myanimelist:anime:${anime.id.toString()}`,
             },
             mappings: [`myanimelist:anime:${anime.id.toString()}`],
@@ -214,15 +218,15 @@ export class MyAnimeList extends BaseProvider {
                     romaji: manga.titles.find(
                         (value: { type: string; title: string }) =>
                             value.type === "Default"
-                    ),
+                    )?.title,
                     english: manga.titles.find(
                         (value: { type: string; title: string }) =>
                             value.type === "English"
-                    ),
+                    )?.title,
                     native: manga.titles.find(
                         (value: { type: string; title: string }) =>
                             value.type === "Japanese"
-                    ),
+                    )?.title,
                 },
                 imageUrl: manga.images.webp.large_image_url,
                 bannerUrl: null,
@@ -240,7 +244,7 @@ export class MyAnimeList extends BaseProvider {
                     )
                     .filter((genre: string | undefined) => !!genre),
                 status: normalizeJikanStatus(manga.status) || null,
-                format: normalizeFormat(manga.type) || MediaFormat.Tv,
+                format: manga.type ? normalizeFormat(manga.type)! : null,
                 mapping: `myanimelist:manga:${manga.mal_id}`,
             },
             mappings: [`myanimelist:manga:${manga.mal_id}`],
@@ -265,9 +269,9 @@ export class MyAnimeList extends BaseProvider {
                 volumes: manga.volumes,
                 startDate: manga.start_date ? new Date(manga.start_date) : null,
                 finishDate: manga.end_date ? new Date(manga.end_date) : null,
-                genres: manga.genres.map((genre: any) => genre.name),
-                status: normalizeMalStatus(manga.status) || null,
-                format: normalizeFormat(manga.type) || null,
+                genres: manga.genres.map((genre: any) => normalizeGenre(genre.name)),
+                status: manga.status ? normalizeMalStatus(manga.status)! : null,
+                format: manga.type ? normalizeFormat(manga.type)! : null,
                 mapping: `myanimelist:manga:${manga.id.toString()}`,
             },
             mappings: [`myanimelist:manga:${manga.id.toString()}`],
@@ -331,9 +335,7 @@ export class MyAnimeList extends BaseProvider {
         };
     }
 
-    private async searchManga(options: {
-        [key: string]: any;
-    }): Promise<{
+    private async searchManga(options: { [key: string]: any }): Promise<{
         media: Media[];
         mappings: Mapping[][];
     }> {
@@ -358,7 +360,8 @@ export class MyAnimeList extends BaseProvider {
 
         let mappings: Mapping[][] = [];
         let mangas: Media[] = res.data.data.map((manga: any) => {
-            const { media, mappings: m } = this.jikanMangaToInternalValue(manga);
+            const { media, mappings: m } =
+                this.jikanMangaToInternalValue(manga);
 
             mappings.push(m);
             return media;
@@ -413,7 +416,7 @@ export class MyAnimeList extends BaseProvider {
 
         let url = `https://api.myanimelist.net/v2/users/${encodeURIComponent(
             account.auth!.username!
-        )}/animelist?limit=1000&fields=list_status{status,score,num_episodes_watched,is_rewatching,start_date,finish_date,priority,num_times_rewatched,rewatch_value,tags,comments,updated_at},start_date,end_date,nsfw,genres,media_type,num_episodes,rating,average_episode_duration`;
+        )}/animelist?limit=1000&fields=list_status{status,score,num_episodes_watched,is_rewatching,start_date,finish_date,priority,num_times_rewatched,rewatch_value,tags,comments,updated_at},start_date,end_date,nsfw,genres,media_type,num_episodes,rating,average_episode_duration,alternative_titles`;
 
         const res = await fetch<any>(url, {
             method: "GET",
@@ -421,6 +424,7 @@ export class MyAnimeList extends BaseProvider {
                 "X-Mal-Client-ID": this.clientID,
             },
         });
+        console.log(res);
 
         if (res.ok === false) {
             throw Error("Failed to get anime list");
@@ -445,20 +449,18 @@ export class MyAnimeList extends BaseProvider {
         return {
             media: newMedia,
             mappings: newMappings,
-            entries: newLibraryEntries
-        }
+            entries: newLibraryEntries,
+        };
     }
 
-    private async getMangaList(
-        account: ExternalAccount
-    ): Promise<{
+    private async getMangaList(account: ExternalAccount): Promise<{
         media: Media[];
         mappings: Mapping[][];
         entries: LibraryEntry[];
     }> {
         let url = `https://api.myanimelist.net/v2/users/${encodeURIComponent(
             account.auth!.username!
-        )}/mangalist?limit=1000&fields=list_status{status,score,num_chapters_read,num_volumes_read,is_rereading,start_date,finish_date,priority,num_times_reread,reread_value,tags,comments,updated_at},start_date,end_date,nsfw,genres,media_type,num_chapters,num_volumes`;
+        )}/mangalist?limit=1000&fields=list_status{status,score,num_chapters_read,num_volumes_read,is_rereading,start_date,finish_date,priority,num_times_reread,reread_value,tags,comments,updated_at},start_date,end_date,nsfw,genres,media_type,num_chapters,num_volumes,alternative_titles`;
 
         const res = await fetch<any>(url, {
             method: "GET",
@@ -490,7 +492,7 @@ export class MyAnimeList extends BaseProvider {
         return {
             media: newMedia,
             mappings: newMappings,
-            entries: newLibraryEntries
+            entries: newLibraryEntries,
         };
     }
 
@@ -535,10 +537,7 @@ export class MyAnimeList extends BaseProvider {
         }
     }
 
-    async getLibrary(
-        type: MediaType,
-        account: ExternalAccount
-    ) {
+    async getLibrary(type: MediaType, account: ExternalAccount) {
         switch (type) {
             case "anime":
                 return this.getAnimeList(account);

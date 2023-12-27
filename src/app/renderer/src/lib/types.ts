@@ -1,4 +1,4 @@
-import { providers } from "./api";
+import { providers } from "./providers";
 
 export type MediaType = "anime" | "manga";
 

@@ -1,6 +1,5 @@
 "use client";
 
-import API, { providers } from "@/lib/api";
 import { Header, Separator, Setting } from "../components";
 import Tooltip from "@/components/Tooltip";
 import { ExternalAccount, db } from "@/lib/db";
@@ -11,6 +10,7 @@ import React from "react";
 import { CheckCircleIcon } from "@heroicons/react/20/solid";
 import { MediaType } from "@/lib/types";
 import { notify } from "@/lib/notifications";
+import { ProviderAPI, providers } from "@/lib/providers";
 
 export default function Connections() {
     const accounts = useLiveQuery(() => db.externalAccounts.toArray());
@@ -82,7 +82,7 @@ function ProviderButton({
     const provider = providers[code];
 
     return (
-        <Tooltip label={provider.title} position="top" spacing={0.5}>
+        <Tooltip label={provider.name} position="top" spacing={0.5}>
             <button
                 onClick={async () => {
                     await db.externalAccounts.add(
@@ -91,7 +91,7 @@ function ProviderButton({
                         })
                     );
                 }}
-                className="active:scale-110 transition-all ease-out relative"
+                className="hover:scale-105 active:scale-110 transition-all ease-out relative"
             >
                 <img
                     src={`/providers/${code}/icon.png`}
@@ -106,7 +106,7 @@ function ProviderButton({
 }
 
 function Account({ account }: { account: ExternalAccount }) {
-    const api = new API(account.provider);
+    const api = new ProviderAPI(account.provider);
 
     const [isConnectAccountModalOpen, setIsConnectAccountModalOpen] =
         React.useState(false);
@@ -138,13 +138,13 @@ function Account({ account }: { account: ExternalAccount }) {
                 <div className="flex flex-row items-center justify-between p-2 leading-none bg-zinc-900">
                     <div className="flex flex-row items-center gap-4">
                         <img
-                            src={`/providers/${account.provider}/icon.png`}
+                            src={`/providers/${String(account.provider)}/icon.png`}
                             className="rounded h-6 w-6 object-center object-cover"
                         />
                         <div className="text-zinc-300">
                             {account.user?.name ||
                                 account.auth?.username ||
-                                api.title}
+                                api.name}
                         </div>
                     </div>
                     <button
@@ -173,7 +173,7 @@ function Account({ account }: { account: ExternalAccount }) {
                             <Button
                                 disabled={
                                     !account.auth?.username ||
-                                    api.config.importableListTypes.length === 0
+                                    api.config.syncing?.import?.mediaTypes.length === 0
                                 }
                                 onClick={(e: any) => {
                                     if (e.target.disabled) return;
@@ -190,7 +190,7 @@ function Account({ account }: { account: ExternalAccount }) {
             <FormModal
                 isOpen={isConnectAccountModalOpen}
                 closeModal={() => setIsConnectAccountModalOpen(false)}
-                title={"Connect to " + api.title}
+                title={"Connect to " + api.name}
                 subtitle={"Link your account to import your lists"}
                 fields={[
                     {
@@ -232,27 +232,27 @@ function Account({ account }: { account: ExternalAccount }) {
                 isOpen={isSelectListTypeImportModalOpen}
                 closeModal={() => setIsSelectListTypeImportModalOpen(false)}
                 title="Select the list to import"
-                subtitle={`Select your list from ${api.title}`}
+                subtitle={`Select your list from ${api.name}`}
                 fields={[
                     {
                         type: "radiogroup",
                         name: "type",
                         options: [
-                            ...(api.config.importableListTypes.includes("anime")
+                            ...(api.config.syncing?.import?.mediaTypes.includes("anime")
                                 ? [
                                       {
                                           value: "anime",
                                           title: "Anime list",
-                                          description: `Import your anime list from ${api.title}`,
+                                          description: `Import your anime list from ${api.name}`,
                                       },
                                   ]
                                 : []),
-                            ...(api.config.importableListTypes.includes("manga")
+                            ...(api.config.syncing?.import?.mediaTypes.includes("manga")
                                 ? [
                                       {
                                           value: "manga",
                                           title: "Manga list",
-                                          description: `Import your manga list from ${api.title}`,
+                                          description: `Import your manga list from ${api.name}`,
                                       },
                                   ]
                                 : []),
@@ -260,26 +260,36 @@ function Account({ account }: { account: ExternalAccount }) {
                     },
                     { type: "separator" },
                     {
-                        type: "checkboxcardgroup",
-                        name: "override",
+                        type: "radiogroup",
+                        name: "method",
                         options: [
                             {
                                 value: "override",
-                                title: "Override current entries",
+                                title: "Override local entries",
                                 description:
-                                    "If the lists conflict, override the local library.",
+                                    "If an entry conflicts, override the local entry.",
                             },
+                            {
+                                value: "keep",
+                                title: "Keep local entries",
+                                description: "If an entry conflicts, keep the local entry.",
+                            },
+                            {
+                                value: "merge",
+                                title: "Merge with local entries (recommended)",
+                                description: "If an entry conflicts, keep the latest entry."
+                            }
                         ],
                     },
                 ]}
-                onSubmit={({ type, override }) => {
-                    api.getLibrary(type as MediaType, account, !!override).then(
+                onSubmit={({ type, method }) => {
+                    api.getLibrary(type as MediaType, account).then(
                         () => {
                             notify({
                                 title: `Imported ${
                                     account.user!.name
                                 }'s ${type} list`,
-                                body: `Your list has been successfully imported from ${api.title}.`,
+                                body: `Your list has been successfully imported from ${api.name}.`,
                                 icon: "/16x16.png",
                             });
                         }

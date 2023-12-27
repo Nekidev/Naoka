@@ -12,10 +12,10 @@ import {
     ChevronUpDownIcon,
 } from "@heroicons/react/24/outline";
 import { VerticalNavSpacer, LeftNavSpacer } from "@/components/NavigationBar";
-import ProviderAPI, {
+import {
     SelectInput as SelectInputInterface,
     CheckboxInput as CheckboxInputInterface,
-} from "@/lib/providers";
+} from "@/lib/providers/base";
 import { LibraryStatus, Mapping, MediaType } from "@/lib/types";
 import { cn } from "@/utils";
 import styles from "./styles.module.css";
@@ -26,11 +26,12 @@ import { defaultLibraryEntry } from "@/lib/db/defaults";
 import Chip from "@/components/Chip";
 import TextInput from "@/components/TextInput";
 import AddToListModal from "@/components/AddToListModal";
+import { ProviderAPI } from "@/lib/providers";
 
 export default function Search() {
     const [searchType, setSearchType] = React.useState<MediaType>("anime");
 
-    const api = new ProviderAPI("anilist");
+    const api = new ProviderAPI("myanimelist");
 
     const [displayMode, setDisplayMode] = React.useState<"list" | "grid">(
         "list"
@@ -71,6 +72,7 @@ export default function Search() {
             });
             setResults(results);
         } catch (e) {
+            console.log(e);
             setError("Oops! An error occurred :/");
         }
 
@@ -295,19 +297,19 @@ function SelectFilter({
     name,
     label,
     icon,
-    values,
+    options,
     ...props
 }: SelectInputInterface & { [key: string]: any }) {
     return (
         <Filter title={label}>
             <div className="relative">
                 <select
-                    defaultValue={values[0].value}
+                    defaultValue={options[0].value}
                     name={name}
                     {...props}
                     className="py-2 px-2 leading-none rounded outline-none bg-zinc-800 text-sm cursor-pointer appearance-none w-full"
                 >
-                    {values.map((v: any, i: number) => (
+                    {options.map((v: any, i: number) => (
                         <option key={i} value={v.value} className="bg-zinc-800">
                             {v.label}
                         </option>
