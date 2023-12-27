@@ -1,11 +1,10 @@
-import { IntRange } from "@/utils/types";
 import { LibraryEntry } from ".";
 
 export const defaultLibraryEntry: LibraryEntry = {
     type: "anime",
     favorite: false,
     status: "not_started",
-    score: 0 as IntRange<1, 100>,
+    score: 0,
     episodeProgress: 0,
     chapterProgress: 0,
     volumeProgress: 0,
