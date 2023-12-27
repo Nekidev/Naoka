@@ -1,8 +1,12 @@
 import { ExternalAccount, LibraryEntry, Media, UserData, db } from "../db";
+import { updateMappings } from "../db/utils";
 import { MediaType, Mapping, Provider } from "../types";
 
 import { AniList } from "./anilist";
 import { MyAnimeList } from "./myanimelist";
+
+// TODO: Create a forms.ts with all these interfaces so that they can be reused
+// in different components.
 
 interface Input {
     name: string;
@@ -170,11 +174,6 @@ export default class ProviderAPI {
 
     constructor(code: Provider) {
         const api: BaseProvider = providers[code as keyof typeof providers];
-
-        if (!api) {
-            throw Error("Invalid API code");
-        }
-
         this.api = api;
     }
 
@@ -185,7 +184,10 @@ export default class ProviderAPI {
         // TODO: Update mappings in the mappings DB table and update media in the media DB table
         const { media, mappings } = await this.api.search(type, options);
 
-        db.media.bulkPut(media);
+        db.media.bulkPut(media).then(() => {});
+        for (const ms of mappings) {
+            updateMappings(ms).then(() => {});
+        }
 
         return media;
     }
@@ -193,6 +195,9 @@ export default class ProviderAPI {
     async getMedia(type: MediaType, id: string): Promise<Media> {
         // TODO: Update mappings in the mappings DB table and media in the media DB table
         const { media, mappings } = await this.api.getMedia(type, id);
+
+        db.media.put(media).then(() => {});
+        updateMappings(mappings).then(() => {});
 
         return media;
     }
@@ -206,6 +211,17 @@ export default class ProviderAPI {
             type,
             account
         );
+
+        db.media.bulkPut(media).then(() => {});
+        for (const ms of mappings) {
+            updateMappings(ms).then(() => {});
+        }
+        
+        return {
+            media,
+            entries,
+            mappings,
+        };
     }
 
     async getUser(account: ExternalAccount): Promise<UserData> {

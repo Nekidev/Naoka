@@ -9,8 +9,8 @@ import { Mapping } from "../types";
  * entries are merged into a single one and the rest are added to the new
  * merged entry.
  *
- * @param {Mapping[]} mappings The mappings to update. All these mappings must
- *                             belong to the same media.
+ * @param {Mapping[]} mappings       The mappings to update. All these mappings
+ *                                   must belong to the same media.
  * @returns {Promise<IndexableType>} The updated Mappings entry ID.
  */
 export async function updateMappings(
