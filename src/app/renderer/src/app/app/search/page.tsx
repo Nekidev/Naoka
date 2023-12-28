@@ -26,12 +26,14 @@ import Chip from "@/components/Chip";
 import TextInput from "@/components/TextInput";
 import AddToListModal from "@/components/AddToListModal";
 import { ProviderAPI } from "@/lib/providers";
-import { LibraryStatus, Mapping, Media, MediaRating, MediaType } from "@/lib/db/types";
+import { LibraryStatus, Mapping, Media, MediaRating, MediaType, Provider } from "@/lib/db/types";
+import { useLocalStorage } from "@uidotdev/usehooks";
 
 export default function Search() {
     const [searchType, setSearchType] = React.useState<MediaType>("anime");
+    const [selectedProvider] = useLocalStorage("Naoka:Provider:Selected", "anilist");
 
-    const api = new ProviderAPI("myanimelist");
+    const api = new ProviderAPI(selectedProvider as Provider);
 
     const [displayMode, setDisplayMode] = React.useState<"list" | "grid">(
         "list"

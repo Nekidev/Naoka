@@ -1,6 +1,6 @@
 "use client";
 
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 import {
     Bars3Icon,
     MagnifyingGlassIcon,
@@ -19,8 +19,15 @@ import { useAppWindow } from "@/lib/window";
 import Tooltip from "../Tooltip";
 import SettingsModal from "../SettingsModal";
 import Link from "../Link";
-import { useLocalStorage } from "@uidotdev/usehooks";
-import { List, Mapping, Media } from "@/lib/db/types";
+import { useClickAway, useLocalStorage } from "@uidotdev/usehooks";
+import {
+    List,
+    Mapping,
+    Media,
+    Provider,
+} from "@/lib/db/types";
+import { motion, AnimatePresence } from "framer-motion";
+import { ProviderAPI, providers } from "@/lib/providers";
 
 interface ListWithMedia extends List {
     media: Media[];
@@ -92,10 +99,7 @@ function MenuButton({
     href: string;
 }): JSX.Element {
     const pathname = usePathname();
-    const [isExpanded] = useLocalStorage(
-        "Naoka:SideBar:Expanded",
-        "true"
-    );
+    const [isExpanded] = useLocalStorage("Naoka:SideBar:Expanded", "true");
 
     return (
         <Tooltip
@@ -194,10 +198,7 @@ function ListButton({ list }: { list: ListWithMedia }) {
             ? `${list.items.length} item${list.items.length > 1 ? "s" : ""}`
             : "No items";
 
-    const [isExpanded] = useLocalStorage(
-        "Naoka:SideBar:Expanded",
-        "true"
-    );
+    const [isExpanded] = useLocalStorage("Naoka:SideBar:Expanded", "true");
 
     const samePathname = usePathname() == "/app/list/";
     const sameId = useSearchParams().get("id") == list.id!.toString();
@@ -328,11 +329,75 @@ function Lists({
     );
 }
 
-function UserProfile({ openSettingsModal }: { openSettingsModal: () => void }) {
-    const [isExpanded, setIsExpanded] = useLocalStorage(
-        "Naoka:SideBar:Expanded",
-        "true"
+function ProviderButton({
+    code,
+    closeSelect,
+}: {
+    code: Provider;
+    closeSelect: () => void;
+}) {
+    const api = new ProviderAPI(code);
+    const accounts = useLiveQuery(() =>
+        db.externalAccounts.where("provider").equals(code).toArray()
     );
+    const [selectedProvider, setSelectedProvider] = useLocalStorage(
+        "Naoka:Provider:Selected",
+        "anilist"
+    );
+
+    return (
+        <button
+            className="flex flex-row items-center gap-2 rounded hover:bg-zinc-800 p-1 transition"
+            onClick={() => {
+                setSelectedProvider(code);
+                closeSelect();
+            }}
+        >
+            <img
+                src={`/providers/${code}/icon.png`}
+                className="h-8 w-8 rounded object-center object-cover"
+            />
+            <div className="flex flex-row items-center gap-1">
+                <span className="text-sm text-zinc-300 leading-none line-clamp-1">
+                    {api.name}
+                </span>
+                {!!accounts?.length && (
+                    <span className="text-sm text-zinc-500 leading-none line-clamp-1">
+                        <span className="font-bold">- </span>
+                        {accounts
+                            ?.map((account) => account.user?.name)
+                            .filter((v) => !!v)
+                            .join(", ")}
+                    </span>
+                )}
+            </div>
+        </button>
+    );
+}
+
+function UserProfile({ openSettingsModal }: { openSettingsModal: () => void }) {
+    const [isExpanded] = useLocalStorage("Naoka:SideBar:Expanded", "true");
+
+    const [isProviderSelectOpen, setIsProviderSelectOpen] =
+        React.useState(false);
+    const providerSelectRef = useClickAway<HTMLDivElement>(() => {
+        setIsProviderSelectOpen(false);
+    });
+
+    const [selectedProvider] = useLocalStorage(
+        "Naoka:Provider:Selected",
+        "anilist"
+    );
+    const externalAccount = useLiveQuery(
+        () =>
+            db.externalAccounts
+                .where("provider")
+                .equals(selectedProvider)
+                .first(),
+        [selectedProvider]
+    );
+
+    const api = new ProviderAPI(selectedProvider as Provider);
 
     return (
         <div
@@ -341,17 +406,65 @@ function UserProfile({ openSettingsModal }: { openSettingsModal: () => void }) {
                 flexDirection: isExpanded == "true" ? "row" : "column-reverse",
             }}
         >
-            <button className="flex flex-row items-center gap-4 transition hover:bg-zinc-800 flex-1 rounded">
+            <AnimatePresence>
+                {isProviderSelectOpen && (
+                    <motion.div
+                        initial={{
+                            y: "0.5rem",
+                            opacity: 0,
+                        }}
+                        animate={{
+                            y: "0rem",
+                            opacity: 1,
+                        }}
+                        exit={{
+                            y: "0.5rem",
+                            opacity: 0,
+                        }}
+                        transition={{ duration: 0.15 }}
+                        ref={providerSelectRef}
+                        className={`absolute left-2 p-1 w-56 z-10 rounded bg-zinc-900 border border-zinc-800 flex flex-col items-stretch drop-shadow-2xl ${
+                            isExpanded == "true"
+                                ? "bottom-0 mb-16"
+                                : "bottom-2 mb-12"
+                        }`}
+                    >
+                        {Object.getOwnPropertyNames(providers).map(
+                            (value: string) => {
+                                return (
+                                    <ProviderButton
+                                        code={value as Provider}
+                                        closeSelect={() =>
+                                            setIsProviderSelectOpen(false)
+                                        }
+                                    />
+                                );
+                            }
+                        )}
+                    </motion.div>
+                )}
+            </AnimatePresence>
+            <button
+                className="flex flex-row items-center gap-4 transition hover:bg-zinc-800 w-full rounded"
+                onClick={() => setIsProviderSelectOpen(true)}
+            >
                 <img
-                    src="/icon.jpg"
+                    src={
+                        externalAccount?.user?.imageUrl ??
+                        `/providers/${selectedProvider}/icon.png`
+                    }
                     className="h-10 w-10 rounded object-cover object-center"
                 />
                 {isExpanded == "true" && (
                     <div className="flex flex-col gap-1 flex-1 items-start">
-                        <div className="leading-none text-sm">Nyeki.py</div>
-                        <div className="text-xs text-white/50 leading-none">
-                            MyAnimeList
+                        <div className="leading-none text-sm">
+                            {externalAccount?.user?.name ?? api.name}
                         </div>
+                        {(externalAccount && externalAccount.user) && (
+                            <div className="text-xs text-white/50 leading-none">
+                                {api.name}
+                            </div>
+                        )}
                     </div>
                 )}
             </button>
