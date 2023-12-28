@@ -16,17 +16,17 @@ import {
     SelectInput as SelectInputInterface,
     CheckboxInput as CheckboxInputInterface,
 } from "@/lib/providers/base";
-import { LibraryStatus, Mapping, MediaType } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import styles from "./styles.module.css";
 import LibraryEntryModal from "@/components/LibraryEntryModal";
 import { useLiveQuery } from "dexie-react-hooks";
-import { db, Media, MediaRating } from "@/lib/db";
+import { db } from "@/lib/db";
 import { defaultLibraryEntry } from "@/lib/db/defaults";
 import Chip from "@/components/Chip";
 import TextInput from "@/components/TextInput";
 import AddToListModal from "@/components/AddToListModal";
 import { ProviderAPI } from "@/lib/providers";
+import { LibraryStatus, Mapping, Media, MediaRating, MediaType } from "@/lib/db/types";
 
 export default function Search() {
     const [searchType, setSearchType] = React.useState<MediaType>("anime");

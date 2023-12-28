@@ -194,7 +194,7 @@ function ListButton({ list }: { list: ListWithMedia }) {
             ? `${list.items.length} item${list.items.length > 1 ? "s" : ""}`
             : "No items";
 
-    const [isExpanded, setIsExpanded] = useLocalStorage(
+    const [isExpanded] = useLocalStorage(
         "Naoka:SideBar:Expanded",
         "true"
     );
@@ -231,11 +231,11 @@ function ListButton({ list }: { list: ListWithMedia }) {
                 </div>
             )}
             {isExpanded == "true" && (
-                <div className="flex-1 flex flex-col items-start">
-                    <div className="text-sm text-zinc-200 line-clamp-1">
+                <div className="flex-1 flex flex-col gap-1 items-start">
+                    <div className="text-sm text-zinc-200 line-clamp-1 leading-none">
                         {title}
                     </div>
-                    <div className="text-xs text-zinc-400 line-clamp-1">
+                    <div className="text-xs text-zinc-400 line-clamp-1 leading-none">
                         {subtitle}
                     </div>
                 </div>
