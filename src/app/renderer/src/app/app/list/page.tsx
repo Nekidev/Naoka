@@ -33,7 +33,7 @@ export default function ListPage() {
                 if (!list) {
                     // Not found. Cannot use notFound() because the page has
                     // already started rendering.
-                    router.replace("/library/");
+                    router.replace("/app/library/");
                     return undefined;
                 }
 
@@ -221,11 +221,8 @@ export default function ListPage() {
                 content="Are you sure you want to delete this list? This action cannot be undone."
                 onConfirm={() => {
                     setIsConfirmModalOpen(false);
-                    router.replace("/library/");
-                    setTimeout(
-                        () => db.lists.where("id").equals(list.id!).delete(),
-                        300
-                    );
+                    router.replace("/app/library/");
+                    db.lists.where("id").equals(list.id!).delete().then(() => {});
                 }}
                 onDecline={() => {
                     setIsConfirmModalOpen(false);

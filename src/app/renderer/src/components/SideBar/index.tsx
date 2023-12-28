@@ -82,7 +82,7 @@ export default function SideBar() {
     );
 }
 
-function MenuItem({
+function MenuButton({
     icon,
     title,
     href,
@@ -92,7 +92,7 @@ function MenuItem({
     href: string;
 }): JSX.Element {
     const pathname = usePathname();
-    const [isExpanded, setIsExpanded] = useLocalStorage(
+    const [isExpanded] = useLocalStorage(
         "Naoka:SideBar:Expanded",
         "true"
     );
@@ -106,7 +106,7 @@ function MenuItem({
         >
             <Link
                 href={href}
-                className={`flex flex-row items-center p-2 gap-4 hover:bg-zinc-700 rounded transition cursor-pointer w-full flex-1 ${
+                className={`flex flex-row items-center p-2 gap-4 hover:bg-zinc-700 active:bg-zinc-800 rounded transition cursor-pointer w-full flex-1 ${
                     pathname == href && "bg-zinc-800"
                 }`}
             >
@@ -166,7 +166,7 @@ function MenuButtons(): JSX.Element {
                 ></div>
             </div>
             <div className="flex flex-col p-2">
-                <MenuItem
+                <MenuButton
                     icon={<MagnifyingGlassIcon className="w-6 h-6" />}
                     title="Search"
                     href="/app/search/"
@@ -176,7 +176,7 @@ function MenuButtons(): JSX.Element {
                     title="Explore"
                     href="/"
                  /> */}
-                <MenuItem
+                <MenuButton
                     icon={<BookmarkIcon className="w-6 h-6" />}
                     title="My library"
                     href="/app/library/"
@@ -206,13 +206,13 @@ function ListButton({ list }: { list: ListWithMedia }) {
     return (
         <Link
             href={`/app/list/?id=${encodeURIComponent(list.id!)}`}
-            className={`hover:bg-zinc-700 transition rounded group flex flex-row items-center gap-2 -m-2 ${
+            className={`hover:bg-zinc-700 active:bg-zinc-800 transition rounded group flex flex-row items-center gap-2 -m-2 ${
                 isExpanded == "true" ? "p-2" : " p-1 justify-center"
             } ${isSelected && "bg-zinc-800"}`}
         >
             {images.length < 2 ? (
                 <div
-                    className={`w-8 h-8 rounded flex flex-col items-center justify-center transition group-hover:bg-zinc-600 ${
+                    className={`w-8 h-8 rounded flex flex-col items-center justify-center transition group-hover:bg-zinc-600 group-active:bg-zinc-700 ${
                         isSelected ? "bg-zinc-700" : "bg-zinc-800"
                     }`}
                 >
