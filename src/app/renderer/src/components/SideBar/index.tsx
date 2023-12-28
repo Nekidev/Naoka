@@ -28,6 +28,7 @@ import {
 } from "@/lib/db/types";
 import { motion, AnimatePresence } from "framer-motion";
 import { ProviderAPI, providers } from "@/lib/providers";
+import { useSidebarExpanded } from "./hooks";
 
 interface ListWithMedia extends List {
     media: Media[];
@@ -38,16 +39,13 @@ export default function SideBar() {
         React.useState(false);
     const [isSettingsModalOpen, setIsSettingsModalOpen] = React.useState(false);
 
-    const [isExpanded, setIsExpanded] = useLocalStorage(
-        "Naoka:SideBar:Expanded",
-        "true"
-    );
+    const [isExpanded, setIsExpanded] = useSidebarExpanded();
 
     React.useEffect(() => {
         const handleKeyDown = (event: KeyboardEvent) => {
             if ((event.ctrlKey || event.metaKey) && event.key === "b") {
                 event.preventDefault();
-                setIsExpanded(isExpanded == "false" ? "true" : "false");
+                setIsExpanded(!isExpanded);
             }
         };
 
@@ -60,7 +58,7 @@ export default function SideBar() {
     return (
         <div
             className={`${
-                isExpanded == "true" ? "w-60" : "w-14"
+                isExpanded ? "w-60" : "w-14"
             } bg-zinc-950 flex flex-col`}
         >
             <MenuButtons />
@@ -140,10 +138,7 @@ function IconButton({
 
 function MenuButtons(): JSX.Element {
     const appWindow = useAppWindow();
-    const [isExpanded, setIsExpanded] = useLocalStorage(
-        "Naoka:SideBar:Expanded",
-        "true"
-    );
+    const [isExpanded, setIsExpanded] = useSidebarExpanded();
 
     return (
         <div className="pb-2">
@@ -152,12 +147,8 @@ function MenuButtons(): JSX.Element {
                     <IconButton
                         icon={<Bars3Icon className="w-6 h-6" />}
                         onClick={() => {
-                            window.localStorage.setItem(
-                                "Naoka:SideBar:isExpanded",
-                                isExpanded == "true" ? "false" : "true"
-                            );
                             setIsExpanded(
-                                isExpanded == "false" ? "true" : "false"
+                                !isExpanded
                             );
                         }}
                     />
@@ -198,7 +189,7 @@ function ListButton({ list }: { list: ListWithMedia }) {
             ? `${list.items.length} item${list.items.length > 1 ? "s" : ""}`
             : "No items";
 
-    const [isExpanded] = useLocalStorage("Naoka:SideBar:Expanded", "true");
+    const [isExpanded] = useSidebarExpanded();
 
     const samePathname = usePathname() == "/app/list/";
     const sameId = useSearchParams().get("id") == list.id!.toString();
@@ -208,7 +199,7 @@ function ListButton({ list }: { list: ListWithMedia }) {
         <Link
             href={`/app/list/?id=${encodeURIComponent(list.id!)}`}
             className={`hover:bg-zinc-700 active:bg-zinc-800 transition rounded group flex flex-row items-center gap-2 -m-2 ${
-                isExpanded == "true" ? "p-2" : " p-1 justify-center"
+                isExpanded ? "p-2" : " p-1 justify-center"
             } ${isSelected && "bg-zinc-800"}`}
         >
             {images.length < 2 ? (
@@ -231,7 +222,7 @@ function ListButton({ list }: { list: ListWithMedia }) {
                     />
                 </div>
             )}
-            {isExpanded == "true" && (
+            {isExpanded && (
                 <div className="flex-1 flex flex-col gap-1 items-start">
                     <div className="text-sm text-zinc-200 line-clamp-1 leading-none">
                         {title}
@@ -252,10 +243,7 @@ function Lists({
     isCreateListModalOpen: boolean;
     setIsCreateListModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
 }): JSX.Element {
-    const [isExpanded, setIsExpanded] = useLocalStorage(
-        "Naoka:SideBar:Expanded",
-        "true"
-    );
+    const [isExpanded, setIsExpanded] = useSidebarExpanded();
 
     const lists: ListWithMedia[] | undefined = useLiveQuery(() =>
         db.lists.toArray(async (lists) => {
@@ -285,9 +273,9 @@ function Lists({
         <div
             className={`flex-1 overflow-y-auto border-y border-zinc-900 py-4 px-3 flex flex-col gap-4 ${
                 styles.sidebarLists
-            } ${isExpanded == "false" && "gap-6"}`}
+            } ${!isExpanded && "gap-6"}`}
         >
-            {isExpanded == "true" ? (
+            {isExpanded ? (
                 <div className="flex flex-row items-center justify-between">
                     <div className="uppercase text-white/50 text-xs">
                         My lists
@@ -310,7 +298,7 @@ function Lists({
                         <ListButton key={list.id} list={list} />
                     ))
                 ) : (
-                    isExpanded == "true" && (
+                    isExpanded && (
                         <div className="flex-1 flex flex-col justify-center items-center text-zinc-300 text-sm">
                             <div className="mb-1">(⩾﹏⩽)</div>
                             <div>There's nothing here!</div>

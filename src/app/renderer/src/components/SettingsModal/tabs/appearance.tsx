@@ -1,14 +1,12 @@
 "use client";
 
-import { useLocalStorage } from "@uidotdev/usehooks";
 import { Header, Select, Setting } from "../components";
+import { useTheme } from "@/lib/settings";
+import { useLanguage } from "@/lib/messages";
 
 export default function Appearance() {
-    const [theme, setTheme] = useLocalStorage("Naoka:Settings:Theme", "dark");
-    const [language, setLanguage] = useLocalStorage(
-        "Naoka:Settings:Language",
-        "en"
-    );
+    const [theme, setTheme] = useTheme();
+    const [language, setLanguage] = useLanguage();
 
     return (
         <>
