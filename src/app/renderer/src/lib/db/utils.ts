@@ -1,6 +1,8 @@
 import { IndexableType } from "dexie";
 import { db } from ".";
-import { Mapping } from "./types";
+import { Mapping, Provider } from "./types";
+import { useLiveQuery } from "dexie-react-hooks";
+import { useSelectedProvider } from "../providers/hooks";
 
 /**
  * Updates mappings in the database. If one of the mappings in the array is
@@ -16,7 +18,6 @@ import { Mapping } from "./types";
 export async function updateMappings(
     mappings: Mapping[]
 ): Promise<IndexableType> {
-    console.log(mappings);
     const existingEntries = db.mappings.where("mappings").anyOf(mappings);
     const existingEntriesCount = await existingEntries.count();
     const existingEntriesArray = await existingEntries.toArray();
@@ -54,4 +55,55 @@ export async function updateMappings(
 
         return newEntry;
     }
+}
+
+/**
+ * Checks if the given mapping is from the specified provider.
+ *
+ * @param {Mapping} mapping - The mapping to check.
+ * @param {string} provider - The provider to compare against.
+ * @return {boolean} True if the mapping is from the provider, false otherwise.
+ */
+export function isMappingFromProvider(
+    mapping: Mapping,
+    provider: Provider
+): boolean {
+    return mapping.split(":")[0] === provider;
+}
+
+/**
+ * Retrieves media data based on the provided mapping and optional provider.
+ *
+ * @param {Mapping} mapping - The mapping to retrieve media data for.
+ * @param {Provider} provider - The optional provider to filter the media data by.
+ * @return {Media | undefined} The retrieved media data.
+ */
+export function useMedia(
+    mapping: Mapping,
+    provider: Provider | undefined = undefined
+) {
+    const [selectedProvider] = useSelectedProvider();
+
+    return useLiveQuery(async () => {
+        return await getMedia(mapping, provider ?? selectedProvider);
+    }, [mapping, provider]);
+}
+
+export async function getMedia(mapping: Mapping, provider: Provider) {
+    if (!isMappingFromProvider(mapping, provider)) {
+        const mappings = await db.mappings
+            .where("mappings")
+            .equals(mapping)
+            .first();
+        const mappingFromProvider = mappings?.mappings.find(
+            (m: Mapping) => m.split(":", 2)[0] === provider
+        );
+
+        if (mappingFromProvider)
+            return (
+                (await db.media.get({ mapping: mappingFromProvider })) ??
+                db.media.get({ mapping })
+            );
+    }
+    return await db.media.get({ mapping });
 }

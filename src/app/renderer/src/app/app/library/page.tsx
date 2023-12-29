@@ -18,7 +18,8 @@ import LibraryEntryModal from "@/components/LibraryEntryModal";
 import { useDebounce } from "@uidotdev/usehooks";
 import { motion, AnimatePresence } from "framer-motion";
 import { LibraryEntry, LibraryStatus, Mapping, Media } from "@/lib/db/types";
-import { useMessages } from "@/lib/messages";
+import { useSelectedProvider } from "@/lib/providers/hooks";
+import { getMedia } from "@/lib/db/utils";
 
 interface LibraryEntryWithMedia extends LibraryEntry {
     media?: Media;
@@ -34,6 +35,8 @@ export default function Library() {
 
     const [query, setQuery] = React.useState("");
     const debouncedQuery = useDebounce(query, 300);
+
+    const [provider] = useSelectedProvider();
 
     const libraryEntries = useLiveQuery(() => {
         return db.library.toArray(async (array: LibraryEntryWithMedia[]) => {
@@ -58,9 +61,8 @@ export default function Library() {
                     }
                 }
 
-                entry.media = await db.media.get({
-                    mapping: entry.mapping,
-                });
+                // TODO: Optimize query using bulk get and not individual get (`getBulkMedia()` maybe?)
+                entry.media = await getMedia(entry.mapping, provider);
 
                 if (
                     !entry.media?.title.native
@@ -81,7 +83,7 @@ export default function Library() {
 
             return result;
         });
-    }, [debouncedQuery, mediaTypeFilters, statusFilters]);
+    }, [debouncedQuery, mediaTypeFilters, statusFilters, provider]);
 
     const [openModalMapping, setOpenModalMapping] =
         React.useState<null | Mapping>(null);
