@@ -19,7 +19,14 @@ import ImageModal from "../ImageModal";
 import Modal from "../Modal";
 import AddToListModal from "../AddToListModal";
 import ConfirmModal from "../ConfirmModal";
-import { LibraryEntry, LibraryStatus, Mapping, MediaType } from "@/lib/db/types";
+import {
+    LibraryEntry,
+    LibraryStatus,
+    Mapping,
+    MediaType,
+} from "@/lib/db/types";
+import { isMappingFromProvider, useMedia } from "@/lib/db/utils";
+import { useSelectedProvider } from "@/lib/providers/hooks";
 
 export default function LibraryEntryModal({
     mapping,
@@ -55,7 +62,7 @@ function FormModal({
     );
     const isFavorite = libraryEntry?.favorite || false;
 
-    const mediaCache = useLiveQuery(() => db.media.get({ mapping }));
+    const media = useMedia(mapping);
 
     const formRef = React.useRef<HTMLFormElement>(null);
 
@@ -66,7 +73,7 @@ function FormModal({
     const [isRemoveFromLibraryModalOpen, setIsRemoveFromLibraryModalOpen] =
         React.useState(false);
 
-    if (!mediaCache) return null;
+    if (!media) return null;
 
     function save(overrides = {}) {
         const formData = new FormData(formRef.current!);
@@ -111,9 +118,9 @@ function FormModal({
                         className="h-40 bg-center bg-cover opacity-40 absolute top-0 bottom-0 left-0 right-0"
                         style={{
                             backgroundImage: `url(${
-                                mediaCache.bannerUrl
-                                    ? mediaCache.bannerUrl
-                                    : mediaCache.imageUrl
+                                media.bannerUrl
+                                    ? media.bannerUrl
+                                    : media.imageUrl
                             })`,
                         }}
                     ></div>
@@ -167,12 +174,14 @@ function FormModal({
                         </div>
                         <img
                             className="w-24 aspect-cover rounded -mb-10 object-cover object-center ring-1 ring-transparent hover:ring-zinc-100 transition-all cursor-pointer"
-                            src={mediaCache.imageUrl!}
+                            src={media.imageUrl!}
                             onClick={() => {
                                 setIsImageModalOpen(true);
                             }}
                         />
-                        <div className="text-lg flex-1">{mediaCache.title.romaji}</div>
+                        <div className="text-lg flex-1">
+                            {media.title.romaji}
+                        </div>
                     </div>
                     <form
                         className="p-8 pt-12 grid grid-cols-3 gap-8"
@@ -215,7 +224,7 @@ function FormModal({
                                         libraryEntry?.episodeProgress || 0
                                     }
                                     min={0}
-                                    max={mediaCache.episodes}
+                                    max={media.episodes}
                                     name="episodeProgress"
                                 />
                             </LibraryEntryInput>
@@ -226,7 +235,7 @@ function FormModal({
                                         libraryEntry?.chapterProgress || 0
                                     }
                                     min={0}
-                                    max={mediaCache.chapters}
+                                    max={media.chapters}
                                     name="chapterProgress"
                                 />
                             </LibraryEntryInput>
@@ -266,7 +275,7 @@ function FormModal({
                                         libraryEntry?.volumeProgress || 0
                                     }
                                     min={0}
-                                    max={mediaCache.volumes}
+                                    max={media.volumes}
                                     name="volumeProgress"
                                 />
                             </LibraryEntryInput>
@@ -318,7 +327,7 @@ function FormModal({
                 </div>
             </Modal>
             <ImageModal
-                imageUrl={isImageModalOpen ? mediaCache.imageUrl : null}
+                imageUrl={isImageModalOpen ? media.imageUrl : null}
                 closeModal={() => setIsImageModalOpen(false)}
             />
             <AddToListModal
