@@ -2,7 +2,7 @@ changelog:
   categories:
     - title: Updates
       labels:
-        - enhancements
+        - enhancement
     - title: Providers
       labels:
         - provider
