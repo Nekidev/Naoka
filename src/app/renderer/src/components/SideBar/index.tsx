@@ -29,6 +29,7 @@ import {
 import { motion, AnimatePresence } from "framer-motion";
 import { ProviderAPI, providers } from "@/lib/providers";
 import { useSidebarExpanded } from "./hooks";
+import { useMessages } from "@/lib/messages";
 
 interface ListWithMedia extends List {
     media: Media[];
@@ -139,6 +140,7 @@ function IconButton({
 function MenuButtons(): JSX.Element {
     const appWindow = useAppWindow();
     const [isExpanded, setIsExpanded] = useSidebarExpanded();
+    const m = useMessages();
 
     return (
         <div className="pb-2">
@@ -163,7 +165,7 @@ function MenuButtons(): JSX.Element {
             <div className="flex flex-col p-2">
                 <MenuButton
                     icon={<MagnifyingGlassIcon className="w-6 h-6" />}
-                    title="Search"
+                    title={m("sidebar_search")}
                     href="/app/search/"
                 />
                 {/* <MenuItem
@@ -173,7 +175,7 @@ function MenuButtons(): JSX.Element {
                  /> */}
                 <MenuButton
                     icon={<BookmarkIcon className="w-6 h-6" />}
-                    title="My library"
+                    title={m("sidebar_library")}
                     href="/app/library/"
                 />
             </div>
@@ -244,6 +246,7 @@ function Lists({
     setIsCreateListModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
 }): JSX.Element {
     const [isExpanded, setIsExpanded] = useSidebarExpanded();
+    const m = useMessages();
 
     const lists: ListWithMedia[] | undefined = useLiveQuery(() =>
         db.lists.toArray(async (lists) => {
@@ -278,7 +281,7 @@ function Lists({
             {isExpanded ? (
                 <div className="flex flex-row items-center justify-between">
                     <div className="uppercase text-white/50 text-xs">
-                        My lists
+                        {m("sidebar_lists")}
                     </div>
                     <div className="flex flex-row items-center gap-2 -my-0.5">
                         <button
@@ -301,9 +304,9 @@ function Lists({
                     isExpanded && (
                         <div className="flex-1 flex flex-col justify-center items-center text-zinc-300 text-sm">
                             <div className="mb-1">(⩾﹏⩽)</div>
-                            <div>There's nothing here!</div>
+                            <div>{m("sidebar_lists_empty_title")}</div>
                             <div className="opacity-50 text-xs">
-                                (You can create a new list on top!)
+                                {m("sidebar_lists_empty_subtitle")}
                             </div>
                         </div>
                     )
@@ -351,7 +354,7 @@ function ProviderButton({
                 </span>
                 {!!accounts?.length && (
                     <span className="text-sm text-zinc-500 leading-none line-clamp-1">
-                        <span className="font-bold">- </span>
+                        <span className="">- </span>
                         {accounts
                             ?.map((account) => account.user?.name)
                             .filter((v) => !!v)
@@ -364,13 +367,15 @@ function ProviderButton({
 }
 
 function UserProfile({ openSettingsModal }: { openSettingsModal: () => void }) {
-    const [isExpanded] = useLocalStorage("Naoka:SideBar:Expanded", "true");
+    const [isExpanded] = useSidebarExpanded();
 
     const [isProviderSelectOpen, setIsProviderSelectOpen] =
         React.useState(false);
     const providerSelectRef = useClickAway<HTMLDivElement>(() => {
         setIsProviderSelectOpen(false);
     });
+
+    const m = useMessages();
 
     const [selectedProvider] = useLocalStorage(
         "Naoka:Provider:Selected",
@@ -391,7 +396,7 @@ function UserProfile({ openSettingsModal }: { openSettingsModal: () => void }) {
         <div
             className="p-2 relative flex items-center gap-2"
             style={{
-                flexDirection: isExpanded == "true" ? "row" : "column-reverse",
+                flexDirection: isExpanded ? "row" : "column-reverse",
             }}
         >
             <AnimatePresence>
@@ -412,7 +417,7 @@ function UserProfile({ openSettingsModal }: { openSettingsModal: () => void }) {
                         transition={{ duration: 0.15 }}
                         ref={providerSelectRef}
                         className={`absolute left-2 p-1 w-56 z-10 rounded bg-zinc-900 border border-zinc-800 flex flex-col items-stretch drop-shadow-2xl ${
-                            isExpanded == "true"
+                            isExpanded
                                 ? "bottom-0 mb-16"
                                 : "bottom-2 mb-12"
                         }`}
@@ -443,7 +448,7 @@ function UserProfile({ openSettingsModal }: { openSettingsModal: () => void }) {
                     }
                     className="h-10 w-10 rounded object-cover object-center"
                 />
-                {isExpanded == "true" && (
+                {isExpanded && (
                     <div className="flex flex-col gap-1 flex-1 items-start">
                         <div className="leading-none text-sm">
                             {externalAccount?.user?.name ?? api.name}
@@ -457,8 +462,8 @@ function UserProfile({ openSettingsModal }: { openSettingsModal: () => void }) {
                 )}
             </button>
             <Tooltip
-                label="Settings"
-                enabled={isExpanded == "false"}
+                label={m("sidebar_settings")}
+                enabled={!isExpanded}
                 position="right"
             >
                 <IconButton

@@ -7,6 +7,7 @@ import React from "react";
 
 import Connections from "./tabs/connections";
 import Appearance from "./tabs/appearance";
+import { useMessages } from "@/lib/messages";
 
 export default function SettingsModal({
     isOpen,
@@ -16,6 +17,7 @@ export default function SettingsModal({
     closeModal: () => void;
 }) {
     const [tab, setTab] = React.useState("appearance");
+    const m = useMessages();
 
     return (
         <AnimatePresence>
@@ -24,13 +26,13 @@ export default function SettingsModal({
                     <div className="rounded bg-zinc-800 w-[calc(100vw-8rem)] max-w-4xl overflow-x-hidden overflow-y-auto flex flex-row items-stretch border border-zinc-800 h-96">
                         <div className="p-2 w-60 bg-zinc-900 flex flex-col items-stretch sticky top-0 left-0 bottom-0 overflow-y-auto">
                             <Tab
-                                label="Appearance"
+                                label={m("settings_appearance_title")}
                                 icon={<PaintBrushIcon className="h-6 w-6" />}
                                 active={tab === "appearance"}
                                 onClick={() => setTab("appearance")}
                             />
                             <Tab
-                                label="Connections"
+                                label={m("settings_connections_title")}
                                 icon={<CloudIcon className="h-6 w-6" />}
                                 active={tab === "connections"}
                                 onClick={() => setTab("connections")}

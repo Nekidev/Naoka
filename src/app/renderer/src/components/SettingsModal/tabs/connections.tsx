@@ -11,26 +11,25 @@ import { CheckCircleIcon } from "@heroicons/react/20/solid";
 import { notify } from "@/lib/notifications";
 import { ProviderAPI, providers } from "@/lib/providers";
 import { ExternalAccount, ImportMethod, MediaType } from "@/lib/db/types";
+import { useMessages } from "@/lib/messages";
 
 export default function Connections() {
+    const m = useMessages();
     const accounts = useLiveQuery(() => db.externalAccounts.toArray());
 
     return (
         <>
             <Header
-                title="Connections"
-                subtitle="Syncronize your library with external accounts."
+                title={m("settings_connections_title")}
+                subtitle={m("settings_connections_subtitle")}
             />
             <div className="bg-yellow-400/20 border border-yellow-400/50 rounded p-2 text-sm text-yellow-400">
-                <div>
-                    Automatic syncing and list exporting are not yet supported.
-                    They'll be added in the future, so stay tuned!
-                </div>
+                <div>{m("settings_connections_warning")}</div>
             </div>
             <Setting
-                title="Link a new account"
+                title={m("settings_connections_connectaccount_title")}
+                info={m("settings_connections_connectaccount_info")}
                 orientation="vertical"
-                info="More sites will be added in the future."
             >
                 <div className="flex flex-row flex-wrap gap-2 -mb-2">
                     {Object.getOwnPropertyNames(providers).map(
@@ -61,9 +60,15 @@ export default function Connections() {
                 ) : (
                     <div className="flex-1 flex flex-col justify-center items-center text-zinc-300 text-base p-4 rounded-lg bg-zinc-850">
                         <div className="mb-1">(⊙.☉)7</div>
-                        <div>And my connected accounts?</div>
+                        <div>
+                            {m(
+                                "settings_connections_connectedaccounts_empty_title"
+                            )}
+                        </div>
                         <div className="opacity-50 text-sm">
-                            Link an external account to import lists!
+                            {m(
+                                "settings_connections_connectedaccounts_empty_subtitle"
+                            )}
                         </div>
                     </div>
                 )}
@@ -106,6 +111,7 @@ function ProviderButton({
 }
 
 function Account({ account }: { account: ExternalAccount }) {
+    const m = useMessages();
     const api = new ProviderAPI(account.provider);
 
     const [isConnectAccountModalOpen, setIsConnectAccountModalOpen] =
@@ -138,7 +144,9 @@ function Account({ account }: { account: ExternalAccount }) {
                 <div className="flex flex-row items-center justify-between p-2 leading-none bg-zinc-900">
                     <div className="flex flex-row items-center gap-4">
                         <img
-                            src={`/providers/${String(account.provider)}/icon.png`}
+                            src={`/providers/${String(
+                                account.provider
+                            )}/icon.png`}
                             className="rounded h-6 w-6 object-center object-cover"
                         />
                         <div className="text-zinc-300">
@@ -165,24 +173,29 @@ function Account({ account }: { account: ExternalAccount }) {
                                 }}
                             >
                                 {account.auth?.username
-                                    ? "Reconnect"
-                                    : "Connect"}
+                                    ? m(
+                                          "settings_connections_account_reconnect"
+                                      )
+                                    : m("settings_connections_account_connect")}
                             </Button>
                         </div>
                         <div className="flex flex-row items-center gap-2">
                             <Button
                                 disabled={
                                     !account.auth?.username ||
-                                    api.config.syncing?.import?.mediaTypes.length === 0
+                                    api.config.syncing?.import?.mediaTypes
+                                        .length === 0
                                 }
                                 onClick={(e: any) => {
                                     if (e.target.disabled) return;
                                     setIsSelectListTypeImportModalOpen(true);
                                 }}
                             >
-                                Import
+                                {m("settings_connections_account_import")}
                             </Button>
-                            <Button disabled={true}>Export</Button>
+                            <Button disabled={true}>
+                                {m("settings_connections_account_export")}
+                            </Button>
                         </div>
                     </div>
                 </div>
@@ -190,12 +203,14 @@ function Account({ account }: { account: ExternalAccount }) {
             <FormModal
                 isOpen={isConnectAccountModalOpen}
                 closeModal={() => setIsConnectAccountModalOpen(false)}
-                title={"Connect to " + api.name}
-                subtitle={"Link your account to import your lists"}
+                title={m("settings_connections_connect_title", {
+                    provider: api.name,
+                })}
+                subtitle={m("settings_connections_connect_subtitle")}
                 fields={[
                     {
                         name: "username",
-                        label: "Username",
+                        label: m("settings_connections_connect_username"),
                         type: "text",
                         defaultValue: account.auth?.username || "",
                     },
@@ -231,29 +246,49 @@ function Account({ account }: { account: ExternalAccount }) {
             <FormModal
                 isOpen={isSelectListTypeImportModalOpen}
                 closeModal={() => setIsSelectListTypeImportModalOpen(false)}
-                title="Select the list to import"
-                subtitle={`Select your list from ${api.name}`}
+                title={m("settings_connections_connect_import_title")}
+                subtitle={m("settings_connections_connect_import_subtitle", {
+                    provider: api.name,
+                })}
                 fields={[
                     {
                         type: "radiogroup",
                         name: "type",
                         defaultValue: "anime",
                         options: [
-                            ...(api.config.syncing?.import?.mediaTypes.includes("anime")
+                            ...(api.config.syncing?.import?.mediaTypes.includes(
+                                "anime"
+                            )
                                 ? [
                                       {
                                           value: "anime",
-                                          title: "Anime list",
-                                          description: `Import your anime list from ${api.name}`,
+                                          title: m(
+                                              "settings_connections_connect_import_anime_title"
+                                          ),
+                                          description: m(
+                                              "settings_connections_connect_import_anime_description",
+                                              {
+                                                  provider: api.name,
+                                              }
+                                          ),
                                       },
                                   ]
                                 : []),
-                            ...(api.config.syncing?.import?.mediaTypes.includes("manga")
+                            ...(api.config.syncing?.import?.mediaTypes.includes(
+                                "manga"
+                            )
                                 ? [
                                       {
                                           value: "manga",
-                                          title: "Manga list",
-                                          description: `Import your manga list from ${api.name}`,
+                                          title: m(
+                                              "settings_connections_connect_import_manga_title"
+                                          ),
+                                          description: m(
+                                              "settings_connections_connect_import_manga_description",
+                                              {
+                                                  provider: api.name,
+                                              }
+                                          ),
                                       },
                                   ]
                                 : []),
@@ -267,38 +302,72 @@ function Account({ account }: { account: ExternalAccount }) {
                         options: [
                             {
                                 value: "override",
-                                title: "Override local entries",
-                                description:
-                                    "If an entry conflicts, override the local one.",
+                                title: m(
+                                    "settings_connections_connect_import_override_title"
+                                ),
+                                description: m(
+                                    "settings_connections_connect_import_override_description"
+                                ),
                             },
                             {
                                 value: "keep",
-                                title: "Keep local entries",
-                                description: "If an entry conflicts, keep the local one.",
+                                title: m(
+                                    "settings_connections_connect_import_keep_title"
+                                ),
+                                description: m(
+                                    "settings_connections_connect_import_keep_description"
+                                ),
                             },
                             {
                                 value: "latest",
-                                title: "Keep the last updated entry (recommended)",
-                                description: "If an entry conflicts, keep the latest one."
-                            }
+                                title: m(
+                                    "settings_connections_connect_import_latest_title"
+                                ),
+                                description: m(
+                                    "settings_connections_connect_import_latest_description"
+                                ),
+                            },
                         ],
                     },
                 ]}
                 onSubmit={({ type, method }) => {
-                    account.importLibrary(type as MediaType, method as ImportMethod).then(() => {
-                        notify({
-                            title: `Imported ${
-                                account.user!.name
-                            }'s ${type} list`,
-                            body: `Your list has been successfully imported from ${api.name}.`,
-                        });
-                    }).catch((e) => {
-                        console.error(e);
-                        notify({
-                            title: `Oops! Your ${api.name} library couldn't be imported`,
-                            body: `Please try again later.`,
+                    account
+                        .importLibrary(
+                            type as MediaType,
+                            method as ImportMethod
+                        )
+                        .then(() => {
+                            notify({
+                                title: m(
+                                    "settings_connections_connect_import_success_title",
+                                    {
+                                        username: account.user!.name,
+                                        type,
+                                    }
+                                ),
+                                body: m(
+                                    "settings_connections_connect_import_success_body",
+                                    {
+                                        provider: api.name,
+                                    }
+                                ),
+                            });
                         })
-                    })
+                        .catch((e) => {
+                            console.error(e);
+                            notify({
+                                title: m(
+                                    "settings_connections_connect_import_failure_title",
+                                    {
+                                        provider: api.name,
+                                        type,
+                                    }
+                                ),
+                                body: m(
+                                    "settings_connections_connect_import_failure_body"
+                                ),
+                            });
+                        });
                 }}
             />
         </>

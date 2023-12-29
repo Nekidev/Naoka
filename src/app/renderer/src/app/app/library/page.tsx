@@ -12,12 +12,12 @@ import React from "react";
 import { cn } from "@/lib/utils";
 import TextInput from "@/components/TextInput";
 import colors from "tailwindcss/colors";
-import { db, LibraryEntry, Media } from "@/lib/db";
+import { db } from "@/lib/db";
 import { useLiveQuery } from "dexie-react-hooks";
-import { LibraryStatus, Mapping } from "@/lib/types";
 import LibraryEntryModal from "@/components/LibraryEntryModal";
 import { useDebounce } from "@uidotdev/usehooks";
 import { motion, AnimatePresence } from "framer-motion";
+import { LibraryEntry, LibraryStatus, Mapping, Media } from "@/lib/db/types";
 
 interface LibraryEntryWithMedia extends LibraryEntry {
     media?: Media;
@@ -183,43 +183,43 @@ export default function Library() {
                             <StatusSelector
                                 label="Not started"
                                 color={colors.yellow["400"]}
-                                selected={statusFilters.includes("not_started")}
+                                selected={statusFilters.includes(LibraryStatus.NotStarted)}
                                 onClick={handleOnStatusSelectorClick(
-                                    "not_started"
+                                    LibraryStatus.NotStarted
                                 )}
                             />
                             <StatusSelector
                                 label="Planned"
                                 color={colors.pink["400"]}
-                                selected={statusFilters.includes("planned")}
-                                onClick={handleOnStatusSelectorClick("planned")}
+                                selected={statusFilters.includes(LibraryStatus.Planned)}
+                                onClick={handleOnStatusSelectorClick(LibraryStatus.Planned)}
                             />
                             <StatusSelector
                                 label="In progress"
                                 color={colors.blue["400"]}
-                                selected={statusFilters.includes("in_progress")}
+                                selected={statusFilters.includes(LibraryStatus.InProgress)}
                                 onClick={handleOnStatusSelectorClick(
-                                    "in_progress"
+                                    LibraryStatus.InProgress
                                 )}
                             />
                             <StatusSelector
                                 label="Paused"
                                 color={colors.orange["400"]}
-                                selected={statusFilters.includes("paused")}
-                                onClick={handleOnStatusSelectorClick("paused")}
+                                selected={statusFilters.includes(LibraryStatus.Paused)}
+                                onClick={handleOnStatusSelectorClick(LibraryStatus.Paused)}
                             />
                             <StatusSelector
                                 label="Dropped"
                                 color={colors.red["400"]}
-                                selected={statusFilters.includes("dropped")}
-                                onClick={handleOnStatusSelectorClick("dropped")}
+                                selected={statusFilters.includes(LibraryStatus.Dropped)}
+                                onClick={handleOnStatusSelectorClick(LibraryStatus.Dropped)}
                             />
                             <StatusSelector
                                 label="Completed"
                                 color={colors.green["400"]}
-                                selected={statusFilters.includes("completed")}
+                                selected={statusFilters.includes(LibraryStatus.Completed)}
                                 onClick={handleOnStatusSelectorClick(
-                                    "completed"
+                                    LibraryStatus.Completed
                                 )}
                             />
                         </div>

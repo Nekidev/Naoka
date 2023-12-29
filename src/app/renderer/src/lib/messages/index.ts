@@ -3,7 +3,7 @@ import { useLocalStorage, usePreferredLanguage } from "@uidotdev/usehooks";
 import defaultMessages from "./translations/en-US";
 import { Messages } from "./translations";
 
-type Language = {
+export type Language = {
     code: string;
     name: string;
     emoji: string;
@@ -14,6 +14,11 @@ export const languages: Language[] = [
         code: "en-US",
         name: "English",
         emoji: "🇺🇸",
+    },
+    {
+        code: "es-AR",
+        name: "Español",
+        emoji: "🇦🇷",
     }
 ];
 
@@ -40,25 +45,26 @@ export function useLanguage() {
             );
     }
 
-    return useLocalStorage(
-        "Naoka:Settings:Language",
-        defaultLanguage ?? "en-US"
-    );
+    return useLocalStorage("Naoka:Settings:Language", defaultLanguage ?? "en-US");
 }
-
 
 export function useMessages() {
     const [language] = useLanguage();
     const [messages, setMessages] = React.useState<undefined | any>();
-    
-    
+
     React.useEffect(() => {
         (async () => {
             setMessages((await require(`./translations/${language}`)).default);
         })();
     }, [language]);
 
-    return (code: keyof Messages) => {
-        return messages?.[code] ?? defaultMessages[code] ?? code;
+    return (code: keyof Messages, options: { [key: string]: any } = {}) => {
+        let message = messages?.[code] ?? defaultMessages[code] ?? code;
+
+        Object.getOwnPropertyNames(options).forEach((key) => {
+            message = message.replace(`{${key}}`, options[key]);
+        })
+
+        return message;
     };
 }
