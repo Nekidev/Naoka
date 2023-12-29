@@ -3,6 +3,9 @@ changelog:
     - title: Updates
       labels:
         - enhancement
+    - title: Bug Fixes
+      labels:
+        - bug
     - title: Providers
       labels:
         - provider
