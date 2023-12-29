@@ -19,7 +19,7 @@ export const languages: Language[] = [
         code: "es-AR",
         name: "Español",
         emoji: "🇦🇷",
-    }
+    },
 ];
 
 /**
@@ -33,7 +33,7 @@ export function useLanguage() {
         .toLowerCase();
 
     let defaultLanguage;
-    if (preferredLanguage in languages) {
+    if (languages.map((lang) => lang.code).includes(preferredLanguage)) {
         defaultLanguage = preferredLanguage;
     } else {
         defaultLanguage = languages
@@ -45,7 +45,10 @@ export function useLanguage() {
             );
     }
 
-    return useLocalStorage("Naoka:Settings:Language", defaultLanguage ?? "en-US");
+    return useLocalStorage(
+        "Naoka:Settings:Language",
+        defaultLanguage ?? "en-US"
+    );
 }
 
 export function useMessages() {
@@ -58,12 +61,15 @@ export function useMessages() {
         })();
     }, [language]);
 
-    return (code: keyof Messages, options: { [key: string]: any } = {}): string => {
+    return (
+        code: keyof Messages,
+        options: { [key: string]: any } = {}
+    ): string => {
         let message = messages?.[code] ?? defaultMessages[code] ?? code;
 
         Object.getOwnPropertyNames(options).forEach((key) => {
             message = message.replace(`{${key}}`, options[key]);
-        })
+        });
 
         return message;
     };
