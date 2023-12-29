@@ -181,6 +181,7 @@ export class ExternalAccount extends Data {
                 return await db.library.bulkAdd(entries);
 
             case ImportMethod.Overwrite:
+                await db.library.bulkAdd(entries);
                 return await db.library.bulkPut(entries);
 
             case ImportMethod.Latest:
