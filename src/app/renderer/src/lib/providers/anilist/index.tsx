@@ -4,7 +4,18 @@ import searchQuery from "./queries/search";
 import libraryQuery from "./queries/library";
 import config from "./config";
 import { BaseProvider } from "../base";
-import { ExternalAccount, LibraryEntry, LibraryStatus, Mapping, Media, MediaFormat, MediaGenre, MediaStatus, MediaType, UserData } from "@/lib/db/types";
+import {
+    ExternalAccount,
+    LibraryEntry,
+    LibraryStatus,
+    Mapping,
+    Media,
+    MediaFormat,
+    MediaGenre,
+    MediaStatus,
+    MediaType,
+    UserData,
+} from "@/lib/db/types";
 
 function normalizeGenre(genre: string): MediaGenre | undefined {
     return {
@@ -174,6 +185,16 @@ export class AniList extends BaseProvider {
                     ...(options.format != ""
                         ? {
                               format: options.format,
+                          }
+                        : {}),
+                    ...(options.status != ""
+                        ? {
+                              status: options.status,
+                          }
+                        : {}),
+                    ...(options.countryOfOrigin != ""
+                        ? {
+                              countryOfOrigin: options.countryOfOrigin,
                           }
                         : {}),
                 },

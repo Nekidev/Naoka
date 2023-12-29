@@ -4,9 +4,11 @@ query Search(
     $sort: MediaSort,
     $type: MediaType,
     $format: MediaFormat,
+    $status: MediaStatus,
     $genre: String,
     $season: MediaSeason,
-    $seasonYear: Int
+    $seasonYear: Int,
+    $countryOfOrigin: String,
 ) {
     Page(perPage: 50) {
         media(
@@ -14,9 +16,11 @@ query Search(
             sort: [$sort],
             type: $type,
             format: $format,
+            status: $status,
             genre: $genre,
             season: $season,
-            seasonYear: $seasonYear
+            seasonYear: $seasonYear,
+            countryOfOrigin: $countryOfOrigin,
         ) {
             id
             idMal

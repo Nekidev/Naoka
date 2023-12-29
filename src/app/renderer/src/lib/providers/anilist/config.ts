@@ -1,5 +1,40 @@
 import { Config } from "../base";
 
+const sortBy = [
+    {
+        label: "Match",
+        value: "SEARCH_MATCH",
+    },
+    {
+        label: "Score",
+        value: "SCORE_DESC",
+    },
+    {
+        label: "Popularity",
+        value: "POPULARITY_DESC",
+    },
+    {
+        label: "Trending",
+        value: "TRENDING_DESC",
+    },
+    {
+        label: "Favorites",
+        value: "FAVOURITES_DESC",
+    },
+    {
+        label: "Status",
+        value: "STATUS",
+    },
+    {
+        label: "Start date",
+        value: "START_DATE",
+    },
+    {
+        label: "End date",
+        value: "END_DATE",
+    },
+];
+
 const config: Config = {
     mediaTypes: ["anime", "manga"],
     syncing: {
@@ -12,40 +47,7 @@ const config: Config = {
     },
     search: {
         anime: {
-            sortBy: [
-                {
-                    label: "Match",
-                    value: "SEARCH_MATCH",
-                },
-                {
-                    label: "Score",
-                    value: "SCORE_DESC",
-                },
-                {
-                    label: "Popularity",
-                    value: "POPULARITY_DESC",
-                },
-                {
-                    label: "Trending",
-                    value: "TRENDING_DESC",
-                },
-                {
-                    label: "Favorites",
-                    value: "FAVOURITES_DESC",
-                },
-                {
-                    label: "Status",
-                    value: "STATUS",
-                },
-                {
-                    label: "Start date",
-                    value: "START_DATE",
-                },
-                {
-                    label: "End date",
-                    value: "END_DATE",
-                },
-            ],
+            sortBy,
             filters: [
                 {
                     type: "select",
@@ -179,7 +181,132 @@ const config: Config = {
             ],
         },
         manga: {
-            filters: [],
+            sortBy,
+            filters: [
+                {
+                    type: "select",
+                    value: {
+                        name: "format",
+                        label: "Format",
+                        options: [
+                            {
+                                label: "All",
+                                value: "",
+                            },
+                            {
+                                label: "Manga",
+                                value: "MANGA",
+                            },
+                            {
+                                label: "Light Novel",
+                                value: "LIGHT_NOVEL",
+                            },
+                            {
+                                label: "One-shot",
+                                value: "ONE_SHOT",
+                            },
+                        ],
+                    },
+                },
+                {
+                    type: "select",
+                    value: {
+                        name: "genre",
+                        label: "Genre",
+                        options: [
+                            {
+                                label: "All",
+                                value: "",
+                            },
+                            ...[
+                                "Action",
+                                "Adventure",
+                                "Comedy",
+                                "Drama",
+                                "Ecchi",
+                                "Fantasy",
+                                "Horror",
+                                "Mahou Shoujo",
+                                "Mecha",
+                                "Music",
+                                "Mistery",
+                                "Psychologycal",
+                                "Romance",
+                                "Sci-Fi",
+                                "Slice of Life",
+                                "Sports",
+                                "Supernatural",
+                                "Thriller",
+                            ].map((genre: string) => ({
+                                label: genre,
+                                value: genre,
+                            })),
+                        ],
+                    },
+                },
+                {
+                    type: "select",
+                    value: {
+                        name: "status",
+                        label: "Status",
+                        options: [
+                            {
+                                label: "All",
+                                value: "",
+                            },
+                            {
+                                label: "Releasing",
+                                value: "RELEASING",
+                            },
+                            {
+                                label: "Finished",
+                                value: "FINISHED",
+                            },
+                            {
+                                label: "Not Yet Released",
+                                value: "NOT_YET_RELEASED",
+                            },
+                            {
+                                label: "Hiatus",
+                                value: "HIATUS",
+                            },
+                            {
+                                label: "Cancelled",
+                                value: "CANCELLED",
+                            },
+                        ],
+                    },
+                },
+                {
+                    type: "select",
+                    value: {
+                        name: "countryOfOrigin",
+                        label: "Country of Origin",
+                        options: [
+                            {
+                                label: "All",
+                                value: "",
+                            },
+                            {
+                                label: "Japan",
+                                value: "JP",
+                            },
+                            {
+                                label: "China",
+                                value: "CN",
+                            },
+                            {
+                                label: "Taiwan",
+                                value: "TW",
+                            },
+                            {
+                                label: "South Korea",
+                                value: "KR",
+                            },
+                        ],
+                    },
+                }
+            ],
         },
     },
 };
