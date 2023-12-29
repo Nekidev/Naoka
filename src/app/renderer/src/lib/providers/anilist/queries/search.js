@@ -8,7 +8,7 @@ query Search(
     $genre: String,
     $season: MediaSeason,
     $seasonYear: Int,
-    $countryOfOrigin: String,
+    $countryOfOrigin: CountryCode,
 ) {
     Page(perPage: 50) {
         media(
