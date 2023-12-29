@@ -1,0 +1,14 @@
+changelog:
+  categories:
+    - title: Updates
+      labels:
+        - enhancements
+    - title: Providers
+      labels:
+        - provider
+      exclude:
+        labels:
+          - enhancements
+    - title: Other Changes
+      labels:
+        - "*"
