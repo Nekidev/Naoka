@@ -1,9 +1,9 @@
-import { LibraryEntry } from ".";
+import { LibraryEntry, LibraryStatus } from "./types";
 
 export const defaultLibraryEntry: LibraryEntry = {
     type: "anime",
     favorite: false,
-    status: "not_started",
+    status: LibraryStatus.NotStarted,
     score: 0,
     episodeProgress: 0,
     chapterProgress: 0,

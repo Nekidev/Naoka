@@ -26,12 +26,27 @@ import Chip from "@/components/Chip";
 import TextInput from "@/components/TextInput";
 import AddToListModal from "@/components/AddToListModal";
 import { ProviderAPI } from "@/lib/providers";
-import { LibraryStatus, Mapping, Media, MediaRating, MediaType, Provider } from "@/lib/db/types";
+import {
+    LibraryStatus,
+    Mapping,
+    Media,
+    MediaGenre,
+    MediaRating,
+    MediaType,
+    Provider,
+} from "@/lib/db/types";
 import { useLocalStorage } from "@uidotdev/usehooks";
+import { useMessages } from "@/lib/messages";
+import { Messages } from "@/lib/messages/translations";
 
 export default function Search() {
+    const m = useMessages();
+
     const [searchType, setSearchType] = React.useState<MediaType>("anime");
-    const [selectedProvider] = useLocalStorage("Naoka:Provider:Selected", "anilist");
+    const [selectedProvider] = useLocalStorage(
+        "Naoka:Provider:Selected",
+        "anilist"
+    );
 
     const api = new ProviderAPI(selectedProvider as Provider);
 
@@ -463,6 +478,8 @@ function MediaRow({
     onClick: any;
     addToList: any;
 }) {
+    const m = useMessages();
+
     const libraryEntry = useLiveQuery(
         () => db.library.get({ mapping: media.mapping }),
         [media],
@@ -495,9 +512,26 @@ function MediaRow({
                                 <span className="text-red-500">+18</span> —
                             </>
                         )}{" "}
-                        {media.startDate?.getFullYear()} {media.format}{" "}
+                        {media.startDate?.getFullYear() || ""}{" "}
+                        {m(`media_format_${media.format}` as keyof Messages) ||
+                            ""}{" "}
                         {media.genres.length > 0 &&
-                            "— " + media.genres.join(", ")}
+                            "— " +
+                                media.genres
+                                    .map((genre: MediaGenre, index: number) => {
+                                        const msg = m(
+                                            `media_genre_${genre}` as keyof Messages
+                                        );
+                                        if (index === 0) {
+                                            return (
+                                                msg[0].toUpperCase() +
+                                                msg.substring(1).toLowerCase()
+                                            );
+                                        } else {
+                                            return msg.toLowerCase();
+                                        }
+                                    })
+                                    .join(", ")}
                     </div>
                 </div>
             </div>

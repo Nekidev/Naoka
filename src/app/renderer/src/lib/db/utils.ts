@@ -1,6 +1,6 @@
 import { IndexableType } from "dexie";
 import { db } from ".";
-import { Mapping } from "../types";
+import { Mapping } from "./types";
 
 /**
  * Updates mappings in the database. If one of the mappings in the array is

@@ -18,6 +18,7 @@ import LibraryEntryModal from "@/components/LibraryEntryModal";
 import { useDebounce } from "@uidotdev/usehooks";
 import { motion, AnimatePresence } from "framer-motion";
 import { LibraryEntry, LibraryStatus, Mapping, Media } from "@/lib/db/types";
+import { useMessages } from "@/lib/messages";
 
 interface LibraryEntryWithMedia extends LibraryEntry {
     media?: Media;

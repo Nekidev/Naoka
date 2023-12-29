@@ -1,4 +1,4 @@
-import { Config } from "..";
+import { Config } from "../base";
 
 const config: Config = {
     mediaTypes: ["anime", "manga"],

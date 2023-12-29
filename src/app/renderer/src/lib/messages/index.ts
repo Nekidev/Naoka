@@ -58,7 +58,7 @@ export function useMessages() {
         })();
     }, [language]);
 
-    return (code: keyof Messages, options: { [key: string]: any } = {}) => {
+    return (code: keyof Messages, options: { [key: string]: any } = {}): string => {
         let message = messages?.[code] ?? defaultMessages[code] ?? code;
 
         Object.getOwnPropertyNames(options).forEach((key) => {
