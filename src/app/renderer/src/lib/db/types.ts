@@ -169,6 +169,8 @@ export class ExternalAccount extends Data {
         return api.getUser(this);
     }
 
+    // I burnt out my brain working on this function, so I wouldn't be suprised
+    // if you cannot understand how tf it works.
     async importLibrary(
         type: MediaType,
         method: ImportMethod = ImportMethod.Keep
