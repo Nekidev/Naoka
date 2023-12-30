@@ -185,18 +185,57 @@ export class ExternalAccount extends Data {
                 return await db.library.bulkPut(entries);
 
             case ImportMethod.Latest:
-                const existingEntries = await db.library.bulkGet(
-                    entries.map((e) => e.mapping)
+                const mappings = await db.mappings
+                    .where("mappings")
+                    .anyOf(entries.map((e) => e.mapping))
+                    .toArray();
+
+                let conflictingEntries: {
+                    entry: LibraryEntry;
+                    mapping: Mapping;
+                }[] = [];
+
+                // Loop through the imported entries to see if any of them already exists
+                await Promise.all(
+                    entries.map(async (e: LibraryEntry) => {
+                        // Find the Mappings object that matches the imported entry's mapping
+                        // for the current account's provider.
+                        const linkedMappings = mappings.find(
+                            // Find the Mappings object that contains the
+                            // mapping of the imported entry
+                            (m: Mappings) =>
+                                !!m.mappings.find(
+                                    (mapping: Mapping) => mapping === e.mapping
+                                )
+                        )?.mappings;
+
+                        // No existing Mappings object for the entry's mapping. This means that it's also
+                        // not in library so it's safe to add it.
+                        if (linkedMappings === undefined) {
+                            return;
+                        }
+
+                        const entry = await db.library
+                            .where("mapping")
+                            .anyOf(linkedMappings)
+                            .first();
+
+                        if (!entry) return;
+
+                        // Find the mapping of the library entry that matches the imported entry and
+                        // replace it's mapping with the new one.
+                        conflictingEntries.push({ entry, mapping: e.mapping }); // Local mapping
+                    })
                 );
+
                 const newEntries = entries.map((newEntry: LibraryEntry) => {
-                    const existingEntry = existingEntries.find(
-                        (e: LibraryEntry | undefined) =>
-                            !!e && e.mapping === newEntry.mapping
+                    let existingEntry = conflictingEntries.find(
+                        (e) => e && e.mapping === newEntry.mapping
                     );
 
                     if (!!existingEntry) {
-                        if (existingEntry.updatedAt > newEntry.updatedAt) {
-                            return existingEntry;
+                        if (existingEntry.entry.updatedAt > newEntry.updatedAt) {
+                            return existingEntry.entry;
                         } else {
                             return newEntry;
                         }
