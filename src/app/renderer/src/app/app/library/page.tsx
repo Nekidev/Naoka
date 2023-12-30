@@ -186,7 +186,9 @@ export default function Library() {
                             <StatusSelector
                                 label="Not started"
                                 color={colors.yellow["400"]}
-                                selected={statusFilters.includes(LibraryStatus.NotStarted)}
+                                selected={statusFilters.includes(
+                                    LibraryStatus.NotStarted
+                                )}
                                 onClick={handleOnStatusSelectorClick(
                                     LibraryStatus.NotStarted
                                 )}
@@ -194,13 +196,19 @@ export default function Library() {
                             <StatusSelector
                                 label="Planned"
                                 color={colors.pink["400"]}
-                                selected={statusFilters.includes(LibraryStatus.Planned)}
-                                onClick={handleOnStatusSelectorClick(LibraryStatus.Planned)}
+                                selected={statusFilters.includes(
+                                    LibraryStatus.Planned
+                                )}
+                                onClick={handleOnStatusSelectorClick(
+                                    LibraryStatus.Planned
+                                )}
                             />
                             <StatusSelector
                                 label="In progress"
                                 color={colors.blue["400"]}
-                                selected={statusFilters.includes(LibraryStatus.InProgress)}
+                                selected={statusFilters.includes(
+                                    LibraryStatus.InProgress
+                                )}
                                 onClick={handleOnStatusSelectorClick(
                                     LibraryStatus.InProgress
                                 )}
@@ -208,19 +216,29 @@ export default function Library() {
                             <StatusSelector
                                 label="Paused"
                                 color={colors.orange["400"]}
-                                selected={statusFilters.includes(LibraryStatus.Paused)}
-                                onClick={handleOnStatusSelectorClick(LibraryStatus.Paused)}
+                                selected={statusFilters.includes(
+                                    LibraryStatus.Paused
+                                )}
+                                onClick={handleOnStatusSelectorClick(
+                                    LibraryStatus.Paused
+                                )}
                             />
                             <StatusSelector
                                 label="Dropped"
                                 color={colors.red["400"]}
-                                selected={statusFilters.includes(LibraryStatus.Dropped)}
-                                onClick={handleOnStatusSelectorClick(LibraryStatus.Dropped)}
+                                selected={statusFilters.includes(
+                                    LibraryStatus.Dropped
+                                )}
+                                onClick={handleOnStatusSelectorClick(
+                                    LibraryStatus.Dropped
+                                )}
                             />
                             <StatusSelector
                                 label="Completed"
                                 color={colors.green["400"]}
-                                selected={statusFilters.includes(LibraryStatus.Completed)}
+                                selected={statusFilters.includes(
+                                    LibraryStatus.Completed
+                                )}
                                 onClick={handleOnStatusSelectorClick(
                                     LibraryStatus.Completed
                                 )}
@@ -353,20 +371,52 @@ function LibraryEntryRow({
             </div>
             <div className="flex-1"></div>
             <div className="flex flex-row items-center gap-8 text-zinc-400 text-sm whitespace-nowrap">
-                {entry.type == "anime" ? (
-                    <span>{entry.episodeProgress} eps.</span>
-                ) : (
-                    <span>
-                        {entry.chapterProgress} chs., {entry.volumeProgress}{" "}
-                        vol.
-                    </span>
-                )}
+                {entry.media &&
+                    (entry.media.episodes ||
+                        entry.media.chapters ||
+                        entry.media.volumes) && (
+                        <div className="flex flex-row items-center gap-2">
+                            <div className="h-2 transition-all group-hover:h-4 rounded-sm bg-zinc-800 group-hover:bg-zinc-700 w-24 relative overflow-hidden">
+                                <div
+                                    className="h-full bg-green-600 rounded-sm transition-all"
+                                    style={{
+                                        width: `${
+                                            entry.type === "anime"
+                                                ? (entry.episodeProgress! /
+                                                      entry.media!.episodes!) *
+                                                  100
+                                                : 0
+                                        }%`,
+                                    }}
+                                ></div>
+                                <div className="text-xs leading-none flex flex-row items-center justify-center gap-1 w-10 text-zinc-300 absolute top-0 bottom-0 left-0 right-0 m-auto opacity-0 group-hover:opacity-100 transition">
+                                    {entry.type === "anime" ? (
+                                        <div>
+                                            {entry.episodeProgress ?? 0}/
+                                            {entry.media.episodes ?? "?"}
+                                        </div>
+                                    ) : (
+                                        <>
+                                            <div>
+                                                {entry.chapterProgress}/
+                                                {entry.media.chapters ?? "?"}
+                                            </div>
+                                            <div>
+                                                {entry.volumeProgress}/
+                                                {entry.media.volumes ?? "?"}
+                                            </div>
+                                        </>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                <Stars rating={entry.score ? entry.score / 20 : 0} />
                 {entry.favorite ? (
                     <HeartIcon className="h-4 w-4 text-red-400 fill-red-400" />
                 ) : (
                     <HeartIcon className="h-4 w-4 transition text-zinc-800 group-hover:text-zinc-700 fill-zinc-800 group-hover:fill-zinc-700" />
                 )}
-                <Stars rating={entry.score ? entry.score / 20 : 0} />
             </div>
         </div>
     );
