@@ -36,7 +36,7 @@
 - **Night-mode-first** - Dark mode is enabled by default (light mode is also available).
 - **Offline library** - No need for a wi-fi connection to update your lists.
 - **Lists** - Create lists and save your favorite anime/manga into them. You can even add both anime and manga to the same list!
-- **Sync your library** - Import from and export your library to [AniList](https://anilist.co), [MyAnimeList](https://myanimelist.net), and [Kitsu](https://kitsu.io) (more coming soon).
+- **Sync your library** - Import from and export your library to [AniList](https://anilist.co), [MyAnimeList](https://myanimelist.net), ~~and [Kitsu](https://kitsu.io)~~ (more coming soon).
 
 ### Not supported
 
@@ -49,7 +49,7 @@
 
 ## Download
 
-You can [download](https://github.com/naoka-dev/Naoka/releases/tag/latest) the latest installable version of Naoka for Windows, ~~macOS and Linux (soon)~~.
+You can [download](https://github.com/naoka-dev/Naoka/releases/) the latest installable version of Naoka for Windows, ~~macOS and Linux (soon)~~.
 
 ## Related
 
