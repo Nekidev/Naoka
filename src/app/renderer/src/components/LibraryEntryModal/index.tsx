@@ -210,10 +210,19 @@ function FormModal({
                                 <option value="completed">Completed</option>
                             </SelectInput>
                         </LibraryEntryInput>
-                        <LibraryEntryInput title="Rating">
+                        <LibraryEntryInput
+                            title="Rating"
+                            label={
+                                ((libraryEntry?.score || 0) / 20) % 1 != 0
+                                    ? `${libraryEntry?.score}/100`
+                                    : undefined
+                            }
+                        >
                             <RatingInput
                                 stars={5}
-                                defaultValue={(libraryEntry?.score || 0) / 20}
+                                defaultValue={Math.floor(
+                                    (libraryEntry?.score || 0) / 20
+                                )}
                                 name="score"
                             />
                         </LibraryEntryInput>
@@ -356,10 +365,12 @@ function FormModal({
 
 function LibraryEntryInput({
     title,
+    label,
     span = 1,
     children,
 }: {
     title: string;
+    label?: string;
     span?: number;
     children: React.ReactNode;
 }) {
@@ -370,7 +381,10 @@ function LibraryEntryInput({
                 gridColumn: `span ${span} / span ${span}`,
             }}
         >
-            <span className="text-xs text-zinc-400">{title}</span>
+            <div className="flex flex-row items-center justify-between mb-1">
+                <span className="text-xs text-zinc-400">{title}</span>
+                {label && <div className="text-xs text-zinc-500">{label}</div>}
+            </div>
             {children}
         </div>
     );
