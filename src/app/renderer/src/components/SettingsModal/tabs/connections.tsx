@@ -59,13 +59,13 @@ export default function Connections() {
                     ))
                 ) : (
                     <div className="flex-1 flex flex-col justify-center items-center text-zinc-300 text-base p-4 rounded-lg bg-zinc-850">
-                        <div className="mb-1">(⊙.☉)7</div>
-                        <div>
+                        <div className="mb-1 text-sm">(⊙.☉)7</div>
+                        <div className="text-sm">
                             {m(
                                 "settings_connections_connectedaccounts_empty_title"
                             )}
                         </div>
-                        <div className="opacity-50 text-sm">
+                        <div className="opacity-50 text-xs">
                             {m(
                                 "settings_connections_connectedaccounts_empty_subtitle"
                             )}
