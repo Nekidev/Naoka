@@ -25,7 +25,6 @@
         "@heroicons/react": "^2.0.18",
         "@tauri-apps/api": "^1.5.2",
         "@uidotdev/usehooks": "^2.4.1",
-        "app-root-path": "^3.1.0",
         "dataclass": "^2.1.1",
         "dexie": "^3.2.4",
         "dexie-react-hooks": "^1.1.7",
