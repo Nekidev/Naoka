@@ -16,6 +16,8 @@ import React from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import ConfirmModal from "@/components/ConfirmModal";
 import { List, Mapping, Media, MediaType } from "@/lib/db/types";
+import { useSelectedProvider } from "@/lib/providers/hooks";
+import { getBulkMedia } from "@/lib/db/utils";
 
 interface ListWithMedia extends List {
     media?: Media[];
@@ -27,6 +29,8 @@ export default function ListPage() {
 
     const id = searchParams.get("id");
 
+    const [selectedProvider] = useSelectedProvider();
+
     const list = useLiveQuery(
         () =>
             db.lists.get(parseInt(id!)).then(async (list: List | undefined) => {
@@ -37,14 +41,18 @@ export default function ListPage() {
                     return undefined;
                 }
 
-                let media = await db.media.bulkGet([...list!.items]);
+                let media = await getBulkMedia(
+                    [...list!.items],
+                    selectedProvider
+                );
+                console.log(media);
 
                 return {
                     ...list,
-                    media: media || [],
+                    media: media.filter((m) => m) || [],
                 } as ListWithMedia;
             }),
-        [id]
+        [id, selectedProvider]
     );
 
     const [isEditModalOpen, setIsEditModalOpen] = React.useState(false);
@@ -134,24 +142,18 @@ export default function ListPage() {
                 </div>
                 <div className="p-4 flex flex-row items-center justify-between gap-8 border-b border-zinc-800">
                     <div className="flex flex-row items-center gap-4">
-                        {list.items.length < 2 ? (
+                        {list.media!.length < 2 ? (
                             <div className="h-20 w-20 rounded bg-zinc-700 flex flex-col items-center justify-center shrink-0">
                                 <RectangleStackIcon className="h-8 w-8 text-zinc-400" />
                             </div>
                         ) : (
                             <div className="h-20 w-20 rounded bg-zinc-700 relative">
                                 <img
-                                    src={
-                                        list.media![0].imageUrl ||
-                                        undefined
-                                    }
+                                    src={list.media![0].imageUrl || undefined}
                                     className="absolute top-0 bottom-0 left-0 h-full rounded aspect-cover object-cover object-center z-10"
                                 />
                                 <img
-                                    src={
-                                        list.media![1].imageUrl ||
-                                        undefined
-                                    }
+                                    src={list.media![1].imageUrl || undefined}
                                     className="absolute top-0 bottom-0 right-0 h-full rounded aspect-cover object-cover object-center"
                                 />
                             </div>
@@ -222,7 +224,11 @@ export default function ListPage() {
                 onConfirm={() => {
                     setIsConfirmModalOpen(false);
                     router.replace("/app/library/");
-                    db.lists.where("id").equals(list.id!).delete().then(() => {});
+                    db.lists
+                        .where("id")
+                        .equals(list.id!)
+                        .delete()
+                        .then(() => {});
                 }}
                 onDecline={() => {
                     setIsConfirmModalOpen(false);

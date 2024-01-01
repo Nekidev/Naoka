@@ -6,6 +6,8 @@ import { RectangleStackIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import CreateListModal from "../CreateListModal";
 import React from "react";
 import { List, Mapping, Media } from "@/lib/db/types";
+import { getBulkMedia, getMedia } from "@/lib/db/utils";
+import { useSelectedProvider } from "@/lib/providers/hooks";
 
 interface ListWithMedia extends List {
     media: Media[];
@@ -32,7 +34,11 @@ function FormModal({
     mapping: Mapping;
     closeModal: () => void;
 }) {
-    const media = useLiveQuery(() => db.media.get({ mapping }), [mapping]);
+    const [selectedProvider] = useSelectedProvider();
+    const media = useLiveQuery(
+        () => getMedia(mapping, selectedProvider),
+        [mapping, selectedProvider]
+    );
     const lists = useLiveQuery(() =>
         db.lists.toArray(async (lists) => {
             let mediaMappings: Array<Mapping> = [];
@@ -43,9 +49,10 @@ function FormModal({
                 );
             }
 
-            const media: Media[] = (await db.media.bulkGet([
-                ...new Set(mediaMappings),
-            ])) as Media[];
+            const media: Media[] = await getBulkMedia(
+                [...new Set(mediaMappings)],
+                selectedProvider
+            ) as Media[];
 
             return lists.map((list) => {
                 const listWithMedia: ListWithMedia = list as ListWithMedia;
