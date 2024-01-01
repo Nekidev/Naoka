@@ -242,16 +242,29 @@ export class ExternalAccount extends Data {
                                 newEntry.updatedAt >
                                 existingEntry!.entry.updatedAt
                             ) {
-                                newEntryInstance[value] =
-                                    newEntry[value as keyof LibraryEntry] ??
-                                    existingEntry?.entry[
-                                        value as keyof LibraryEntry
-                                    ];
+                                if (!!newEntry[value as keyof LibraryEntry]) {
+                                    newEntryInstance[value] =
+                                        newEntry[value as keyof LibraryEntry];
+                                } else {
+                                    newEntryInstance[value] =
+                                        existingEntry?.entry[
+                                            value as keyof LibraryEntry
+                                        ];
+                                }
                             } else {
-                                newEntryInstance[value] =
-                                    existingEntry?.entry[
+                                if (
+                                    !!existingEntry?.entry[
                                         value as keyof LibraryEntry
-                                    ] ?? newEntry[value as keyof LibraryEntry];
+                                    ]
+                                ) {
+                                    newEntryInstance[value] =
+                                        existingEntry?.entry[
+                                            value as keyof LibraryEntry
+                                        ];
+                                } else {
+                                    newEntryInstance[value] =
+                                        newEntry[value as keyof LibraryEntry];
+                                }
                             }
                         }
                     );
