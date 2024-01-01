@@ -220,9 +220,9 @@ function FormModal({
                         >
                             <RatingInput
                                 stars={5}
-                                defaultValue={Math.floor(
+                                defaultValue={libraryEntry?.score ? Math.floor(
                                     (libraryEntry?.score || 0) / 20
-                                )}
+                                ) : null}
                                 name="score"
                             />
                         </LibraryEntryInput>
@@ -410,10 +410,10 @@ function RatingInput({
     ...props
 }: {
     stars: 5 | 10;
-    defaultValue: number;
+    defaultValue: number | null;
     [key: string]: any;
 }) {
-    const [markedStars, setMarkedStars] = React.useState<number>(defaultValue);
+    const [markedStars, setMarkedStars] = React.useState<number | null>(defaultValue);
     const [hoveredStarIndex, setHoveredStarIndex] = React.useState<
         number | null
     >(null);
@@ -438,7 +438,7 @@ function RatingInput({
                                             ? "fill-orange-400 text-orange-400"
                                             : "fill-yellow-400 text-yellow-400"
                                         : "fill-transparent"
-                                    : markedStars > index
+                                    : !!markedStars && markedStars > index
                                     ? markedStars <= 2
                                         ? "fill-red-400 text-red-400"
                                         : markedStars == 3
@@ -458,18 +458,18 @@ function RatingInput({
                         />
                     );
                 })}
-                {markedStars > 0 && (
+                {!!markedStars && markedStars > 0 && (
                     <button
                         className="absolute top-0 bottom-0 right-0 p-2 my-auto text-zinc-400 hover:text-zinc-200 transition"
                         onClick={() => {
-                            setMarkedStars(0);
+                            setMarkedStars(null);
                         }}
                     >
                         <XMarkIcon className="h-4 w-4" />
                     </button>
                 )}
             </div>
-            <input type="hidden" value={markedStars * 20} name={props.name} />
+            <input type="hidden" value={markedStars ? markedStars * 20 : ""} name={props.name} />
         </>
     );
 }
