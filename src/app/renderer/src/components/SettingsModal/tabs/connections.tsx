@@ -327,6 +327,15 @@ function Account({ account }: { account: ExternalAccount }) {
                                     "settings_connections_connect_import_latest_description"
                                 ),
                             },
+                            {
+                                value: "merge",
+                                title: m(
+                                    "settings_connections_connect_import_merge_title"
+                                ),
+                                description: m(
+                                    "settings_connections_connect_import_merge_description"
+                                ),
+                            }
                         ],
                     },
                 ]}

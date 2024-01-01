@@ -113,7 +113,7 @@ export interface LibraryEntry {
     type: MediaType;
     favorite: boolean;
     status: LibraryStatus;
-    score: number;
+    score: number | null;
     episodeProgress?: number;
     chapterProgress?: number;
     volumeProgress?: number;
@@ -140,6 +140,9 @@ export enum ImportMethod {
 
     // Keep the lastest library entry
     Latest = "latest",
+
+    // Merge both library entries, preferring the data of the latest updated entry
+    Merge = "merge",
 }
 
 export interface UserData {
@@ -226,18 +229,46 @@ export class ExternalAccount extends Data {
                 (e) => e && e.mapping === newEntry.mapping
             );
 
-            if (existingEntry) {
+            if (!!existingEntry) {
                 // Keep favorite status
                 newEntry.favorite = existingEntry.entry.favorite;
 
-                if (
-                    (method === ImportMethod.Latest &&
-                        existingEntry.entry.updatedAt > newEntry.updatedAt) ||
-                    method === ImportMethod.Keep
-                ) {
-                    return existingEntry.entry;
+                if (method === ImportMethod.Merge) {
+                    let newEntryInstance: { [key: string]: any } = {};
+
+                    Object.getOwnPropertyNames(newEntry).forEach(
+                        (value: string) => {
+                            if (
+                                newEntry.updatedAt >
+                                existingEntry!.entry.updatedAt
+                            ) {
+                                newEntryInstance[value] =
+                                    newEntry[value as keyof LibraryEntry] ??
+                                    existingEntry?.entry[
+                                        value as keyof LibraryEntry
+                                    ];
+                            } else {
+                                newEntryInstance[value] =
+                                    existingEntry?.entry[
+                                        value as keyof LibraryEntry
+                                    ] ?? newEntry[value as keyof LibraryEntry];
+                            }
+                        }
+                    );
+
+                    newEntryInstance.mapping = existingEntry.entry.mapping;
+                    newEntry = newEntryInstance as LibraryEntry;
                 } else {
-                    return newEntry;
+                    if (
+                        (method === ImportMethod.Latest &&
+                            existingEntry.entry.updatedAt >
+                                newEntry.updatedAt) ||
+                        method === ImportMethod.Keep
+                    ) {
+                        return existingEntry.entry;
+                    } else {
+                        return newEntry;
+                    }
                 }
             }
 
