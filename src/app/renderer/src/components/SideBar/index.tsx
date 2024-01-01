@@ -20,16 +20,13 @@ import Tooltip from "../Tooltip";
 import SettingsModal from "../SettingsModal";
 import Link from "../Link";
 import { useClickAway, useLocalStorage } from "@uidotdev/usehooks";
-import {
-    List,
-    Mapping,
-    Media,
-    Provider,
-} from "@/lib/db/types";
+import { List, Mapping, Media, Provider } from "@/lib/db/types";
 import { motion, AnimatePresence } from "framer-motion";
 import { ProviderAPI, providers } from "@/lib/providers";
 import { useSidebarExpanded } from "./hooks";
 import { useMessages } from "@/lib/messages";
+import { getBulkMedia } from "@/lib/db/utils";
+import { useSelectedProvider } from "@/lib/providers/hooks";
 
 interface ListWithMedia extends List {
     media: Media[];
@@ -149,9 +146,7 @@ function MenuButtons(): JSX.Element {
                     <IconButton
                         icon={<Bars3Icon className="w-6 h-6" />}
                         onClick={() => {
-                            setIsExpanded(
-                                !isExpanded
-                            );
+                            setIsExpanded(!isExpanded);
                         }}
                     />
                 </div>
@@ -248,28 +243,34 @@ function Lists({
     const [isExpanded, setIsExpanded] = useSidebarExpanded();
     const m = useMessages();
 
-    const lists: ListWithMedia[] | undefined = useLiveQuery(() =>
-        db.lists.toArray(async (lists) => {
-            let mediaMappings: Array<Mapping> = [];
+    const [selectedProvider] = useSelectedProvider();
 
-            for (const list of lists) {
-                list.items.map((mapping: Mapping) =>
-                    mediaMappings.push(mapping)
-                );
-            }
+    const lists: ListWithMedia[] | undefined = useLiveQuery(
+        () =>
+            db.lists.toArray(async (lists) => {
+                let mediaMappings: Array<Mapping> = [];
 
-            const media: Media[] = (await db.media.bulkGet([
-                ...new Set(mediaMappings),
-            ])) as Media[];
+                for (const list of lists) {
+                    list.items.map((mapping: Mapping) =>
+                        mediaMappings.push(mapping)
+                    );
+                }
 
-            return lists.map((list) => {
-                const listWithMedia = list as ListWithMedia;
-                listWithMedia.media = media.filter((v) =>
-                    list.items.includes(v!.mapping)
-                );
-                return listWithMedia;
-            });
-        })
+                const mappingsSet = [...new Set(mediaMappings)];
+                const media: Media[] = (await getBulkMedia(
+                    mappingsSet,
+                    selectedProvider
+                )) as Media[];
+
+                return lists.map((list) => {
+                    const listWithMedia = list as ListWithMedia;
+                    listWithMedia.media = media.filter((v, i) =>
+                        list.items.includes(mappingsSet[i])
+                    );
+                    return listWithMedia;
+                });
+            }),
+        [selectedProvider]
     );
 
     return (
@@ -417,9 +418,7 @@ function UserProfile({ openSettingsModal }: { openSettingsModal: () => void }) {
                         transition={{ duration: 0.15 }}
                         ref={providerSelectRef}
                         className={`absolute left-2 p-1 w-56 z-10 rounded bg-zinc-900 border border-zinc-800 flex flex-col items-stretch drop-shadow-2xl ${
-                            isExpanded
-                                ? "bottom-0 mb-16"
-                                : "bottom-2 mb-12"
+                            isExpanded ? "bottom-0 mb-16" : "bottom-2 mb-12"
                         }`}
                     >
                         {Object.getOwnPropertyNames(providers).map(
@@ -453,7 +452,7 @@ function UserProfile({ openSettingsModal }: { openSettingsModal: () => void }) {
                         <div className="leading-none text-sm">
                             {externalAccount?.user?.name ?? api.name}
                         </div>
-                        {(externalAccount && externalAccount.user) && (
+                        {externalAccount && externalAccount.user && (
                             <div className="text-xs text-white/50 leading-none">
                                 {api.name}
                             </div>
