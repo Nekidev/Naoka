@@ -4,7 +4,7 @@ export const defaultLibraryEntry: LibraryEntry = {
     type: "anime",
     favorite: false,
     status: LibraryStatus.NotStarted,
-    score: 0,
+    score: null,
     episodeProgress: 0,
     chapterProgress: 0,
     volumeProgress: 0,
