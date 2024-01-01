@@ -235,7 +235,9 @@ export class ExternalAccount extends Data {
                         (e) => e && e.mapping === newEntry.mapping
                     );
 
-                    if (!!existingEntry) {
+                    if (existingEntry) {
+                        // Keep favorite status
+                        newEntry.favorite = existingEntry.entry.favorite;
                         if (existingEntry.entry.updatedAt > newEntry.updatedAt) {
                             return existingEntry.entry;
                         } else {
