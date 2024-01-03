@@ -57,7 +57,7 @@ You can [download](https://github.com/naoka-dev/Naoka/releases/) the latest inst
 
 ## Support
 
-[![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/F1F7S2JB8)
+[![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/nekidev)
 
 ## Credits
 
