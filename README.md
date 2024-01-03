@@ -33,7 +33,7 @@
 ## Key Features
 
 - **Nice UI** - There's a lot of effort put on making everything look nice.
-- **Night-mode-first** - Dark mode is enabled by default (light mode will also be available).
+- **Night mode** - Dark mode is enabled by default (light mode will also be available).
 - **Offline library** - No need for a wi-fi connection to update your lists.
 - **Lists** - Create lists and save your favorite anime/manga into them. You can even add both anime and manga to the same list!
 - **Sync your library** - Import from and export your library to [AniList](https://anilist.co), [MyAnimeList](https://myanimelist.net), ~~and [Kitsu](https://kitsu.io)~~ (more coming soon).
