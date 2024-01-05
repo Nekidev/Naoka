@@ -4,44 +4,24 @@ import { AnimatePresence } from "framer-motion";
 import Modal from "../Modal";
 import { CheckIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import React from "react";
+import Input, { InputType } from "@/lib/forms";
+
+export enum FormComponentType {
+    Separator = "separator"
+}
+
+export type ComponentType = FormComponentType | InputType;
+
+export interface FormComponent {
+    type: FormComponentType;
+}
 
 interface FormModalProps {
     isOpen: boolean;
     closeModal: () => void;
     title: string;
     subtitle?: string | null;
-    fields: (
-        | {
-              type: "text";
-              name: string;
-              label: string;
-              defaultValue: string;
-              info?: string;
-          }
-        | {
-              type: "radiogroup";
-              name: string;
-              defaultValue?: string;
-              options: {
-                  value: string;
-                  title: string;
-                  description?: string;
-              }[];
-          }
-        | {
-              type: "checkboxcardgroup" | "checkboxgroup";
-              name: string;
-              options: {
-                  value: string;
-                  title: string;
-                  description?: string;
-                  defaultChecked?: boolean;
-              }[];
-          }
-        | {
-              type: "separator";
-          }
-    )[];
+    fields: (Input | FormComponent)[];
     onSubmit: (result: { [key: string]: string }) => void;
     onDismiss?: () => void;
 }
@@ -98,14 +78,14 @@ function FormModalContent(props: FormModalProps) {
                 >
                     {props.fields.map((field, index: number) => {
                         switch (field.type) {
-                            case "text":
+                            case InputType.Text:
                                 return (
                                     <div
                                         key={index}
                                         className="flex flex-col gap-1 text-zinc-300"
                                     >
                                         <input
-                                            type={field.type}
+                                            type={field.valueType}
                                             name={field.name}
                                             placeholder={field.label}
                                             defaultValue={field.defaultValue}
@@ -115,7 +95,7 @@ function FormModalContent(props: FormModalProps) {
                                     </div>
                                 );
 
-                            case "radiogroup":
+                            case InputType.RadioGroup:
                                 return (
                                     <div className="flex flex-col gap-4 items-stretch">
                                         {field.options.map((option, index) => (
@@ -123,37 +103,29 @@ function FormModalContent(props: FormModalProps) {
                                                 key={index}
                                                 name={field.name}
                                                 value={option.value}
-                                                title={option.title}
+                                                title={option.label}
                                                 description={option.description}
                                             />
                                         ))}
                                     </div>
                                 );
 
-                            case "checkboxgroup":
-                            case "checkboxcardgroup":
+                            case InputType.CheckboxInput:
                                 return (
                                     <div className="flex flex-col gap-4 items-stretch">
-                                        {field.options.map((option, index) => (
-                                            <CheckboxCard
-                                                key={index}
-                                                name={field.name}
-                                                value={option.value}
-                                                title={option.title}
-                                                description={option.description}
-                                                isCard={
-                                                    field.type ===
-                                                    "checkboxcardgroup"
-                                                }
-                                                defaultChecked={
-                                                    option.defaultChecked
-                                                }
-                                            />
-                                        ))}
+                                        <CheckboxCard
+                                            key={index}
+                                            name={field.name}
+                                            title={field.label}
+                                            description={field.description}
+                                            defaultChecked={
+                                                field.defaultChecked
+                                            }
+                                        />
                                     </div>
                                 );
 
-                            case "separator":
+                            case FormComponentType.Separator:
                                 return (
                                     <div className="w-full h-px bg-zinc-700"></div>
                                 );
@@ -219,37 +191,32 @@ function RadioCard({
 
 function CheckboxCard({
     name,
-    value,
     title,
     description,
     defaultChecked,
-    isCard = false,
 }: {
     name: string;
-    value: string;
     title: string;
     description?: string;
     defaultChecked?: boolean;
-    isCard?: boolean;
 }) {
     return (
         <label
-            htmlFor={`${name}-${value}`}
+            htmlFor={name}
             className={`${
-                isCard && "p-2 rounded bg-zinc-850 hover:bg-zinc-900 transition"
+                !!description && "p-2 rounded bg-zinc-850 hover:bg-zinc-900 transition"
             } flex flex-row items-start gap-2 cursor-pointer`}
         >
             <input
                 type="checkbox"
-                id={`${name}-${value}`}
+                id={name}
                 name={name}
-                value={value}
                 className="peer hidden"
                 defaultChecked={defaultChecked}
             />
             <div
                 className={`border border-zinc-100 rounded w-3 h-3 peer-checked:bg-zinc-100 text-zinc-900 transition my-1.5 mr-1.5 ${
-                    isCard && "mx-1.5"
+                    !!description && "mx-1.5"
                 }`}
             >
                 <CheckIcon className="h-2.5 w-2.5 stroke-2 transition" />

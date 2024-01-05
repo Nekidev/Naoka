@@ -1,30 +1,12 @@
-// TODO: Create a forms.ts with all these interfaces so that they can be reused
-// in different components.
-
-import { ExternalAccount, LibraryEntry, Mapping, Media, MediaType, UserData } from "../db/types";
-
-interface Input {
-    name: string;
-    label: string;
-}
-
-export interface SelectInput extends Input {
-    icon?: JSX.Element;
-    options: {
-        label: string;
-        value: string;
-    }[];
-}
-
-export interface RangeInput extends Input {
-    start: number;
-    end: number;
-    steps: number;
-}
-
-export interface CheckboxInput extends Input {
-    defaultValue: boolean;
-}
+import {
+    ExternalAccount,
+    LibraryEntry,
+    Mapping,
+    Media,
+    MediaType,
+    UserData,
+} from "../db/types";
+import Input from "../forms";
 
 interface SearchConfig {
     // Delay to wait after a key is pressed before executing a query. Will be 0
@@ -34,20 +16,7 @@ interface SearchConfig {
         label: string;
         value: string;
     }[];
-    filters: (
-        | {
-              type: "select";
-              value: SelectInput;
-          }
-        | {
-              type: "range";
-              value: RangeInput;
-          }
-        | {
-              type: "checkbox";
-              value: CheckboxInput;
-          }
-    )[];
+    filters: Input[];
 }
 
 export interface Config {

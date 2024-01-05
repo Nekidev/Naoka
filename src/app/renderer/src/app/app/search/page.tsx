@@ -12,10 +12,6 @@ import {
     ChevronUpDownIcon,
 } from "@heroicons/react/24/outline";
 import { VerticalNavSpacer, LeftNavSpacer } from "@/components/NavigationBar";
-import {
-    SelectInput as SelectInputInterface,
-    CheckboxInput as CheckboxInputInterface,
-} from "@/lib/providers/base";
 import { cn } from "@/lib/utils";
 import styles from "./styles.module.css";
 import LibraryEntryModal from "@/components/LibraryEntryModal";
@@ -38,6 +34,11 @@ import {
 import { useLocalStorage } from "@uidotdev/usehooks";
 import { useMessages } from "@/lib/messages";
 import { Messages } from "@/lib/messages/translations";
+import {
+    SelectInput as SelectInputInterface,
+    CheckboxInput as CheckboxGroupInterface,
+    InputType,
+} from "@/lib/forms";
 
 export default function Search() {
     const m = useMessages();
@@ -266,21 +267,21 @@ export default function Search() {
                         {api.config.search[searchType]?.filters.map(
                             (filter: any, index: number) => {
                                 switch (filter.type) {
-                                    case "select":
+                                    case InputType.Select:
                                         return (
                                             <SelectFilter
                                                 key={index}
                                                 onChange={search}
-                                                {...filter.value}
+                                                {...filter}
                                             />
                                         );
 
-                                    case "checkbox":
+                                    case InputType.CheckboxInput:
                                         return (
                                             <CheckboxFilter
                                                 key={index}
                                                 onChange={search}
-                                                {...filter.value}
+                                                {...filter}
                                             />
                                         );
                                 }
@@ -341,10 +342,10 @@ function SelectFilter({
 function CheckboxFilter({
     name,
     label,
-    defaultValue,
+    defaultChecked,
     ...props
-}: CheckboxInputInterface & { [key: string]: any }) {
-    const [checked, setChecked] = React.useState(defaultValue);
+}: CheckboxGroupInterface & { [key: string]: any }) {
+    const [checked, setChecked] = React.useState(defaultChecked);
 
     return (
         <label

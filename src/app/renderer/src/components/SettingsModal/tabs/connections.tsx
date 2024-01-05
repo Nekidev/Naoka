@@ -5,13 +5,14 @@ import Tooltip from "@/components/Tooltip";
 import { db } from "@/lib/db";
 import { useLiveQuery } from "dexie-react-hooks";
 import { XMarkIcon } from "@heroicons/react/24/outline";
-import FormModal from "@/components/FormModal";
+import FormModal, { FormComponentType } from "@/components/FormModal";
 import React from "react";
 import { CheckCircleIcon } from "@heroicons/react/20/solid";
 import { notify } from "@/lib/notifications";
 import { ProviderAPI, providers } from "@/lib/providers";
 import { ExternalAccount, ImportMethod, MediaType } from "@/lib/db/types";
 import { useMessages } from "@/lib/messages";
+import { InputType } from "@/lib/forms";
 
 export default function Connections() {
     const m = useMessages();
@@ -209,9 +210,9 @@ function Account({ account }: { account: ExternalAccount }) {
                 subtitle={m("settings_connections_connect_subtitle")}
                 fields={[
                     {
+                        type: InputType.Text,
                         name: "username",
                         label: m("settings_connections_connect_username"),
-                        type: "text",
                         defaultValue: account.auth?.username || "",
                     },
                 ]}
@@ -252,8 +253,9 @@ function Account({ account }: { account: ExternalAccount }) {
                 })}
                 fields={[
                     {
-                        type: "radiogroup",
+                        type: InputType.RadioGroup,
                         name: "type",
+                        label: "Type",
                         defaultValue: "anime",
                         options: [
                             ...(api.config.syncing?.import?.mediaTypes.includes(
@@ -262,7 +264,7 @@ function Account({ account }: { account: ExternalAccount }) {
                                 ? [
                                       {
                                           value: "anime",
-                                          title: m(
+                                          label: m(
                                               "settings_connections_connect_import_anime_title"
                                           ),
                                           description: m(
@@ -280,7 +282,7 @@ function Account({ account }: { account: ExternalAccount }) {
                                 ? [
                                       {
                                           value: "manga",
-                                          title: m(
+                                          label: m(
                                               "settings_connections_connect_import_manga_title"
                                           ),
                                           description: m(
@@ -294,15 +296,16 @@ function Account({ account }: { account: ExternalAccount }) {
                                 : []),
                         ],
                     },
-                    { type: "separator" },
+                    { type: FormComponentType.Separator },
                     {
-                        type: "radiogroup",
+                        type: InputType.RadioGroup,
                         name: "method",
+                        label: "Method",
                         defaultValue: "merge",
                         options: [
                             {
                                 value: "override",
-                                title: m(
+                                label: m(
                                     "settings_connections_connect_import_override_title"
                                 ),
                                 description: m(
@@ -311,7 +314,7 @@ function Account({ account }: { account: ExternalAccount }) {
                             },
                             {
                                 value: "keep",
-                                title: m(
+                                label: m(
                                     "settings_connections_connect_import_keep_title"
                                 ),
                                 description: m(
@@ -320,7 +323,7 @@ function Account({ account }: { account: ExternalAccount }) {
                             },
                             {
                                 value: "latest",
-                                title: m(
+                                label: m(
                                     "settings_connections_connect_import_latest_title"
                                 ),
                                 description: m(
@@ -329,7 +332,7 @@ function Account({ account }: { account: ExternalAccount }) {
                             },
                             {
                                 value: "merge",
-                                title: m(
+                                label: m(
                                     "settings_connections_connect_import_merge_title"
                                 ),
                                 description: m(
