@@ -1,14 +1,15 @@
+import { InputType } from "@/lib/forms";
 import { Config } from "../base";
 
 const config: Config = {
     mediaTypes: ["anime", "manga"],
     syncing: {
         auth: {
-            type: "oauth"
+            type: "oauth",
         },
         import: {
-            mediaTypes: ["anime", "manga"]
-        }
+            mediaTypes: ["anime", "manga"],
+        },
     },
     search: {
         anime: {
@@ -48,111 +49,109 @@ const config: Config = {
             ],
             filters: [
                 {
-                    type: "select",
-                    value: {
-                        name: "type",
-                        label: "Show type",
-                        options: [
-                            {
-                                label: "All",
-                                value: "",
-                            },
-                            {
-                                label: "TV",
-                                value: "tv",
-                            },
-                            {
-                                label: "Movie",
-                                value: "movie",
-                            },
-                            {
-                                label: "OVA",
-                                value: "ova",
-                            },
-                            {
-                                label: "Special",
-                                value: "special",
-                            },
-                            {
-                                label: "ONA",
-                                value: "ona",
-                            },
-                            {
-                                label: "Music",
-                                value: "music",
-                            },
-                        ],
-                    },
+                    type: InputType.Select,
+                    name: "type",
+                    label: "Show type",
+                    options: [
+                        {
+                            label: "All",
+                            value: "",
+                        },
+                        {
+                            label: "TV",
+                            value: "tv",
+                        },
+                        {
+                            label: "Movie",
+                            value: "movie",
+                        },
+                        {
+                            label: "OVA",
+                            value: "ova",
+                        },
+                        {
+                            label: "Special",
+                            value: "special",
+                        },
+                        {
+                            label: "ONA",
+                            value: "ona",
+                        },
+                        {
+                            label: "Music",
+                            value: "music",
+                        },
+                    ],
                 },
                 {
-                    type: "select",
-                    value: {
-                        name: "rating",
-                        label: "Age rating",
-                        options: [
-                            {
-                                label: "All",
-                                value: "",
-                            },
-                            {
-                                label: "G - All ages",
-                                value: "g",
-                            },
-                            {
-                                label: "PG - Children",
-                                value: "pg",
-                            },
-                            {
-                                label: "PG-13 - Teens 13 or older",
-                                value: "pg13",
-                            },
-                            {
-                                label: "R - 17+ (violence & profanity)",
-                                value: "r17",
-                            },
-                            {
-                                label: "R+ - Mild Nudity",
-                                value: "r",
-                            },
-                            {
-                                label: "Rx - Hentai",
-                                value: "rx",
-                            },
-                        ],
-                    },
+                    type: InputType.Select,
+                    name: "rating",
+                    label: "Age rating",
+                    options: [
+                        {
+                            label: "All",
+                            value: "",
+                        },
+                        {
+                            label: "G - All ages",
+                            value: "g",
+                        },
+                        {
+                            label: "PG - Children",
+                            value: "pg",
+                        },
+                        {
+                            label: "PG-13 - Teens 13 or older",
+                            value: "pg13",
+                        },
+                        {
+                            label: "R - 17+ (violence & profanity)",
+                            value: "r17",
+                        },
+                        {
+                            label: "R+ - Mild Nudity",
+                            value: "r",
+                        },
+                        {
+                            label: "Rx - Hentai",
+                            value: "rx",
+                        },
+                    ],
                 },
                 {
-                    type: "select",
-                    value: {
-                        name: "status",
-                        label: "Status",
-                        options: [
-                            {
-                                label: "All",
-                                value: "",
-                            },
-                            {
-                                label: "Upcoming",
-                                value: "upcoming",
-                            },
-                            {
-                                label: "Airing",
-                                value: "airing",
-                            },
-                            {
-                                label: "Complete",
-                                value: "complete",
-                            },
-                        ],
-                    },
+                    type: InputType.Select,
+                    name: "status",
+                    label: "Status",
+                    options: [
+                        {
+                            label: "All",
+                            value: "",
+                        },
+                        {
+                            label: "Upcoming",
+                            value: "upcoming",
+                        },
+                        {
+                            label: "Airing",
+                            value: "airing",
+                        },
+                        {
+                            label: "Complete",
+                            value: "complete",
+                        },
+                    ],
                 },
                 {
-                    type: "checkbox",
-                    value: {
-                        name: "sfw",
-                        label: "Filter NSFW results",
-                        defaultValue: true,
-                    },
+                    type: InputType.CheckboxGroup,
+                    name: "sfw",
+                    label: "Filter NSFW results",
+                    options: [
+                        {
+                            value: "sfw",
+                            label: "Filter NSFW results",
+                            defaultChecked: true,
+                        },
+                    ],
                 },
             ],
         },
@@ -197,82 +196,82 @@ const config: Config = {
             ],
             filters: [
                 {
-                    type: "select",
-                    value: {
-                        name: "type",
-                        label: "Type",
-                        options: [
-                            {
-                                label: "All",
-                                value: "",
-                            },
-                            {
-                                label: "Manga",
-                                value: "manga",
-                            },
-                            {
-                                label: "Light novel",
-                                value: "lightnovel",
-                            },
-                            {
-                                label: "One shot",
-                                value: "oneshot",
-                            },
-                            {
-                                label: "Doujinshi",
-                                value: "doujin",
-                            },
-                            {
-                                label: "Manhwa",
-                                value: "manhwa",
-                            },
-                            {
-                                label: "Manhua",
-                                value: "manhua",
-                            },
-                        ],
-                    },
+                    type: InputType.Select,
+                    name: "type",
+                    label: "Type",
+                    options: [
+                        {
+                            label: "All",
+                            value: "",
+                        },
+                        {
+                            label: "Manga",
+                            value: "manga",
+                        },
+                        {
+                            label: "Light novel",
+                            value: "lightnovel",
+                        },
+                        {
+                            label: "One shot",
+                            value: "oneshot",
+                        },
+                        {
+                            label: "Doujinshi",
+                            value: "doujin",
+                        },
+                        {
+                            label: "Manhwa",
+                            value: "manhwa",
+                        },
+                        {
+                            label: "Manhua",
+                            value: "manhua",
+                        },
+                    ],
                 },
                 {
-                    type: "select",
-                    value: {
-                        name: "status",
-                        label: "Status",
-                        options: [
-                            {
-                                label: "All",
-                                value: "",
-                            },
-                            {
-                                label: "Upcoming",
-                                value: "upcoming",
-                            },
-                            {
-                                label: "Publishing",
-                                value: "publishing",
-                            },
-                            {
-                                label: "Hiatus",
-                                value: "hiatus",
-                            },
-                            {
-                                label: "Discontinued",
-                                value: "discontinued",
-                            },
-                            {
-                                label: "Complete",
-                                value: "complete",
-                            },
-                        ],
-                    },
+                    type: InputType.Select,
+                    name: "status",
+                    label: "Status",
+                    options: [
+                        {
+                            label: "All",
+                            value: "",
+                        },
+                        {
+                            label: "Upcoming",
+                            value: "upcoming",
+                        },
+                        {
+                            label: "Publishing",
+                            value: "publishing",
+                        },
+                        {
+                            label: "Hiatus",
+                            value: "hiatus",
+                        },
+                        {
+                            label: "Discontinued",
+                            value: "discontinued",
+                        },
+                        {
+                            label: "Complete",
+                            value: "complete",
+                        },
+                    ],
                 },
                 {
-                    type: "checkbox",
-                    value: {
-                        name: "sfw",
-                        label: "Filter NSFW results",
-                        defaultValue: true,
-                    },
+                    type: InputType.CheckboxGroup,
+                    name: "sfw",
+                    label: "Filter NSFW results",
+                    options: [
+                        {
+                            value: "sfw",
+                            label: "Filter NSFW results",
+                            defaultChecked: true,
+                        },
+                    ],
                 },
             ],
         },
