@@ -385,7 +385,13 @@ function LibraryEntryRow({
                                                 ? (entry.episodeProgress! /
                                                       entry.media!.episodes!) *
                                                   100
-                                                : 0
+                                                : Math.max(
+                                                      entry.chapterProgress! /
+                                                          entry.media!
+                                                              .chapters!,
+                                                      entry.volumeProgress! /
+                                                          entry.media!.volumes!
+                                                  ) * 100
                                         }%`,
                                     }}
                                 ></div>
