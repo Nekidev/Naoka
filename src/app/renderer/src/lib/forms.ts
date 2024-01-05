@@ -2,7 +2,7 @@ export enum InputType {
     Select,
     Text,
     TextArea,
-    CheckboxGroup,
+    CheckboxInput,
     RadioGroup,
 }
 
@@ -34,14 +34,10 @@ export interface TextAreaInput extends Input {
     type: InputType.TextArea;
 }
 
-export interface CheckboxGroup extends Input {
-    type: InputType.CheckboxGroup;
-    options: {
-        label: string;
-        value: string;
-        description?: string;
-        defaultChecked?: boolean;
-    }[];
+export interface CheckboxInput extends Input {
+    type: InputType.CheckboxInput;
+    description?: string;
+    defaultChecked?: boolean;
 }
 
 export interface RadioGroup extends Input {
@@ -57,6 +53,6 @@ type DefaultInputType =
     | SelectInput
     | TextInput
     | TextAreaInput
-    | CheckboxGroup
+    | CheckboxInput
     | RadioGroup;
 export default DefaultInputType;

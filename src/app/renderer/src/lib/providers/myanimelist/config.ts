@@ -142,16 +142,10 @@ const config: Config = {
                     ],
                 },
                 {
-                    type: InputType.CheckboxGroup,
+                    type: InputType.CheckboxInput,
                     name: "sfw",
                     label: "Filter NSFW results",
-                    options: [
-                        {
-                            value: "sfw",
-                            label: "Filter NSFW results",
-                            defaultChecked: true,
-                        },
-                    ],
+                    defaultChecked: true
                 },
             ],
         },
@@ -262,16 +256,10 @@ const config: Config = {
                     ],
                 },
                 {
-                    type: InputType.CheckboxGroup,
+                    type: InputType.CheckboxInput,
                     name: "sfw",
                     label: "Filter NSFW results",
-                    options: [
-                        {
-                            value: "sfw",
-                            label: "Filter NSFW results",
-                            defaultChecked: true,
-                        },
-                    ],
+                    defaultChecked: true,
                 },
             ],
         },
