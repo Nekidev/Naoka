@@ -204,16 +204,22 @@ function Account({ account }: { account: ExternalAccount }) {
             <FormModal
                 isOpen={isConnectAccountModalOpen}
                 closeModal={() => setIsConnectAccountModalOpen(false)}
-                title={m("settings_connections_connect_title", {
-                    provider: api.name,
-                })}
-                subtitle={m("settings_connections_connect_subtitle")}
-                fields={[
+                steps={[
                     {
-                        type: InputType.Text,
-                        name: "username",
-                        label: m("settings_connections_connect_username"),
-                        defaultValue: account.auth?.username || "",
+                        title: m("settings_connections_connect_title", {
+                            provider: api.name,
+                        }),
+                        subtitle: m("settings_connections_connect_subtitle"),
+                        fields: [
+                            {
+                                type: InputType.Text,
+                                name: "username",
+                                label: m(
+                                    "settings_connections_connect_username"
+                                ),
+                                defaultValue: account.auth?.username || "",
+                            },
+                        ],
                     },
                 ]}
                 onSubmit={({ username }) => {
@@ -247,98 +253,111 @@ function Account({ account }: { account: ExternalAccount }) {
             <FormModal
                 isOpen={isSelectListTypeImportModalOpen}
                 closeModal={() => setIsSelectListTypeImportModalOpen(false)}
-                title={m("settings_connections_connect_import_title")}
-                subtitle={m("settings_connections_connect_import_subtitle", {
-                    provider: api.name,
-                })}
-                fields={[
+                steps={[
                     {
-                        type: InputType.RadioGroup,
-                        name: "type",
-                        label: "Type",
-                        defaultValue: "anime",
-                        options: [
-                            ...(api.config.syncing?.import?.mediaTypes.includes(
-                                "anime"
-                            )
-                                ? [
-                                      {
-                                          value: "anime",
-                                          label: m(
-                                              "settings_connections_connect_import_anime_title"
-                                          ),
-                                          description: m(
-                                              "settings_connections_connect_import_anime_description",
+                        title: m("settings_connections_connect_import_title"),
+                        subtitle: m(
+                            "settings_connections_connect_import_subtitle",
+                            {
+                                provider: api.name,
+                            }
+                        ),
+                        fields: [
+                            {
+                                type: InputType.RadioGroup,
+                                name: "type",
+                                label: "Type",
+                                defaultValue: "anime",
+                                options: [
+                                    ...(api.config.syncing?.import?.mediaTypes.includes(
+                                        "anime"
+                                    )
+                                        ? [
                                               {
-                                                  provider: api.name,
-                                              }
-                                          ),
-                                      },
-                                  ]
-                                : []),
-                            ...(api.config.syncing?.import?.mediaTypes.includes(
-                                "manga"
-                            )
-                                ? [
-                                      {
-                                          value: "manga",
-                                          label: m(
-                                              "settings_connections_connect_import_manga_title"
-                                          ),
-                                          description: m(
-                                              "settings_connections_connect_import_manga_description",
+                                                  value: "anime",
+                                                  label: m(
+                                                      "settings_connections_connect_import_anime_title"
+                                                  ),
+                                                  description: m(
+                                                      "settings_connections_connect_import_anime_description",
+                                                      {
+                                                          provider: api.name,
+                                                      }
+                                                  ),
+                                              },
+                                          ]
+                                        : []),
+                                    ...(api.config.syncing?.import?.mediaTypes.includes(
+                                        "manga"
+                                    )
+                                        ? [
                                               {
-                                                  provider: api.name,
-                                              }
-                                          ),
-                                      },
-                                  ]
-                                : []),
+                                                  value: "manga",
+                                                  label: m(
+                                                      "settings_connections_connect_import_manga_title"
+                                                  ),
+                                                  description: m(
+                                                      "settings_connections_connect_import_manga_description",
+                                                      {
+                                                          provider: api.name,
+                                                      }
+                                                  ),
+                                              },
+                                          ]
+                                        : []),
+                                ],
+                            },
                         ],
                     },
-                    { type: FormComponentType.Separator },
                     {
-                        type: InputType.RadioGroup,
-                        name: "method",
-                        label: "Method",
-                        defaultValue: "merge",
-                        options: [
+                        title: "Select the import method",
+                        subtitle:
+                            "How do you want your library to be imported?",
+                        fields: [
                             {
-                                value: "override",
-                                label: m(
-                                    "settings_connections_connect_import_override_title"
-                                ),
-                                description: m(
-                                    "settings_connections_connect_import_override_description"
-                                ),
+                                type: InputType.RadioGroup,
+                                name: "method",
+                                label: "Method",
+                                defaultValue: "merge",
+                                options: [
+                                    {
+                                        value: "override",
+                                        label: m(
+                                            "settings_connections_connect_import_override_title"
+                                        ),
+                                        description: m(
+                                            "settings_connections_connect_import_override_description"
+                                        ),
+                                    },
+                                    {
+                                        value: "keep",
+                                        label: m(
+                                            "settings_connections_connect_import_keep_title"
+                                        ),
+                                        description: m(
+                                            "settings_connections_connect_import_keep_description"
+                                        ),
+                                    },
+                                    {
+                                        value: "latest",
+                                        label: m(
+                                            "settings_connections_connect_import_latest_title"
+                                        ),
+                                        description: m(
+                                            "settings_connections_connect_import_latest_description"
+                                        ),
+                                    },
+                                    {
+                                        value: "merge",
+                                        label: m(
+                                            "settings_connections_connect_import_merge_title"
+                                        ),
+                                        description: m(
+                                            "settings_connections_connect_import_merge_description"
+                                        ),
+                                    },
+                                ],
                             },
-                            {
-                                value: "keep",
-                                label: m(
-                                    "settings_connections_connect_import_keep_title"
-                                ),
-                                description: m(
-                                    "settings_connections_connect_import_keep_description"
-                                ),
-                            },
-                            {
-                                value: "latest",
-                                label: m(
-                                    "settings_connections_connect_import_latest_title"
-                                ),
-                                description: m(
-                                    "settings_connections_connect_import_latest_description"
-                                ),
-                            },
-                            {
-                                value: "merge",
-                                label: m(
-                                    "settings_connections_connect_import_merge_title"
-                                ),
-                                description: m(
-                                    "settings_connections_connect_import_merge_description"
-                                ),
-                            }
                         ],
                     },
                 ]}
