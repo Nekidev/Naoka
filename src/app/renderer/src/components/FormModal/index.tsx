@@ -1,13 +1,13 @@
 "use client";
 
-import { AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, steps } from "framer-motion";
 import Modal from "../Modal";
 import { CheckIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import React from "react";
 import Input, { InputType } from "@/lib/forms";
 
 export enum FormComponentType {
-    Separator = "separator"
+    Separator = "separator",
 }
 
 export type ComponentType = FormComponentType | InputType;
@@ -16,12 +16,16 @@ export interface FormComponent {
     type: FormComponentType;
 }
 
+export interface Step {
+    title: string;
+    subtitle?: string;
+    fields: (Input | FormComponent)[];
+}
+
 interface FormModalProps {
     isOpen: boolean;
     closeModal: () => void;
-    title: string;
-    subtitle?: string | null;
-    fields: (Input | FormComponent)[];
+    steps: Step[];
     onSubmit: (result: { [key: string]: string }) => void;
     onDismiss?: () => void;
 }
@@ -35,102 +39,130 @@ export default function FormModal(props: FormModalProps) {
 }
 
 function FormModalContent(props: FormModalProps) {
+    const [currentStep, setCurrentStep] = React.useState(0);
+    const formRef = React.useRef<HTMLFormElement | null>(null);
+
     return (
         <Modal closeModal={props.closeModal}>
             <div className="w-screen max-w-md bg-zinc-800 relative rounded overflow-x-hidden overflow-y-auto shadow-2xl p-4 flex flex-col gap-4">
-                <div className="flex flex-row items-start justify-between gap-4">
-                    <div className="flex flex-col gap-2">
-                        <h2 className="text-xl leading-none">{props.title}</h2>
-                        {props.subtitle && (
-                            <div className="text-zinc-400 text-sm leading-none">
-                                {props.subtitle}
-                            </div>
-                        )}
-                    </div>
-                    <button
-                        className="p-2 -m-2"
-                        onClick={() => {
-                            props.onDismiss && props.onDismiss();
-                            props.closeModal();
-                        }}
-                    >
-                        <XMarkIcon className="h-6 w-6" />
-                    </button>
-                </div>
                 <form
-                    onSubmit={(e) => {
-                        e.preventDefault();
-
-                        var values: { [key: string]: string } = {};
-
-                        Array.from(
-                            new FormData(e.target as HTMLFormElement).entries()
-                        ).map(([key, value]) => {
-                            values[key as keyof typeof values] =
-                                value as string;
-                        });
-
-                        props.onSubmit(values);
-                        props.closeModal();
-                    }}
+                    ref={formRef}
+                    onSubmit={(e) => e.preventDefault()}
                     autoComplete="off"
-                    className="flex flex-col items-stretch gap-4"
+                    className="flex flex-col gap-4 relative"
                 >
-                    {props.fields.map((field, index: number) => {
-                        switch (field.type) {
-                            case InputType.Text:
-                                return (
-                                    <div
-                                        key={index}
-                                        className="flex flex-col gap-1 text-zinc-300"
-                                    >
-                                        <input
-                                            type={field.valueType}
-                                            name={field.name}
-                                            placeholder={field.label}
-                                            defaultValue={field.defaultValue}
-                                            className="leading-none p-2 rounded bg-zinc-900 w-full border border-zinc-900 focus:border-zinc-100 transition placeholder:text-zinc-400"
-                                            autoComplete="none"
-                                        />
+                    <div className="w-full flex flex-row overflow-hidden">
+                        {props.steps.map((step, index: number) => {
+                            return (
+                                <div
+                                    className="w-full min-w-full flex flex-col gap-4 transition-all"
+                                    style={{
+                                        marginLeft:
+                                            index == 0
+                                                ? `-${currentStep * 100}%`
+                                                : `0`,
+                                    }}
+                                    key={index}
+                                >
+                                    <div className="flex flex-row items-start justify-between gap-4">
+                                        <div className="flex flex-col gap-2">
+                                            <h2 className="text-xl leading-none">
+                                                {step.title}
+                                            </h2>
+                                            {step.subtitle && (
+                                                <div className="text-zinc-400 text-sm leading-none">
+                                                    {step.subtitle}
+                                                </div>
+                                            )}
+                                        </div>
+                                        <button
+                                            className="p-2 -m-2"
+                                            onClick={() => {
+                                                props.onDismiss &&
+                                                    props.onDismiss();
+                                                props.closeModal();
+                                            }}
+                                        >
+                                            <XMarkIcon className="h-6 w-6" />
+                                        </button>
                                     </div>
-                                );
+                                    {step.fields.map((field, index: number) => {
+                                        switch (field.type) {
+                                            case InputType.Text:
+                                                return (
+                                                    <div
+                                                        key={index}
+                                                        className="flex flex-col gap-1 text-zinc-300"
+                                                    >
+                                                        <input
+                                                            type={
+                                                                field.valueType
+                                                            }
+                                                            name={field.name}
+                                                            placeholder={
+                                                                field.label
+                                                            }
+                                                            defaultValue={
+                                                                field.defaultValue
+                                                            }
+                                                            className="leading-none p-2 rounded bg-zinc-900 w-full border border-zinc-900 focus:border-zinc-100 transition placeholder:text-zinc-400"
+                                                            autoComplete="none"
+                                                        />
+                                                    </div>
+                                                );
 
-                            case InputType.RadioGroup:
-                                return (
-                                    <div className="flex flex-col gap-4 items-stretch">
-                                        {field.options.map((option, index) => (
-                                            <RadioCard
-                                                key={index}
-                                                name={field.name}
-                                                value={option.value}
-                                                title={option.label}
-                                                description={option.description}
-                                            />
-                                        ))}
-                                    </div>
-                                );
+                                            case InputType.RadioGroup:
+                                                return (
+                                                    <div className="flex flex-col gap-4 items-stretch">
+                                                        {field.options.map(
+                                                            (option, index) => (
+                                                                <RadioCard
+                                                                    key={index}
+                                                                    name={
+                                                                        field.name
+                                                                    }
+                                                                    value={
+                                                                        option.value
+                                                                    }
+                                                                    title={
+                                                                        option.label
+                                                                    }
+                                                                    description={
+                                                                        option.description
+                                                                    }
+                                                                />
+                                                            )
+                                                        )}
+                                                    </div>
+                                                );
 
-                            case InputType.CheckboxInput:
-                                return (
-                                    <div className="flex flex-col gap-4 items-stretch">
-                                        <CheckboxCard
-                                            key={index}
-                                            name={field.name}
-                                            title={field.label}
-                                            description={field.description}
-                                            defaultChecked={
-                                                field.defaultChecked
-                                            }
-                                        />
-                                    </div>
-                                );
+                                            case InputType.CheckboxInput:
+                                                return (
+                                                    <div className="flex flex-col gap-4 items-stretch">
+                                                        <CheckboxCard
+                                                            key={index}
+                                                            name={field.name}
+                                                            title={field.label}
+                                                            description={
+                                                                field.description
+                                                            }
+                                                            defaultChecked={
+                                                                field.defaultChecked
+                                                            }
+                                                        />
+                                                    </div>
+                                                );
 
-                            case FormComponentType.Separator:
-                                return (
-                                    <div className="w-full h-px bg-zinc-700"></div>
-                                );
-                        }
-                    })}
+                                            case FormComponentType.Separator:
+                                                return (
+                                                    <div className="w-full h-px bg-zinc-700"></div>
+                                                );
+                                        }
+                                    })}
+                                </div>
+                            );
+                        })}
+                    </div>
                     <div className="flex flex-row items-center justify-end gap-2">
                         <button
                             className="py-2 px-4 leading-none bg-zinc-700 text-zinc-300 rounded hover:bg-zinc-600 transition"
@@ -142,11 +174,45 @@ function FormModalContent(props: FormModalProps) {
                         >
                             Discard
                         </button>
+                        <div className="flex-1"></div>
+                        <button
+                            className="py-2 px-4 leading-none bg-zinc-700 text-zinc-300 rounded hover:bg-zinc-600 transition disabled:opacity-70 disabled:hover:bg-zinc-700 disabled:cursor-not-allowed"
+                            type="button"
+                            disabled={currentStep === 0}
+                            onClick={() => {
+                                if (currentStep != 0) {
+                                    setCurrentStep((v) => v - 1);
+                                }
+                            }}
+                        >
+                            Previous
+                        </button>
                         <button
                             className="py-2 px-4 leading-none bg-zinc-100 text-zinc-900 rounded hover:bg-zinc-300 transition"
-                            type="submit"
+                            type="button"
+                            onClick={() => {
+                                if (currentStep < props.steps.length - 1) {
+                                    setCurrentStep((v) => v + 1);
+                                } else {
+                                    var values: { [key: string]: string } = {};
+
+                                    Array.from(
+                                        new FormData(
+                                            formRef.current!
+                                        ).entries()
+                                    ).map(([key, value]) => {
+                                        values[key as keyof typeof values] =
+                                            value as string;
+                                    });
+
+                                    props.onSubmit(values);
+                                    props.closeModal();
+                                }
+                            }}
                         >
-                            Accept
+                            {currentStep === props.steps.length - 1
+                                ? "Accept"
+                                : "Next"}
                         </button>
                     </div>
                 </form>
@@ -204,7 +270,8 @@ function CheckboxCard({
         <label
             htmlFor={name}
             className={`${
-                !!description && "p-2 rounded bg-zinc-850 hover:bg-zinc-900 transition"
+                !!description &&
+                "p-2 rounded bg-zinc-850 hover:bg-zinc-900 transition"
             } flex flex-row items-start gap-2 cursor-pointer`}
         >
             <input
