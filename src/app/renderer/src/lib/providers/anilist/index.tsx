@@ -119,8 +119,12 @@ export class AniList extends BaseProvider {
                 genres: media.genres
                     .map((genre: string) => normalizeGenre(genre))
                     .filter((genre: MediaGenre | undefined) => !!genre),
-                format: normalizeMediaFormat(media.format) || null,
-                status: normalizeMediaStatus(media.status) || null,
+                format: media.format
+                    ? normalizeMediaFormat(media.format) ?? null
+                    : null,
+                status: media.status
+                    ? normalizeMediaStatus(media.status) ?? null
+                    : null,
                 episodes: media.episodes,
                 chapters: media.chapters,
                 volumes: media.volumes,

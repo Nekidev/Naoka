@@ -40,6 +40,7 @@ const messages = {
     media_format_doujinshi: "Doujinshi",
     media_format_manhwa: "Manhwa",
     media_format_manhua: "Manhua",
+    media_format_null: "Unknown",
     media_format_oel: "OEL",
     sidebar_search: "Search",
     sidebar_library: "My library",
