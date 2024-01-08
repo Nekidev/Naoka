@@ -41,16 +41,13 @@ export default function FormModal(props: FormModalProps) {
 function FormModalContent(props: FormModalProps) {
     const [currentStep, setCurrentStep] = React.useState(0);
     const formRef = React.useRef<HTMLFormElement | null>(null);
-    
 
     return (
         <Modal closeModal={props.closeModal}>
             <div className="w-screen max-w-md bg-zinc-800 relative rounded overflow-x-hidden overflow-y-auto shadow-2xl p-4 flex flex-col gap-4">
                 <form
                     ref={formRef}
-                    onSubmit={(e) => {
-                        e.preventDefault();
-                    }}
+                    onSubmit={(e) => e.preventDefault()}
                     autoComplete="off"
                     className="flex flex-col gap-4 relative"
                 >
