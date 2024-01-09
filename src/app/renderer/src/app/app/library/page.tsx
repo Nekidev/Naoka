@@ -368,7 +368,7 @@ function LibraryEntryRow({
             ) : (
                 <div className="w-10 aspect-square rounded bg-zinc-800 group-hover:bg-zinc-700 transition animate-pulse"></div>
             )}
-            <div className="flex flex-col gap-1 justify-center text-zinc-300 group-hover:text-zinc-100 transition">
+            <div className="flex flex-col gap-1.5 justify-center text-zinc-300 group-hover:text-zinc-100 transition">
                 {!!entry.media ? (
                     <span className="line-clamp-1 leading-none">
                         {getMediaTitle(entry.media)}
@@ -379,7 +379,7 @@ function LibraryEntryRow({
                         style={{ width: Math.random() * 200 + 30 + "px" }}
                     ></div>
                 )}
-                <span className="text-zinc-400 text-sm leading-none">
+                <span className="text-zinc-400 text-xs leading-none line-clamp-1">
                     {([MediaRating.RPlus, MediaRating.Rx].includes(
                         // May be null/undefined but that's fine. The ! is just
                         // for type checking.
