@@ -17,7 +17,14 @@ import { useLiveQuery } from "dexie-react-hooks";
 import LibraryEntryModal from "@/components/LibraryEntryModal";
 import { useDebounce } from "@uidotdev/usehooks";
 import { motion, AnimatePresence } from "framer-motion";
-import { LibraryEntry, LibraryStatus, Mapping, Media, MediaGenre, MediaRating } from "@/lib/db/types";
+import {
+    LibraryEntry,
+    LibraryStatus,
+    Mapping,
+    Media,
+    MediaGenre,
+    MediaRating,
+} from "@/lib/db/types";
 import { useSelectedProvider } from "@/lib/providers/hooks";
 import { getMedia } from "@/lib/db/utils";
 import { getMediaTitle } from "@/lib/settings";
@@ -112,8 +119,8 @@ export default function Library() {
 
     return (
         <>
-            <main className="flex flex-col min-h-full max-h-full overflow-y-auto">
-                <div className="sticky top-0 shrink-0 bg-zinc-900 z-10">
+            <main className="flex flex-col min-h-full max-h-full">
+                <div className="shrink-0 bg-zinc-900 z-10">
                     <div className="flex flex-row items-center">
                         <VerticalNavSpacer />
                         <LeftNavSpacer />
@@ -259,37 +266,39 @@ export default function Library() {
                     </div>
                     <div className="h-px shrink-0 bg-zinc-800 mt-2"></div>
                 </div>
-                {libraryEntries ? (
-                    libraryEntries.length > 0 ? (
-                        <div className="p-4 flex flex-col gap-4">
-                            {libraryEntries.map((entry) => (
-                                <LibraryEntryRow
-                                    key={entry.mapping}
-                                    entry={entry}
-                                    openModal={() =>
-                                        setOpenModalMapping(entry.mapping)
-                                    }
-                                />
-                            ))}
-                        </div>
+                <div className="flex-1 flex flex-col overflow-y-auto relative">
+                    {libraryEntries ? (
+                        libraryEntries.length > 0 ? (
+                            <div className="p-4 flex flex-col gap-4">
+                                {libraryEntries.map((entry) => (
+                                    <LibraryEntryRow
+                                        key={entry.mapping}
+                                        entry={entry}
+                                        openModal={() =>
+                                            setOpenModalMapping(entry.mapping)
+                                        }
+                                    />
+                                ))}
+                            </div>
+                        ) : (
+                            <div className="flex-1 flex flex-col justify-center items-center text-zinc-300">
+                                <div className="mb-2">(╥﹏╥)</div>
+                                <div>There's nothing here!</div>
+                                {(statusFilters.length > 0 ||
+                                    mediaTypeFilters.length > 0 ||
+                                    debouncedQuery.length > 0) && (
+                                    <div className="opacity-50 text-xs">
+                                        (Try clearing your filters)
+                                    </div>
+                                )}
+                            </div>
+                        )
                     ) : (
-                        <div className="flex-1 flex flex-col justify-center items-center text-zinc-300">
-                            <div className="mb-2">(╥﹏╥)</div>
-                            <div>There's nothing here!</div>
-                            {(statusFilters.length > 0 ||
-                                mediaTypeFilters.length > 0 ||
-                                debouncedQuery.length > 0) && (
-                                <div className="opacity-50 text-xs">
-                                    (Try clearing your filters)
-                                </div>
-                            )}
+                        <div className="flex-1 flex flex-col items-center justify-center">
+                            <div className="h-6 w-6 border-2 border-white/90 border-t-transparent rounded-full animate-spin"></div>
                         </div>
-                    )
-                ) : (
-                    <div className="flex-1 flex flex-col items-center justify-center">
-                        <div className="h-6 w-6 border-2 border-white/90 border-t-transparent rounded-full animate-spin"></div>
-                    </div>
-                )}
+                    )}
+                </div>
             </main>
             <LibraryEntryModal
                 mapping={openModalMapping}
@@ -371,10 +380,7 @@ function LibraryEntryRow({
                     ></div>
                 )}
                 <span className="text-zinc-400 text-sm leading-none">
-                {([
-                        MediaRating.RPlus,
-                        MediaRating.Rx,
-                    ].includes(
+                    {([MediaRating.RPlus, MediaRating.Rx].includes(
                         // May be null/undefined but that's fine. The ! is just
                         // for type checking.
                         entry.media!.rating!
@@ -388,20 +394,22 @@ function LibraryEntryRow({
                     {m(`media_format_${entry.media!.format}` as keyof Messages)}{" "}
                     {entry.media!.genres.length > 0 &&
                         "— " +
-                            entry.media!.genres
-                                .map((genre: MediaGenre, index: number) => {
-                                    const msg = m(
-                                        `media_genre_${genre}` as keyof Messages
-                                    );
-                                    if (index === 0) {
-                                        return (
-                                            msg[0].toUpperCase() +
-                                            msg.substring(1).toLowerCase()
+                            entry
+                                .media!.genres.map(
+                                    (genre: MediaGenre, index: number) => {
+                                        const msg = m(
+                                            `media_genre_${genre}` as keyof Messages
                                         );
-                                    } else {
-                                        return msg.toLowerCase();
+                                        if (index === 0) {
+                                            return (
+                                                msg[0].toUpperCase() +
+                                                msg.substring(1).toLowerCase()
+                                            );
+                                        } else {
+                                            return msg.toLowerCase();
+                                        }
                                     }
-                                })
+                                )
                                 .join(", ")}
                 </span>
             </div>
@@ -433,9 +441,7 @@ function LibraryEntryRow({
                                             statusColors[entry.status]["400"],
                                     }}
                                 ></div>
-                                <div
-                                    className="text-xs leading-none flex flex-row items-center justify-center gap-1 w-10 text-zinc-300 absolute top-0 bottom-0 left-0 right-0 m-auto opacity-0 group-hover:opacity-100 transition"
-                                >
+                                <div className="text-xs leading-none flex flex-row items-center justify-center gap-1 w-10 text-zinc-300 absolute top-0 bottom-0 left-0 right-0 m-auto opacity-0 group-hover:opacity-100 transition">
                                     {entry.type === "anime" ? (
                                         <div>
                                             {entry.episodeProgress ?? 0}/
