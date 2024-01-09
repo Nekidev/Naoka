@@ -33,7 +33,6 @@ export class ProviderAPI {
         type: MediaType,
         options: { [key: string]: any }
     ): Promise<Media[]> {
-        // TODO: Update mappings in the mappings DB table and update media in the media DB table
         const { media, mappings } = await this.api.search(type, options);
 
         (async () => {
@@ -47,7 +46,6 @@ export class ProviderAPI {
     }
 
     async getMedia(type: MediaType, id: string): Promise<Media> {
-        // TODO: Update mappings in the mappings DB table and media in the media DB table
         const { media, mappings } = await this.api.getMedia(type, id);
 
         (async () => {
@@ -59,7 +57,6 @@ export class ProviderAPI {
     }
 
     async getLibrary(type: MediaType, account: ExternalAccount) {
-        // TODO: Save entries to library and update mappings and media in the DB
         const { media, mappings, entries } = await this.api.getLibrary(
             type,
             account
