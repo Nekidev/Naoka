@@ -17,10 +17,12 @@ import { useLiveQuery } from "dexie-react-hooks";
 import LibraryEntryModal from "@/components/LibraryEntryModal";
 import { useDebounce } from "@uidotdev/usehooks";
 import { motion, AnimatePresence } from "framer-motion";
-import { LibraryEntry, LibraryStatus, Mapping, Media } from "@/lib/db/types";
+import { LibraryEntry, LibraryStatus, Mapping, Media, MediaGenre, MediaRating } from "@/lib/db/types";
 import { useSelectedProvider } from "@/lib/providers/hooks";
 import { getMedia } from "@/lib/db/utils";
 import { getMediaTitle } from "@/lib/settings";
+import { Messages } from "@/lib/messages/translations";
+import { useMessages } from "@/lib/messages";
 
 interface LibraryEntryWithMedia extends LibraryEntry {
     media?: Media;
@@ -335,6 +337,8 @@ function LibraryEntryRow({
     entry: LibraryEntryWithMedia;
     openModal: any;
 }) {
+    const m = useMessages();
+
     return (
         <div
             className="flex flex-row items-strtetch gap-4 p-2 -m-2 relative hover:bg-zinc-800 rounded transition cursor-pointer group"
@@ -367,7 +371,38 @@ function LibraryEntryRow({
                     ></div>
                 )}
                 <span className="text-zinc-400 text-sm leading-none">
-                    {entry.type == "anime" ? "Anime" : "Manga"}
+                {([
+                        MediaRating.RPlus,
+                        MediaRating.Rx,
+                    ].includes(
+                        // May be null/undefined but that's fine. The ! is just
+                        // for type checking.
+                        entry.media!.rating!
+                    ) ||
+                        !!entry.media!.isAdult) && (
+                        <>
+                            <span className="text-red-500">Adult</span> —
+                        </>
+                    )}{" "}
+                    {entry.media!.startDate?.getFullYear() || ""}{" "}
+                    {m(`media_format_${entry.media!.format}` as keyof Messages)}{" "}
+                    {entry.media!.genres.length > 0 &&
+                        "— " +
+                            entry.media!.genres
+                                .map((genre: MediaGenre, index: number) => {
+                                    const msg = m(
+                                        `media_genre_${genre}` as keyof Messages
+                                    );
+                                    if (index === 0) {
+                                        return (
+                                            msg[0].toUpperCase() +
+                                            msg.substring(1).toLowerCase()
+                                        );
+                                    } else {
+                                        return msg.toLowerCase();
+                                    }
+                                })
+                                .join(", ")}
                 </span>
             </div>
             <div className="flex-1"></div>
