@@ -5,7 +5,7 @@ import Tooltip from "@/components/Tooltip";
 import { db } from "@/lib/db";
 import { useLiveQuery } from "dexie-react-hooks";
 import { XMarkIcon } from "@heroicons/react/24/outline";
-import FormModal, { FormComponentType } from "@/components/FormModal";
+import FormModal from "@/components/FormModal";
 import React from "react";
 import { CheckCircleIcon } from "@heroicons/react/20/solid";
 import { notify } from "@/lib/notifications";
@@ -267,7 +267,8 @@ function Account({ account }: { account: ExternalAccount }) {
                                 type: InputType.RadioGroup,
                                 name: "type",
                                 label: "Type",
-                                defaultValue: "anime",
+                                // defaultValue: "anime",
+                                required: true,
                                 options: [
                                     ...(api.config.syncing?.import?.mediaTypes.includes(
                                         "anime"
@@ -318,7 +319,8 @@ function Account({ account }: { account: ExternalAccount }) {
                                 type: InputType.RadioGroup,
                                 name: "method",
                                 label: "Method",
-                                defaultValue: "merge",
+                                required: true,
+                                // defaultValue: "merge",
                                 options: [
                                     {
                                         value: "override",
