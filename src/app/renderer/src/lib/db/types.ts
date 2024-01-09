@@ -97,6 +97,7 @@ export interface Media {
     format: MediaFormat | null;
     status: MediaStatus | null;
     rating?: MediaRating | null;
+    isAdult?: boolean;
     duration?: number | null;
     mapping: Mapping;
 }
