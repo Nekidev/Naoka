@@ -121,7 +121,7 @@ function normalizeFormat(format: string): MediaFormat | undefined {
     }[format.toLowerCase()];
 }
 
-function normalizeRating(rating: string): MediaRating | undefined {
+function normalizeMalRating(rating: string): MediaRating | undefined {
     return {
         g: MediaRating.G,
         pg: MediaRating.PG,
@@ -130,6 +130,17 @@ function normalizeRating(rating: string): MediaRating | undefined {
         "r+": MediaRating.RPlus,
         rx: MediaRating.Rx,
     }[rating.toLowerCase().split("-")[0]];
+}
+
+function normalizeJikanRating(rating: string): MediaRating | undefined {
+    return {
+        "G - All Ages": MediaRating.G,
+        "PG - Children": MediaRating.PG,
+        "PG-13 - Teens 13 or older": MediaRating.PG13,
+        "R - 17+ (violence & profanity)": MediaRating.R,
+        "R+ - Mild Nudity": MediaRating.RPlus,
+        "Rx - Hentai": MediaRating.Rx
+    }[rating];
 }
 
 export class MyAnimeList extends BaseProvider {
@@ -162,10 +173,10 @@ export class MyAnimeList extends BaseProvider {
                 imageUrl: anime.images.webp.large_image_url,
                 bannerUrl: null,
                 episodes: anime.episodes,
-                startDate: anime.airing.from
-                    ? new Date(anime.airing.from)
+                startDate: anime.aired.from
+                    ? new Date(anime.aired.from)
                     : null,
-                finishDate: anime.airing.to ? new Date(anime.airing.to) : null,
+                finishDate: anime.aired.to ? new Date(anime.aired.to) : null,
                 genres: anime.genres
                     .map((value: { name: string }) =>
                         normalizeGenre(value.name)
@@ -174,7 +185,7 @@ export class MyAnimeList extends BaseProvider {
                 status: normalizeJikanStatus(anime.status) || null,
                 format: anime.type ? normalizeFormat(anime.type)! : null,
                 duration: anime.duration ? normalizeTime(anime.duration) : null,
-                rating: anime.rating ? normalizeRating(anime.rating) : null,
+                rating: anime.rating ? normalizeJikanRating(anime.rating) : null,
                 mapping: `myanimelist:anime:${anime.mal_id}`,
             },
             mappings: [`myanimelist:anime:${anime.mal_id}`],
@@ -206,6 +217,8 @@ export class MyAnimeList extends BaseProvider {
                 duration: anime.average_episode_duration
                     ? Math.round(anime.average_episode_duration / 60)
                     : null,
+                rating: anime.rating ? normalizeMalRating(anime.rating) : null,
+                isAdult: anime.nsfw == "black",
                 mapping: `myanimelist:anime:${anime.id.toString()}`,
             },
             mappings: [`myanimelist:anime:${anime.id.toString()}`],
@@ -279,6 +292,7 @@ export class MyAnimeList extends BaseProvider {
                 ),
                 status: manga.status ? normalizeMalStatus(manga.status)! : null,
                 format: manga.type ? normalizeFormat(manga.type)! : null,
+                isAdult: manga.nsfw == "black",
                 mapping: `myanimelist:manga:${manga.id.toString()}`,
             },
             mappings: [`myanimelist:manga:${manga.id.toString()}`],
@@ -317,8 +331,13 @@ export class MyAnimeList extends BaseProvider {
             url += `&order_by=${options.sortBy}&sort=asc`;
         }
 
+        if (!options.adult) {
+            url += "&sfw"
+        }
+
         delete options.query;
         delete options.sortBy;
+        delete options.adult;
 
         url += `&${serializeURL(options)}`;
 
@@ -354,8 +373,13 @@ export class MyAnimeList extends BaseProvider {
             url += `&order_by=${options.sortBy}&sort=asc`;
         }
 
+        if (!options.adult) {
+            url += "&sfw"
+        }
+
         delete options.query;
         delete options.sortBy;
+        delete options.adult;
 
         url += `&${serializeURL(options)}`;
 

@@ -141,12 +141,6 @@ const config: Config = {
                         },
                     ],
                 },
-                {
-                    type: InputType.CheckboxInput,
-                    name: "sfw",
-                    label: "Filter NSFW results",
-                    defaultChecked: true
-                },
             ],
         },
         manga: {
@@ -254,12 +248,6 @@ const config: Config = {
                             value: "complete",
                         },
                     ],
-                },
-                {
-                    type: InputType.CheckboxInput,
-                    name: "sfw",
-                    label: "Filter NSFW results",
-                    defaultChecked: true,
                 },
             ],
         },

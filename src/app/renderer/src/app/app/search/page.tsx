@@ -436,13 +436,17 @@ function MediaCard({ media, onClick }: { media: Media; onClick: any }) {
                     {getMediaTitle(media)}
                 </div>
                 <div className="text-xs text-zinc-400 line-clamp-1 mt-auto">
-                    {[MediaRating.RPlus, MediaRating.Rx].includes(
+                    {([
+                        MediaRating.RPlus,
+                        MediaRating.Rx,
+                    ].includes(
                         // May be null/undefined but that's fine. The ! is just
                         // for type checking.
                         media.rating!
-                    ) && (
+                    ) ||
+                        !!media.isAdult) && (
                         <>
-                            <span className="text-red-500">+18</span> —
+                            <span className="text-red-500">Adult</span> —
                         </>
                     )}{" "}
                     {media.startDate?.getFullYear() || ""}{" "}
@@ -525,13 +529,17 @@ function MediaRow({
                 </div>
                 <div className="flex flex-row items-center gap-2">
                     <div className="text-xs text-zinc-400 line-clamp-1 text-left">
-                        {[MediaRating.RPlus, MediaRating.Rx].includes(
+                        {([
+                            MediaRating.RPlus,
+                            MediaRating.Rx,
+                        ].includes(
                             // May be null/undefined but that's fine. The ! is just
                             // for type checking.
                             media.rating!
-                        ) && (
+                        ) ||
+                            !!media.isAdult) && (
                             <>
-                                <span className="text-red-500">+18</span> —
+                                <span className="text-red-500">Adult</span> —
                             </>
                         )}{" "}
                         {media.startDate?.getFullYear() || ""}{" "}

@@ -31,3 +31,7 @@ export function getMediaTitle(media: Media, lang?: "english" | "romaji" | "nativ
         undefined
     );
 }
+
+export function useAdultFilter() {
+    return useLocalStorage("Naoka:Settings:AdultFilter", true);
+}

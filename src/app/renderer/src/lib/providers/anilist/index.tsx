@@ -129,6 +129,7 @@ export class AniList extends BaseProvider {
                 chapters: media.chapters,
                 volumes: media.volumes,
                 duration: media.duration,
+                isAdult: media.isAdult,
                 mapping: `anilist:${
                     media.type.toLowerCase() as MediaType
                 }:${media.id.toString()}`,
@@ -201,6 +202,9 @@ export class AniList extends BaseProvider {
                               countryOfOrigin: options.countryOfOrigin,
                           }
                         : {}),
+                    ...(!options.adult ? {
+                        isAdult: false
+                    } : {})
                 },
             }),
         }).then((res) => res.json());

@@ -9,6 +9,7 @@ query Search(
     $season: MediaSeason,
     $seasonYear: Int,
     $countryOfOrigin: CountryCode,
+    $isAdult: Boolean
 ) {
     Page(perPage: 50) {
         media(
@@ -21,6 +22,7 @@ query Search(
             season: $season,
             seasonYear: $seasonYear,
             countryOfOrigin: $countryOfOrigin,
+            isAdult: $isAdult
         ) {
             id
             idMal

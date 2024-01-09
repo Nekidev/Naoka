@@ -2,11 +2,16 @@
 
 import { AnimatePresence } from "framer-motion";
 import Modal from "../Modal";
-import { BookmarkIcon, CloudIcon, PaintBrushIcon } from "@heroicons/react/24/outline";
+import {
+    CloudIcon,
+    PaintBrushIcon,
+    SparklesIcon,
+} from "@heroicons/react/24/outline";
 import React from "react";
 
 import Connections from "./tabs/connections";
 import Appearance from "./tabs/appearance";
+import Media from "./tabs/media";
 import { useMessages } from "@/lib/messages";
 
 export default function SettingsModal({
@@ -37,6 +42,12 @@ export default function SettingsModal({
                                 active={tab === "connections"}
                                 onClick={() => setTab("connections")}
                             />
+                            <Tab
+                                label={m("settings_media_title")}
+                                icon={<SparklesIcon className="h-6 w-6" />}
+                                active={tab === "media"}
+                                onClick={() => setTab("media")}
+                            />
                         </div>
                         <div className="flex-1 flex flex-col">
                             <div className="p-4 flex flex-col flex-1 gap-6 min-h-max">
@@ -44,6 +55,8 @@ export default function SettingsModal({
                                     <Appearance />
                                 ) : tab == "connections" ? (
                                     <Connections />
+                                ) : tab == "media" ? (
+                                    <Media />
                                 ) : (
                                     ""
                                 )}
