@@ -1,17 +1,25 @@
 import { db } from "../db";
 import { BaseProvider } from "./base";
-import { ExternalAccount, Media, MediaType, Provider, UserData } from "../db/types";
+import {
+    ExternalAccount,
+    Media,
+    MediaRating,
+    MediaType,
+    Provider,
+    UserData,
+} from "../db/types";
 
 import { AniList } from "./anilist";
 import { MyAnimeList } from "./myanimelist";
 
 import { updateMappings } from "../db/utils";
+import { useAdultFilter } from "../settings";
 
 // Add new providers here
 export const providers = {
     anilist: new AniList(),
     myanimelist: new MyAnimeList(),
-}
+};
 
 export class ProviderAPI {
     private api!: BaseProvider;
@@ -33,14 +41,31 @@ export class ProviderAPI {
         type: MediaType,
         options: { [key: string]: any }
     ): Promise<Media[]> {
-        const { media, mappings } = await this.api.search(type, options);
+        let adultFilter = JSON.parse(
+            localStorage.getItem("Naoka:Settings:AdultFilter") ?? "true"
+        );
+        let { media, mappings } = await this.api.search(type, {
+            ...options,
+            adult: !adultFilter,
+        });
 
         (async () => {
             await db.media.bulkPut(media);
             for (const ms of mappings) {
-                await updateMappings(ms)
+                await updateMappings(ms);
             }
         })().then(() => {});
+
+        if (adultFilter) {
+            // No adult content allowed
+            media = media.filter(
+                (m: Media) =>
+                    !m.isAdult &&
+                    ![MediaRating.RPlus, MediaRating.Rx].includes(
+                        m.rating!
+                    )
+            );
+        }
 
         return media;
     }
@@ -65,7 +90,7 @@ export class ProviderAPI {
         (async () => {
             await db.media.bulkPut(media);
             for (const ms of mappings) {
-                await updateMappings(ms)
+                await updateMappings(ms);
             }
         })().then(() => {});
 

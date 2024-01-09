@@ -202,6 +202,9 @@ export class AniList extends BaseProvider {
                               countryOfOrigin: options.countryOfOrigin,
                           }
                         : {}),
+                    ...(!options.adult ? {
+                        isAdult: false
+                    } : {})
                 },
             }),
         }).then((res) => res.json());

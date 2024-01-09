@@ -331,8 +331,13 @@ export class MyAnimeList extends BaseProvider {
             url += `&order_by=${options.sortBy}&sort=asc`;
         }
 
+        if (!options.adult) {
+            url += "&sfw"
+        }
+
         delete options.query;
         delete options.sortBy;
+        delete options.adult;
 
         url += `&${serializeURL(options)}`;
 
@@ -368,8 +373,13 @@ export class MyAnimeList extends BaseProvider {
             url += `&order_by=${options.sortBy}&sort=asc`;
         }
 
+        if (!options.adult) {
+            url += "&sfw"
+        }
+
         delete options.query;
         delete options.sortBy;
+        delete options.adult;
 
         url += `&${serializeURL(options)}`;
 

@@ -439,7 +439,6 @@ function MediaCard({ media, onClick }: { media: Media; onClick: any }) {
                     {([
                         MediaRating.RPlus,
                         MediaRating.Rx,
-                        MediaRating.R,
                     ].includes(
                         // May be null/undefined but that's fine. The ! is just
                         // for type checking.
@@ -533,7 +532,6 @@ function MediaRow({
                         {([
                             MediaRating.RPlus,
                             MediaRating.Rx,
-                            MediaRating.R,
                         ].includes(
                             // May be null/undefined but that's fine. The ! is just
                             // for type checking.
