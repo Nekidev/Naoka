@@ -120,7 +120,7 @@ export default function Library() {
     return (
         <>
             <main className="flex flex-col min-h-full max-h-full">
-                <div className="sticky top-0 shrink-0 bg-zinc-900 z-10">
+                <div className="shrink-0 bg-zinc-900 z-10">
                     <div className="flex flex-row items-center">
                         <VerticalNavSpacer />
                         <LeftNavSpacer />
@@ -266,7 +266,7 @@ export default function Library() {
                     </div>
                     <div className="h-px shrink-0 bg-zinc-800 mt-2"></div>
                 </div>
-                <div className="flex-1 overflow-y-auto">
+                <div className="flex-1 flex flex-col overflow-y-auto relative">
                     {libraryEntries ? (
                         libraryEntries.length > 0 ? (
                             <div className="p-4 flex flex-col gap-4">
