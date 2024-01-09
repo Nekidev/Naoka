@@ -254,18 +254,20 @@ function FormModalContent(props: FormModalProps) {
                             Discard
                         </button>
                         <div className="flex-1"></div>
-                        <button
-                            className="py-2 px-4 leading-none bg-zinc-700 text-zinc-300 rounded hover:bg-zinc-600 transition disabled:opacity-60 disabled:hover:bg-zinc-700 disabled:cursor-not-allowed"
-                            type="button"
-                            disabled={currentStep === 0}
-                            onClick={() => {
-                                if (currentStep != 0) {
-                                    setCurrentStep((v) => v - 1);
-                                }
-                            }}
-                        >
-                            Previous
-                        </button>
+                        {props.steps.length > 1 && (
+                            <button
+                                className="py-2 px-4 leading-none bg-zinc-700 text-zinc-300 rounded hover:bg-zinc-600 transition disabled:opacity-60 disabled:hover:bg-zinc-700 disabled:cursor-not-allowed"
+                                type="button"
+                                disabled={currentStep === 0}
+                                onClick={() => {
+                                    if (currentStep != 0) {
+                                        setCurrentStep((v) => v - 1);
+                                    }
+                                }}
+                            >
+                                Previous
+                            </button>
+                        )}
                         <button
                             className="py-2 px-4 leading-none bg-zinc-100 text-zinc-900 rounded hover:bg-zinc-300 transition disabled:opacity-60 disabled:hover:bg-zinc-100 disabled:cursor-not-allowed flex flex-col items-center justify-center"
                             type="button"
