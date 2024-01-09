@@ -5,21 +5,12 @@ import Modal from "../Modal";
 import { CheckIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import React from "react";
 import Input, { InputType } from "@/lib/forms";
-
-export enum FormComponentType {
-    Separator = "separator",
-}
-
-export type ComponentType = FormComponentType | InputType;
-
-export interface FormComponent {
-    type: FormComponentType;
-}
+import { useObjectState } from "@uidotdev/usehooks";
 
 export interface Step {
     title: string;
     subtitle?: string;
-    fields: (Input | FormComponent)[];
+    fields: Input[];
 }
 
 interface FormModalProps {
@@ -38,9 +29,39 @@ export default function FormModal(props: FormModalProps) {
     );
 }
 
+interface FormValidationType {
+    [key: string]: {
+        step: number;
+        valid: boolean;
+    };
+}
+
 function FormModalContent(props: FormModalProps) {
     const [currentStep, setCurrentStep] = React.useState(0);
     const formRef = React.useRef<HTMLFormElement | null>(null);
+
+    let defaultFormValidation: FormValidationType = {};
+    props.steps.forEach((step, stepIndex) => {
+        step.fields.forEach((field) => {
+            defaultFormValidation[field.name] = {
+                step: stepIndex,
+                valid: !!field.defaultValue || !field.required,
+            };
+        });
+    });
+
+    let [formValidation, setFormValidation] = useObjectState(
+        defaultFormValidation
+    );
+
+    console.log(formValidation);
+
+    const isCurrentStepInputValid =
+        Object.getOwnPropertyNames(formValidation)
+            .map((name: string) => formValidation[name])
+            .filter((field) => {
+                return field.step === currentStep && !field.valid;
+            }).length === 0;
 
     return (
         <Modal closeModal={props.closeModal}>
@@ -105,6 +126,26 @@ function FormModalContent(props: FormModalProps) {
                                                             defaultValue={
                                                                 field.defaultValue
                                                             }
+                                                            onChange={(e) => {
+                                                                let newValue: FormValidationType =
+                                                                    {};
+                                                                newValue[
+                                                                    field.name
+                                                                ] = {
+                                                                    step: formValidation[
+                                                                        field
+                                                                            .name
+                                                                    ].step,
+                                                                    valid:
+                                                                        !!e
+                                                                            .target
+                                                                            .value ||
+                                                                        !field.required,
+                                                                };
+                                                                setFormValidation(
+                                                                    newValue
+                                                                );
+                                                            }}
                                                             className="leading-none p-2 rounded bg-zinc-900 w-full border border-zinc-900 focus:border-zinc-100 transition placeholder:text-zinc-400"
                                                             autoComplete="none"
                                                         />
@@ -130,6 +171,28 @@ function FormModalContent(props: FormModalProps) {
                                                                     description={
                                                                         option.description
                                                                     }
+                                                                    defaultChecked={
+                                                                        option.value ==
+                                                                            field.defaultValue &&
+                                                                        !!field.defaultValue
+                                                                    }
+                                                                    onChange={() => {
+                                                                        let newValue: FormValidationType =
+                                                                            {};
+                                                                        newValue[
+                                                                            field.name
+                                                                        ] = {
+                                                                            step: formValidation[
+                                                                                field
+                                                                                    .name
+                                                                            ]
+                                                                                .step,
+                                                                            valid: true,
+                                                                        };
+                                                                        setFormValidation(
+                                                                            newValue
+                                                                        );
+                                                                    }}
                                                                 />
                                                             )
                                                         )}
@@ -149,13 +212,29 @@ function FormModalContent(props: FormModalProps) {
                                                             defaultChecked={
                                                                 field.defaultChecked
                                                             }
+                                                            onChange={(
+                                                                e: any
+                                                            ) => {
+                                                                let newValue: FormValidationType =
+                                                                    {};
+                                                                newValue[
+                                                                    field.name
+                                                                ] = {
+                                                                    step: formValidation[
+                                                                        field
+                                                                            .name
+                                                                    ].step,
+                                                                    valid:
+                                                                        e.target
+                                                                            .value ||
+                                                                        !field.required,
+                                                                };
+                                                                setFormValidation(
+                                                                    newValue
+                                                                );
+                                                            }}
                                                         />
                                                     </div>
-                                                );
-
-                                            case FormComponentType.Separator:
-                                                return (
-                                                    <div className="w-full h-px bg-zinc-700"></div>
                                                 );
                                         }
                                     })}
@@ -176,7 +255,7 @@ function FormModalContent(props: FormModalProps) {
                         </button>
                         <div className="flex-1"></div>
                         <button
-                            className="py-2 px-4 leading-none bg-zinc-700 text-zinc-300 rounded hover:bg-zinc-600 transition disabled:opacity-70 disabled:hover:bg-zinc-700 disabled:cursor-not-allowed"
+                            className="py-2 px-4 leading-none bg-zinc-700 text-zinc-300 rounded hover:bg-zinc-600 transition disabled:opacity-60 disabled:hover:bg-zinc-700 disabled:cursor-not-allowed"
                             type="button"
                             disabled={currentStep === 0}
                             onClick={() => {
@@ -188,18 +267,19 @@ function FormModalContent(props: FormModalProps) {
                             Previous
                         </button>
                         <button
-                            className="py-2 px-4 leading-none bg-zinc-100 text-zinc-900 rounded hover:bg-zinc-300 transition"
+                            className="py-2 px-4 leading-none bg-zinc-100 text-zinc-900 rounded hover:bg-zinc-300 transition disabled:opacity-60 disabled:hover:bg-zinc-100 disabled:cursor-not-allowed flex flex-col items-center justify-center"
                             type="button"
-                            onClick={() => {
+                            disabled={!isCurrentStepInputValid}
+                            onClick={(e) => {
+                                if (!isCurrentStepInputValid) return;
+
                                 if (currentStep < props.steps.length - 1) {
                                     setCurrentStep((v) => v + 1);
                                 } else {
                                     var values: { [key: string]: string } = {};
 
                                     Array.from(
-                                        new FormData(
-                                            formRef.current!
-                                        ).entries()
+                                        new FormData(formRef.current!).entries()
                                     ).map(([key, value]) => {
                                         values[key as keyof typeof values] =
                                             value as string;
@@ -210,9 +290,12 @@ function FormModalContent(props: FormModalProps) {
                                 }
                             }}
                         >
-                            {currentStep === props.steps.length - 1
-                                ? "Accept"
-                                : "Next"}
+                            <div style={{
+                                opacity: currentStep === props.steps.length - 1 ? 1 : 0
+                            }}>Accept</div>
+                            <div className="-mt-4" style={{
+                                opacity: currentStep === props.steps.length - 1 ? 0 : 1
+                            }}>Next</div>
                         </button>
                     </div>
                 </form>
@@ -226,11 +309,15 @@ function RadioCard({
     description,
     name,
     value,
+    defaultChecked,
+    onChange: onInput,
 }: {
     title: string;
     description?: string;
     name: string;
     value: string;
+    defaultChecked?: boolean;
+    onChange?: any;
 }) {
     return (
         <label
@@ -243,6 +330,8 @@ function RadioCard({
                 name={name}
                 value={value}
                 className="peer hidden"
+                defaultChecked={defaultChecked}
+                onChange={onInput}
             />
             <div className="ring-1 ring-offset-1 ring-zinc-100 ring-offset-zinc-850 h-2 w-2 m-2 peer-checked:bg-zinc-100 rounded-full transition"></div>
             <div className="flex-1 shrink-0 flex flex-col">
@@ -260,11 +349,13 @@ function CheckboxCard({
     title,
     description,
     defaultChecked,
+    onChange,
 }: {
     name: string;
     title: string;
     description?: string;
     defaultChecked?: boolean;
+    onChange?: any;
 }) {
     return (
         <label
@@ -280,6 +371,7 @@ function CheckboxCard({
                 name={name}
                 className="peer hidden"
                 defaultChecked={defaultChecked}
+                onChange={onChange}
             />
             <div
                 className={`border border-zinc-100 rounded w-3 h-3 peer-checked:bg-zinc-100 text-zinc-900 transition my-1.5 mr-1.5 ${
