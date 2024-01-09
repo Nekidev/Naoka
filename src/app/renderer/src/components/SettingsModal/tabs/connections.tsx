@@ -267,7 +267,6 @@ function Account({ account }: { account: ExternalAccount }) {
                                 type: InputType.RadioGroup,
                                 name: "type",
                                 label: "Type",
-                                // defaultValue: "anime",
                                 required: true,
                                 options: [
                                     ...(api.config.syncing?.import?.mediaTypes.includes(
@@ -320,8 +319,17 @@ function Account({ account }: { account: ExternalAccount }) {
                                 name: "method",
                                 label: "Method",
                                 required: true,
-                                // defaultValue: "merge",
+                                defaultValue: "merge",
                                 options: [
+                                    {
+                                        value: "merge",
+                                        label: m(
+                                            "settings_connections_connect_import_merge_title"
+                                        ),
+                                        description: m(
+                                            "settings_connections_connect_import_merge_description"
+                                        ),
+                                    },
                                     {
                                         value: "override",
                                         label: m(
@@ -347,15 +355,6 @@ function Account({ account }: { account: ExternalAccount }) {
                                         ),
                                         description: m(
                                             "settings_connections_connect_import_latest_description"
-                                        ),
-                                    },
-                                    {
-                                        value: "merge",
-                                        label: m(
-                                            "settings_connections_connect_import_merge_title"
-                                        ),
-                                        description: m(
-                                            "settings_connections_connect_import_merge_description"
                                         ),
                                     },
                                 ],
