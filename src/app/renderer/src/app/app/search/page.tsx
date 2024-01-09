@@ -411,6 +411,8 @@ function MediaCard({ media, onClick }: { media: Media; onClick: any }) {
         }
     );
 
+    const m = useMessages();
+
     return (
         <div
             className="w-full h-full rounded relative cursor-pointer flex flex-col gap-2 group"
@@ -443,8 +445,25 @@ function MediaCard({ media, onClick }: { media: Media; onClick: any }) {
                             <span className="text-red-500">+18</span> —
                         </>
                     )}{" "}
-                    {media.startDate?.getFullYear()} {media.format}{" "}
-                    {media.genres.length > 0 && "— " + media.genres.join(", ")}
+                    {media.startDate?.getFullYear() || ""}{" "}
+                    {m(`media_format_${media.format}` as keyof Messages)}{" "}
+                    {media.genres.length > 0 &&
+                        "— " +
+                            media.genres
+                                .map((genre: MediaGenre, index: number) => {
+                                    const msg = m(
+                                        `media_genre_${genre}` as keyof Messages
+                                    );
+                                    if (index === 0) {
+                                        return (
+                                            msg[0].toUpperCase() +
+                                            msg.substring(1).toLowerCase()
+                                        );
+                                    } else {
+                                        return msg.toLowerCase();
+                                    }
+                                })
+                                .join(", ")}
                 </div>
             </div>
         </div>
