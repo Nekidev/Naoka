@@ -59,7 +59,7 @@ const messages = {
     settings_appearance_language_subtitle: "Hello! Hola! こんいちは!",
     settings_connections_title: "Connections",
     settings_connections_subtitle: "Syncronize your library with external accounts.",
-    settings_connections_warning: "Automatic syncing and list exporting are not yet supported. They'll be added in the future, so stay tuned!",
+    settings_connections_warning: "Automatic syncing and list exporting are not yet supported.  They'll be added in the future, so stay tuned!",
     settings_connections_connectaccount_title: "Connect a new account",
     settings_connections_connectaccount_info: "More sites will be added in the future.",
     settings_connections_connectedaccounts_empty_title: "And my connected accounts?",
