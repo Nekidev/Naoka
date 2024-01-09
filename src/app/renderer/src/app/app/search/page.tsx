@@ -52,8 +52,8 @@ export default function Search() {
 
     const api = new ProviderAPI(selectedProvider as Provider);
 
-    const [displayMode, setDisplayMode] = React.useState<"list" | "grid">(
-        "list"
+    const [displayMode, setDisplayMode] = useLocalStorage<"list" | "grid">(
+        "Naoka:Search:DisplayMode", "list"
     );
     const [query, setQuery] = React.useState<string>("");
     const [results, setResults] = React.useState<Media[]>([]);
