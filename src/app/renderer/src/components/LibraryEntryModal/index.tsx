@@ -26,6 +26,7 @@ import {
     MediaType,
 } from "@/lib/db/types";
 import { useMedia } from "@/lib/db/utils";
+import { getMediaTitle, useTitleLanguage } from "@/lib/settings";
 
 export default function LibraryEntryModal({
     mapping,
@@ -71,6 +72,8 @@ function FormModal({
 
     const [isRemoveFromLibraryModalOpen, setIsRemoveFromLibraryModalOpen] =
         React.useState(false);
+
+    const [titleLanguage] = useTitleLanguage();
 
     if (!media) return null;
 
@@ -179,7 +182,7 @@ function FormModal({
                             }}
                         />
                         <div className="text-lg flex-1">
-                            {media.title.romaji}
+                            {getMediaTitle(media, titleLanguage)}
                         </div>
                     </div>
                     <form

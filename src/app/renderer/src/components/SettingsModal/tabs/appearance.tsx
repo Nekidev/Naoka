@@ -1,15 +1,17 @@
 "use client";
 
 import { Header, Select, Setting } from "../components";
-import { useTheme } from "@/lib/settings";
+import { useTheme, useTitleLanguage } from "@/lib/settings";
 import { Language, useLanguage, useMessages } from "@/lib/messages";
 import { languages } from "../../../lib/messages";
+import { Messages } from "@/lib/messages/translations";
 
 export default function Appearance() {
     const m = useMessages();
 
     const [theme, setTheme] = useTheme();
     const [language, setLanguage] = useLanguage();
+    const [titleLanguage, setTitleLanguage] = useTitleLanguage();
 
     return (
         <>
@@ -51,6 +53,25 @@ export default function Appearance() {
                     ))}
                 </Select>
             </Setting>
+            <Setting
+                title={m("settings_appearance_titlelanguage_title")}
+                subtitle={m("settings_appearance_titlelanguage_subtitle")}
+                >
+                    <Select
+                        value={titleLanguage}
+                        onChange={(e) => setTitleLanguage(e.target.value)}
+                    >
+                        <option value="english">
+                            {m("settings_appearance_titlelanguage_english")} (High-Rise Invasion)
+                        </option>
+                        <option value="romaji">
+                            {m("settings_appearance_titlelanguage_romaji")} (Tenkuu Shinpan)
+                        </option>
+                        <option value="native">
+                            {m("settings_appearance_titlelanguage_native")} (天空侵犯)
+                        </option>
+                    </Select>
+                </Setting>
         </>
     );
 }

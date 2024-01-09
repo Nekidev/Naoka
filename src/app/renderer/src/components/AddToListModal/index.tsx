@@ -8,6 +8,7 @@ import React from "react";
 import { List, Mapping, Media } from "@/lib/db/types";
 import { getBulkMedia, getMedia } from "@/lib/db/utils";
 import { useSelectedProvider } from "@/lib/providers/hooks";
+import { getMediaTitle } from "@/lib/settings";
 
 interface ListWithMedia extends List {
     media: Media[];
@@ -87,7 +88,7 @@ function FormModal({
                             />
                             <div className="flex-1 flex flex-col items-start justify-center gap-1">
                                 <div className="leading-none line-clamp-1 text-zinc-300">
-                                    {media?.title.romaji}
+                                    {!!media && getMediaTitle(media)}
                                 </div>
                                 <div className="leading-none text-sm text-zinc-400">
                                     {media?.type === "anime"

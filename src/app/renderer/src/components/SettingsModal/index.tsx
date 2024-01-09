@@ -2,7 +2,7 @@
 
 import { AnimatePresence } from "framer-motion";
 import Modal from "../Modal";
-import { CloudIcon, PaintBrushIcon } from "@heroicons/react/24/outline";
+import { BookmarkIcon, CloudIcon, PaintBrushIcon } from "@heroicons/react/24/outline";
 import React from "react";
 
 import Connections from "./tabs/connections";

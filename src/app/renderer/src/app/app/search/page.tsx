@@ -39,6 +39,7 @@ import {
     CheckboxInput as CheckboxGroupInterface,
     InputType,
 } from "@/lib/forms";
+import { getMediaTitle, useTitleLanguage } from "@/lib/settings";
 
 export default function Search() {
     const m = useMessages();
@@ -418,7 +419,7 @@ function MediaCard({ media, onClick }: { media: Media; onClick: any }) {
             <div className="relative">
                 <img
                     src={media.imageUrl || undefined}
-                    alt={media.title.romaji || undefined}
+                    alt={getMediaTitle(media)}
                     className="w-full aspect-[2/3] object-cover object-center rounded"
                 />
                 <div className="opacity-0 group-hover:opacity-100 absolute top-0 bottom-0 left-0 right-0 bg-zinc-950/30 transition-all"></div>
@@ -430,7 +431,7 @@ function MediaCard({ media, onClick }: { media: Media; onClick: any }) {
             </div>
             <div className="flex flex-col gap-1 flex-1">
                 <div className="text-sm text-zinc-200 group-hover:text-white line-clamp-2 leading-tight transition">
-                    {media.title.romaji}
+                    {getMediaTitle(media)}
                 </div>
                 <div className="text-xs text-zinc-400 line-clamp-1 mt-auto">
                     {[MediaRating.RPlus, MediaRating.Rx].includes(
@@ -480,6 +481,7 @@ function MediaRow({
     addToList: any;
 }) {
     const m = useMessages();
+    const [titleLanguage] = useTitleLanguage();
 
     const libraryEntry = useLiveQuery(
         () => db.library.get({ mapping: media.mapping }),
@@ -496,11 +498,11 @@ function MediaRow({
             <img
                 className="w-10 rounded aspect-square object-cover object-center"
                 src={media.imageUrl || undefined}
-                alt={media.title.romaji || undefined}
+                alt={getMediaTitle(media)}
             />
             <div className="flex flex-col justify-center flex-1">
                 <div className="text-zinc-200 group-hover:text-white transition text-left line-clamp-1">
-                    {media.title.romaji}
+                    {getMediaTitle(media)}
                 </div>
                 <div className="flex flex-row items-center gap-2">
                     <div className="text-xs text-zinc-400 line-clamp-1 text-left">
