@@ -20,6 +20,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { LibraryEntry, LibraryStatus, Mapping, Media } from "@/lib/db/types";
 import { useSelectedProvider } from "@/lib/providers/hooks";
 import { getMedia } from "@/lib/db/utils";
+import { getMediaTitle } from "@/lib/settings";
 
 interface LibraryEntryWithMedia extends LibraryEntry {
     media?: Media;
@@ -348,16 +349,16 @@ function LibraryEntryRow({
             {entry.media ? (
                 <img
                     src={entry.media.imageUrl!}
-                    alt={entry.media.title.romaji!}
+                    alt={getMediaTitle(entry.media)}
                     className="w-10 aspect-square rounded object-cover object-center"
                 />
             ) : (
                 <div className="w-10 aspect-square rounded bg-zinc-800 group-hover:bg-zinc-700 transition animate-pulse"></div>
             )}
             <div className="flex flex-col gap-1 justify-center text-zinc-300 group-hover:text-zinc-100 transition">
-                {entry.media ? (
+                {!!entry.media ? (
                     <span className="line-clamp-1 leading-none">
-                        {entry.media?.title.romaji}
+                        {getMediaTitle(entry.media)}
                     </span>
                 ) : (
                     <div
