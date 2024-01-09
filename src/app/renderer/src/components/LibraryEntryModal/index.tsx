@@ -25,8 +25,7 @@ import {
     Mapping,
     MediaType,
 } from "@/lib/db/types";
-import { isMappingFromProvider, useMedia } from "@/lib/db/utils";
-import { useSelectedProvider } from "@/lib/providers/hooks";
+import { useMedia } from "@/lib/db/utils";
 
 export default function LibraryEntryModal({
     mapping,
