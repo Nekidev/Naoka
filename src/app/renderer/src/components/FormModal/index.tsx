@@ -54,8 +54,6 @@ function FormModalContent(props: FormModalProps) {
         defaultFormValidation
     );
 
-    console.log(formValidation);
-
     const isCurrentStepInputValid =
         Object.getOwnPropertyNames(formValidation)
             .map((name: string) => formValidation[name])
