@@ -8,7 +8,7 @@ import React from "react";
 import { List, Mapping, Media } from "@/lib/db/types";
 import { getBulkMedia, getMedia } from "@/lib/db/utils";
 import { useSelectedProvider } from "@/lib/providers/hooks";
-import { getMediaTitle } from "@/lib/settings";
+import { getMediaTitle, useTitleLanguage } from "@/lib/settings";
 
 interface ListWithMedia extends List {
     media: Media[];
@@ -50,10 +50,10 @@ function FormModal({
                 );
             }
 
-            const media: Media[] = await getBulkMedia(
+            const media: Media[] = (await getBulkMedia(
                 [...new Set(mediaMappings)],
                 selectedProvider
-            ) as Media[];
+            )) as Media[];
 
             return lists.map((list) => {
                 const listWithMedia: ListWithMedia = list as ListWithMedia;
@@ -67,6 +67,8 @@ function FormModal({
 
     const [isCreateListModalOpen, setIsCreateListModalOpen] =
         React.useState(false);
+
+    const [titleLanguage] = useTitleLanguage();
 
     return (
         <>
@@ -88,7 +90,8 @@ function FormModal({
                             />
                             <div className="flex-1 flex flex-col items-start justify-center gap-1">
                                 <div className="leading-none line-clamp-1 text-zinc-300">
-                                    {!!media && getMediaTitle(media)}
+                                    {!!media &&
+                                        getMediaTitle(media, titleLanguage)}
                                 </div>
                                 <div className="leading-none text-sm text-zinc-400">
                                     {media?.type === "anime"
