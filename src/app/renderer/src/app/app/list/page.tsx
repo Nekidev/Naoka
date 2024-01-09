@@ -18,6 +18,7 @@ import ConfirmModal from "@/components/ConfirmModal";
 import { List, Mapping, Media, MediaType } from "@/lib/db/types";
 import { useSelectedProvider } from "@/lib/providers/hooks";
 import { getBulkMedia } from "@/lib/db/utils";
+import { getMediaTitle } from "@/lib/settings";
 
 interface ListWithMedia extends List {
     media?: Media[];
@@ -261,7 +262,7 @@ function MediaItem({
                 />
                 <div className="flex flex-col flex-1 gap-1">
                     <div className="line-clamp-1 leading-none text-zinc-300">
-                        {media.title.romaji}
+                        {getMediaTitle(media)}
                     </div>
                     <div className="text-sm text-zinc-400 leading-none">
                         {media.type == "anime" ? "Anime" : "Manga"}
