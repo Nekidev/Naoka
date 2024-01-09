@@ -26,6 +26,15 @@ interface LibraryEntryWithMedia extends LibraryEntry {
     media?: Media;
 }
 
+const statusColors: { [key in LibraryStatus]: { [key: string]: string } } = {
+    not_started: colors.yellow,
+    planned: colors.pink,
+    in_progress: colors.blue,
+    paused: colors.orange,
+    dropped: colors.red,
+    completed: colors.green,
+};
+
 export default function Library() {
     const [mediaTypeFilters, setMediaTypeFilters] = React.useState<
         Array<String>
@@ -326,15 +335,6 @@ function LibraryEntryRow({
     entry: LibraryEntryWithMedia;
     openModal: any;
 }) {
-    const statusColors: { [key in LibraryStatus]: string } = {
-        not_started: colors.yellow["400"],
-        planned: colors.pink["400"],
-        in_progress: colors.blue["400"],
-        paused: colors.orange["400"],
-        dropped: colors.red["400"],
-        completed: colors.green["400"],
-    };
-
     return (
         <div
             className="flex flex-row items-strtetch gap-4 p-2 -m-2 relative hover:bg-zinc-800 rounded transition cursor-pointer group"
@@ -343,7 +343,7 @@ function LibraryEntryRow({
             <div
                 className="w-1 rounded-full"
                 style={{
-                    backgroundColor: statusColors[entry.status],
+                    backgroundColor: statusColors[entry.status]["400"],
                 }}
             ></div>
             {entry.media ? (
@@ -379,7 +379,7 @@ function LibraryEntryRow({
                         <div className="flex flex-row items-center gap-2">
                             <div className="h-2 transition-all group-hover:h-4 rounded-sm bg-zinc-800 group-hover:bg-zinc-700 w-24 relative overflow-hidden">
                                 <div
-                                    className="h-full bg-green-600 rounded-sm transition-all"
+                                    className="h-full rounded-sm transition-all group-hover:opacity-60"
                                     style={{
                                         width: `${
                                             entry.type === "anime"
@@ -394,9 +394,13 @@ function LibraryEntryRow({
                                                           entry.media!.volumes!
                                                   ) * 100
                                         }%`,
+                                        backgroundColor:
+                                            statusColors[entry.status]["400"],
                                     }}
                                 ></div>
-                                <div className="text-xs leading-none flex flex-row items-center justify-center gap-1 w-10 text-zinc-300 absolute top-0 bottom-0 left-0 right-0 m-auto opacity-0 group-hover:opacity-100 transition">
+                                <div
+                                    className="text-xs leading-none flex flex-row items-center justify-center gap-1 w-10 text-zinc-300 absolute top-0 bottom-0 left-0 right-0 m-auto opacity-0 group-hover:opacity-100 transition"
+                                >
                                     {entry.type === "anime" ? (
                                         <div>
                                             {entry.episodeProgress ?? 0}/
