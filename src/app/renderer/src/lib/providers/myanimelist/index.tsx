@@ -47,7 +47,6 @@ function normalizeTime(timeString: string) {
 }
 
 function normalizeGenre(genre: string): MediaGenre | undefined {
-    console.log(genre);
     return {
         action: MediaGenre.Action,
         adventure: MediaGenre.Adventure,
@@ -213,7 +212,7 @@ export class MyAnimeList extends BaseProvider {
                     .map((genre: any) => normalizeGenre(genre.name))
                     .filter((genre: string | undefined) => !!genre),
                 status: anime.status ? normalizeMalStatus(anime.status)! : null,
-                format: anime.type ? normalizeFormat(anime.type)! : null,
+                format: anime.media_type ? normalizeFormat(anime.media_type)! : null,
                 duration: anime.average_episode_duration
                     ? Math.round(anime.average_episode_duration / 60)
                     : null,
@@ -291,7 +290,7 @@ export class MyAnimeList extends BaseProvider {
                     .map((genre: any) => normalizeGenre(genre.name))
                     .filter((genre: string | undefined) => !!genre),
                 status: manga.status ? normalizeMalStatus(manga.status)! : null,
-                format: manga.type ? normalizeFormat(manga.type)! : null,
+                format: manga.media_type ? normalizeFormat(manga.media_type)! : null,
                 isAdult: manga.nsfw == "black",
                 mapping: `myanimelist:manga:${manga.id.toString()}`,
             },
