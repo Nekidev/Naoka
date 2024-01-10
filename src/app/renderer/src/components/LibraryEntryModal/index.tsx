@@ -23,10 +23,14 @@ import {
     LibraryEntry,
     LibraryStatus,
     Mapping,
+    MediaGenre,
+    MediaRating,
     MediaType,
 } from "@/lib/db/types";
 import { useMedia } from "@/lib/db/utils";
 import { getMediaTitle, useTitleLanguage } from "@/lib/settings";
+import { Messages } from "@/lib/messages/translations";
+import { useMessages } from "@/lib/messages";
 
 export default function LibraryEntryModal({
     mapping,
@@ -74,6 +78,8 @@ function FormModal({
         React.useState(false);
 
     const [titleLanguage] = useTitleLanguage();
+
+    const m = useMessages();
 
     if (!media) return null;
 
@@ -181,8 +187,29 @@ function FormModal({
                                 setIsImageModalOpen(true);
                             }}
                         />
-                        <div className="text-lg flex-1">
-                            {getMediaTitle(media, titleLanguage)}
+                        <div className="flex-1">
+                            <div className="text-xs text-zinc-400">
+                                {([MediaRating.RPlus, MediaRating.Rx].includes(
+                                    // May be null/undefined but that's fine. The ! is just
+                                    // for type checking.
+                                    media.rating!
+                                ) ||
+                                    !!media.isAdult) && (
+                                    <>
+                                        <span className="text-red-500">
+                                            Adult
+                                        </span>{" "}
+                                        —
+                                    </>
+                                )}{" "}
+                                {media.startDate?.getFullYear() || ""}{" "}
+                                {m(
+                                    `media_format_${media.format}` as keyof Messages
+                                ) || ""}
+                            </div>
+                            <div className="text-lg flex-1">
+                                {getMediaTitle(media, titleLanguage)}
+                            </div>
                         </div>
                     </div>
                     <form
@@ -222,9 +249,13 @@ function FormModal({
                         >
                             <RatingInput
                                 stars={5}
-                                defaultValue={libraryEntry?.score ? Math.floor(
-                                    (libraryEntry?.score || 0) / 20
-                                ) : null}
+                                defaultValue={
+                                    libraryEntry?.score
+                                        ? Math.floor(
+                                              (libraryEntry?.score || 0) / 20
+                                          )
+                                        : null
+                                }
                                 name="score"
                             />
                         </LibraryEntryInput>
@@ -415,7 +446,9 @@ function RatingInput({
     defaultValue: number | null;
     [key: string]: any;
 }) {
-    const [markedStars, setMarkedStars] = React.useState<number | null>(defaultValue);
+    const [markedStars, setMarkedStars] = React.useState<number | null>(
+        defaultValue
+    );
     const [hoveredStarIndex, setHoveredStarIndex] = React.useState<
         number | null
     >(null);
@@ -471,7 +504,11 @@ function RatingInput({
                     </button>
                 )}
             </div>
-            <input type="hidden" value={markedStars ? markedStars * 20 : ""} name={props.name} />
+            <input
+                type="hidden"
+                value={markedStars ? markedStars * 20 : ""}
+                name={props.name}
+            />
         </>
     );
 }
