@@ -32,11 +32,11 @@
 
 ## Key Features
 
-- **Nice UI** - There's a lot of effort put on making everything look nice.
-- **Night mode** - Dark mode is enabled by default (light mode will also be available).
-- **Offline library** - No need for a wi-fi connection to update your lists.
-- **Lists** - Create lists and save your favorite anime/manga into them. You can even add both anime and manga to the same list!
-- **Sync your library** - Import from and export your library to [AniList](https://anilist.co), [MyAnimeList](https://myanimelist.net), ~~and [Kitsu](https://kitsu.io)~~ (more coming soon).
+- **Nice UI** — There's a lot of effort put on making everything look nice.
+- **Night mode** — Dark mode is enabled by default (light mode will also be available).
+- **Offline library** — No need for a Wi-Fi connection to update your lists.
+- **Lists** — Create lists and save your favorite anime/manga into them. You can even add both anime and manga to the same list!
+- **Sync your library** — Import from and export your library to [AniList](https://anilist.co), [MyAnimeList](https://myanimelist.net), ~~and [Kitsu](https://kitsu.io)~~ (more coming soon).
 
 ### Not supported
 
@@ -44,16 +44,16 @@
 - (Planned) Notifications when a new episode/chapter is released.
 - (Maybe in the future) Anime streaming and manga reading.
 - (Not planned) Illegal anime streaming.
-- (Planned) Linux and MacOS versions.
+- (Planned) Linux and macOS versions.
 - (Maybe in the future) See anime/manga information.
 
 ## Download
 
-You can [download](https://github.com/naoka-dev/Naoka/releases/) the latest installable version of Naoka for Windows, ~~macOS and Linux (soon)~~.
+You can [download](https://github.com/naoka-dev/Naoka/releases/) the latest installable version of Naoka for Windows, ~~macOS, and Linux (soon)~~.
 
 ## Related
 
-[Taiga](https://taiga.moe/) - Naoka is inspired in this app, so you probably want to check it out too!
+[Taiga](https://taiga.moe/) — Naoka is inspired in this app, so you probably want to check it out too!
 
 ## Support
 
