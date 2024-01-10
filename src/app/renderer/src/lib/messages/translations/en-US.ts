@@ -100,6 +100,8 @@ const messages = {
     settings_media_adultfilter_subtitle: "Hide adult content everywhere in the app.",
     settings_media_adultfilter_true: "Yes, hide adult content",
     settings_media_adultfilter_false: "No, show adult content",
+    settings_about_title: "About",
+    settings_about_subtitle: "An anime and manga tracking app."
 };
 
 export default messages;

@@ -89,3 +89,20 @@ export function Select({
 export function Separator() {
     return <div className="h-px bg-zinc-700 -mx-4 -my-2 shrink-0"></div>;
 }
+
+export function Paragraph({
+    title,
+    children
+}: {
+    title: string;
+    children: React.ReactNode;
+}) {
+    return (
+        <div className="flex flex-col items-stretch">
+            <div className="text-zinc-200 text-base">{title}</div>
+            <div className="text-sm text-zinc-400">
+                {children}
+            </div>
+        </div>
+    );
+}

@@ -37,6 +37,10 @@
                 "startDragging": true,
                 "setSize": true,
                 "setTitle": true
+            },
+            "shell": {
+                "all": false,
+                "open": true
             }
         },
         "bundle": {
