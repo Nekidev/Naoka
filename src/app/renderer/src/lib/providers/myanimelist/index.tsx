@@ -117,6 +117,14 @@ function normalizeFormat(format: string): MediaFormat | undefined {
         ova: MediaFormat.Ova,
         ona: MediaFormat.Ona,
         music: MediaFormat.Music,
+        manga: MediaFormat.Manga,
+        novel: MediaFormat.Novel,
+        one_shot: MediaFormat.OneShot,
+        doujinshi: MediaFormat.Doujinshi,
+        manhwa: MediaFormat.Manhwa,
+        manhua: MediaFormat.Manhua,
+        oel: MediaFormat.Oel,
+        unknown: MediaFormat.Unknown
     }[format.toLowerCase()];
 }
 
@@ -282,8 +290,8 @@ export class MyAnimeList extends BaseProvider {
                 },
                 imageUrl: manga.main_picture?.large,
                 bannerUrl: null,
-                chapters: manga.chapters,
-                volumes: manga.volumes,
+                chapters: manga.num_chapters,
+                volumes: manga.num_volumes,
                 startDate: manga.start_date ? new Date(manga.start_date) : null,
                 finishDate: manga.end_date ? new Date(manga.end_date) : null,
                 genres: manga.genres
