@@ -60,6 +60,7 @@ export enum MediaFormat {
     Manhwa = "manhwa",
     Manhua = "manhua",
     Oel = "oel",
+    Unknown = "unknown"
 }
 
 export enum MediaStatus {
