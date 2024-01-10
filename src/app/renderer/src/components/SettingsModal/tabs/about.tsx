@@ -51,6 +51,14 @@ export default function About() {
                     >
                         Ko-fi
                     </button>
+                    <button
+                        className="text-blue-400 underline"
+                        onClick={() =>
+                            open("https://patreon.com/nekidev")
+                        }
+                    >
+                        Patreon
+                    </button>
                 </div>
             </Paragraph>
             <Paragraph title="Contributors">
