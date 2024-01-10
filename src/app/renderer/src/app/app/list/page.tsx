@@ -46,7 +46,6 @@ export default function ListPage() {
                     [...list!.items],
                     selectedProvider
                 );
-                console.log(media);
 
                 return {
                     ...list,
