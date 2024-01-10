@@ -1,18 +1,22 @@
 "use client";
 
-import { AnimatePresence } from "framer-motion";
-import Modal from "../Modal";
 import {
     CloudIcon,
+    InformationCircleIcon,
     PaintBrushIcon,
     SparklesIcon,
 } from "@heroicons/react/24/outline";
 import React from "react";
 
+import { AnimatePresence } from "framer-motion";
+
+import Modal from "../Modal";
+import { useMessages } from "@/lib/messages";
+
 import Connections from "./tabs/connections";
 import Appearance from "./tabs/appearance";
 import Media from "./tabs/media";
-import { useMessages } from "@/lib/messages";
+import About from "./tabs/about";
 
 export default function SettingsModal({
     isOpen,
@@ -48,6 +52,17 @@ export default function SettingsModal({
                                 active={tab === "media"}
                                 onClick={() => setTab("media")}
                             />
+                            <div className="flex-1"></div>
+                            <div className="border-t border-zinc-800 -m-2 p-2 pb-0 sticky bottom-0 left-0 right-0 flex flex-col items-stretch">
+                                <Tab
+                                    label={m("settings_about_title")}
+                                    icon={
+                                        <InformationCircleIcon className="h-6 w-6" />
+                                    }
+                                    active={tab === "about"}
+                                    onClick={() => setTab("about")}
+                                />
+                            </div>
                         </div>
                         <div className="flex-1 flex flex-col">
                             <div className="p-4 flex flex-col flex-1 gap-6 min-h-max">
@@ -57,6 +72,8 @@ export default function SettingsModal({
                                     <Connections />
                                 ) : tab == "media" ? (
                                     <Media />
+                                ) : tab == "about" ? (
+                                    <About />
                                 ) : (
                                     ""
                                 )}
