@@ -15,7 +15,7 @@ export default function About() {
                 subtitle={m("settings_about_subtitle")}
             />
             <Paragraph title="Version">
-                {pkg.version} {process.env.NODE_ENV && "dev"}{" "}
+                {pkg.version} {process.env.NODE_ENV === "development" && "dev"}{" "}
                 <button
                     className="text-blue-400 underline"
                     onClick={() =>
