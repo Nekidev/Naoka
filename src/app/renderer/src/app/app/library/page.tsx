@@ -30,6 +30,7 @@ import { getMedia } from "@/lib/db/utils";
 import { getMediaTitle } from "@/lib/settings";
 import { Messages } from "@/lib/messages/translations";
 import { useMessages } from "@/lib/messages";
+import VirtualList from "@/components/VirtualList";
 
 interface LibraryEntryWithMedia extends LibraryEntry {
     media?: Media;
@@ -43,6 +44,10 @@ const statusColors: { [key in LibraryStatus]: { [key: string]: string } } = {
     dropped: colors.red,
     completed: colors.green,
 };
+
+function remToPx(rem: number) {
+    return rem * parseFloat(getComputedStyle(document.documentElement).fontSize);
+}
 
 export default function Library() {
     const [mediaTypeFilters, setMediaTypeFilters] = React.useState<
@@ -269,17 +274,26 @@ export default function Library() {
                 <div className="flex-1 flex flex-col overflow-y-auto relative">
                     {libraryEntries ? (
                         libraryEntries.length > 0 ? (
-                            <div className="p-4 flex flex-col gap-4">
-                                {libraryEntries.map((entry) => (
-                                    <LibraryEntryRow
-                                        key={entry.mapping}
-                                        entry={entry}
-                                        openModal={() =>
-                                            setOpenModalMapping(entry.mapping)
-                                        }
-                                    />
-                                ))}
-                            </div>
+                            <VirtualList
+                                className="flex flex-col flex-1"
+                                style={{
+                                    padding: "0.5rem",
+                                }}
+                                items={libraryEntries}
+                                component={({ item, index }: { item: LibraryEntryWithMedia; index: number }) => {
+                                    return (
+                                        <LibraryEntryRow
+                                            key={item.mapping}
+                                            entry={item}
+                                            openModal={() => {
+                                                setOpenModalMapping(item.mapping);
+                                            }}
+                                        />
+                                    );
+                                }}
+                                componentSize={remToPx(3.5)}
+                                overscan={5}
+                            />
                         ) : (
                             <div className="flex-1 flex flex-col justify-center items-center text-zinc-300">
                                 <div className="mb-2">(╥﹏╥)</div>
@@ -350,7 +364,7 @@ function LibraryEntryRow({
 
     return (
         <div
-            className="flex flex-row items-strtetch gap-4 p-2 -m-2 relative hover:bg-zinc-800 rounded transition cursor-pointer group"
+            className="flex flex-row items-strtetch gap-4 p-2 relative hover:bg-zinc-800 rounded transition cursor-pointer group"
             onClick={() => openModal()}
         >
             <div
