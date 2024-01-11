@@ -3,10 +3,10 @@
     "description": "A desktop app for anime and manga tracking.",
     "author": {
         "name": "Nyeki",
-        "email": "hello@nyeki.dev",
+        "email": "nyeki@nyeki.dev",
         "url": "https://nyeki.dev"
     },
-    "version": "v0.1.0-beta",
+    "version": "v0.1.0",
     "private": true,
     "main": "main/index.js",
     "scripts": {
