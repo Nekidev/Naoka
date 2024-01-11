@@ -51,7 +51,7 @@ export default function VirtualList({
         return () => {
             containerRef.current?.removeEventListener("scroll", handleScroll);
         };
-    }, [renderFrom, renderTo]);
+    }, [renderFrom, renderTo, items]);
 
     return (
         <div ref={containerRef} style={style} {...props}>
