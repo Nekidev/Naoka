@@ -99,7 +99,7 @@ function Tab({
 }) {
     return (
         <button
-            className={`p-2 rounded hover:bg-zinc-700 leading-none flex flex-row items-center gap-4 transition ${
+            className={`p-2 rounded hover:bg-zinc-700 active:bg-zinc-800 leading-none flex flex-row items-center gap-4 transition ${
                 active && "bg-zinc-800"
             }`}
             onClick={onClick}
