@@ -26,7 +26,7 @@ import {
     MediaRating,
 } from "@/lib/db/types";
 import { useSelectedProvider } from "@/lib/providers/hooks";
-import { getMedia } from "@/lib/db/utils";
+import { getBulkMedia, getMedia } from "@/lib/db/utils";
 import { getMediaTitle } from "@/lib/settings";
 import { Messages } from "@/lib/messages/translations";
 import { useMessages } from "@/lib/messages";
@@ -46,7 +46,9 @@ const statusColors: { [key in LibraryStatus]: { [key: string]: string } } = {
 };
 
 function remToPx(rem: number) {
-    return rem * parseFloat(getComputedStyle(document.documentElement).fontSize);
+    return (
+        rem * parseFloat(getComputedStyle(document.documentElement).fontSize)
+    );
 }
 
 export default function Library() {
@@ -85,24 +87,33 @@ export default function Library() {
                     }
                 }
 
-                // TODO: Optimize query using bulk get and not individual get (`getBulkMedia()` maybe?)
-                entry.media = await getMedia(entry.mapping, provider);
-
-                if (
-                    !entry.media?.title.native
-                        ?.toLowerCase()
-                        .includes(query.toLowerCase()) &&
-                    !entry.media?.title.romaji
-                        ?.toLowerCase()
-                        .includes(query.toLowerCase()) &&
-                    !entry.media?.title.english
-                        ?.toLowerCase()
-                        .includes(query.toLowerCase())
-                ) {
-                    continue;
-                }
-
                 result.push(entry);
+            }
+
+            let loadedMedia = await getBulkMedia(
+                result.map((e) => e.mapping),
+                provider
+            );
+
+            for (let index in result) {
+                result[index].media = loadedMedia[index];
+            }
+
+            if (!!debouncedQuery) {
+                result = result.filter((entry: LibraryEntryWithMedia) => {
+                    let q = debouncedQuery.toLowerCase();
+                    return (
+                        !entry.media?.title.native
+                            ?.toLowerCase()
+                            .includes(q) &&
+                        !entry.media?.title.romaji
+                            ?.toLowerCase()
+                            .includes(q) &&
+                        !entry.media?.title.english
+                            ?.toLowerCase()
+                            .includes(q)
+                    );
+                });
             }
 
             return result;
@@ -280,13 +291,21 @@ export default function Library() {
                                     padding: "0.5rem",
                                 }}
                                 items={libraryEntries}
-                                component={({ item, index }: { item: LibraryEntryWithMedia; index: number }) => {
+                                component={({
+                                    item,
+                                    index,
+                                }: {
+                                    item: LibraryEntryWithMedia;
+                                    index: number;
+                                }) => {
                                     return (
                                         <LibraryEntryRow
                                             key={item.mapping}
                                             entry={item}
                                             openModal={() => {
-                                                setOpenModalMapping(item.mapping);
+                                                setOpenModalMapping(
+                                                    item.mapping
+                                                );
                                             }}
                                         />
                                     );
