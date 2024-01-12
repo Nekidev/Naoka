@@ -99,17 +99,18 @@ export default function Library() {
                 result[index].media = loadedMedia[index];
             }
 
-            if (!!debouncedQuery) {
+            console.log(debouncedQuery);
+            if (debouncedQuery.length > 0) {
                 result = result.filter((entry: LibraryEntryWithMedia) => {
                     let q = debouncedQuery.toLowerCase();
                     return (
-                        !entry.media?.title.native
+                        entry.media?.title.native
                             ?.toLowerCase()
-                            .includes(q) &&
-                        !entry.media?.title.romaji
+                            .includes(q) ||
+                        entry.media?.title.romaji
                             ?.toLowerCase()
-                            .includes(q) &&
-                        !entry.media?.title.english
+                            .includes(q) ||
+                        entry.media?.title.english
                             ?.toLowerCase()
                             .includes(q)
                     );
