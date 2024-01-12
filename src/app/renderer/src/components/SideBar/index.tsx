@@ -350,11 +350,11 @@ function ProviderButton({
                 className="h-8 w-8 rounded object-center object-cover"
             />
             <div className="flex flex-row items-center gap-1">
-                <span className="text-sm text-zinc-300 leading-none line-clamp-1">
+                <span className="text-sm text-zinc-300 leading-none line-clamp-1 shrink-0">
                     {api.name}
                 </span>
                 {!!accounts?.length && (
-                    <span className="text-sm text-zinc-500 leading-none line-clamp-1">
+                    <span className="text-sm text-left text-zinc-500 leading-none line-clamp-1">
                         <span className="">- </span>
                         {accounts
                             ?.map((account) => account.user?.name)
