@@ -1,12 +1,9 @@
 "use client";
 
 import React from "react";
-import { Rubik } from "next/font/google";
 import "./globals.css";
-import { useIsClient, useLocalStorage } from "@uidotdev/usehooks";
+import { useIsClient } from "@uidotdev/usehooks";
 import { useTheme } from "@/lib/settings";
-
-const rubik = Rubik({ subsets: ["latin"] });
 
 export default function RootLayout({
     children,
@@ -54,7 +51,7 @@ function Layout({ children }: { children: React.ReactNode }) {
                 <title>Naoka</title>
             </head>
             <body
-                className={`${rubik.className}`}
+                className="font-rubik"
                 onContextMenu={(e) => {
                     e.preventDefault();
                 }}

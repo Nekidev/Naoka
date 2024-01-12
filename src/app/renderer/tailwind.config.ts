@@ -7,7 +7,7 @@ const config: Config = {
         process.cwd() + "/renderer/src/components/**/*.{js,ts,jsx,tsx,mdx}",
         process.cwd() + "/renderer/src/app/**/*.{js,ts,jsx,tsx,mdx}",
     ],
-    darkMode: 'class',
+    darkMode: "class",
     theme: {
         extend: {
             backgroundImage: {
@@ -19,14 +19,17 @@ const config: Config = {
                 cover: "2 / 3",
             },
             spacing: {
-                14: "3.5rem"
+                14: "3.5rem",
             },
             colors: {
                 zinc: {
                     850: "#202023",
-                    ...colors.zinc
-                }
-            }
+                    ...colors.zinc,
+                },
+            },
+            fontFamily: {
+                rubik: ["'Rubik'", "sans-serif"],
+            },
         },
     },
     plugins: [],
