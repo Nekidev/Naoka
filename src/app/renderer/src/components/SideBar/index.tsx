@@ -437,7 +437,7 @@ function UserProfile({ openSettingsModal }: { openSettingsModal: () => void }) {
                 )}
             </AnimatePresence>
             <button
-                className="flex flex-row items-center gap-4 transition hover:bg-zinc-800 w-full rounded"
+                className="flex flex-row items-center gap-4 transition hover:bg-zinc-700 active:bg-zinc-800 w-full rounded"
                 onClick={() => setIsProviderSelectOpen(true)}
             >
                 <img
