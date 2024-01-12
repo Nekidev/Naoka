@@ -17,7 +17,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import ConfirmModal from "@/components/ConfirmModal";
 import { List, Mapping, Media, MediaType } from "@/lib/db/types";
 import { useSelectedProvider } from "@/lib/providers/hooks";
-import { getBulkMedia } from "@/lib/db/utils";
+import { getBulkMedia, getMedia } from "@/lib/db/utils";
 import { getMediaTitle } from "@/lib/settings";
 
 interface ListWithMedia extends List {
@@ -187,10 +187,11 @@ export default function ListPage() {
                 </div>
                 {list.items.length > 0 ? (
                     <div className="p-2 gap-x-4 grid grid-cols-3 relative">
-                        {list.media!.map((item: Media) => (
+                        {list.media!.map((item: Media, index: number) => (
                             <MediaItem
                                 list={list}
                                 media={item}
+                                mapping={list.items[index]}
                                 openLibraryEntryModal={
                                     setLibraryEntryModalMapping
                                 }
@@ -244,10 +245,12 @@ export default function ListPage() {
 function MediaItem({
     list,
     media,
+    mapping,
     openLibraryEntryModal,
 }: {
     list: List;
     media: Media;
+    mapping: Mapping;
     openLibraryEntryModal: any;
 }) {
     const [isConfirmModalOpen, setIsConfirmModalOpen] = React.useState(false);
@@ -285,11 +288,11 @@ function MediaItem({
             <ConfirmModal
                 isOpen={isConfirmModalOpen}
                 title="Remove from this list"
-                content={`Do you want to remove '${media.title.romaji}' from the list?`}
+                content={`Do you want to remove '${getMediaTitle(media)}' from the list?`}
                 onConfirm={async () => {
                     await db.lists.update(list.id!, {
                         items: list.items.filter(
-                            (v: string) => v != media.mapping
+                            (v: string) => v != mapping
                         ),
                     });
                 }}
