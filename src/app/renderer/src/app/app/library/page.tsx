@@ -417,7 +417,7 @@ function LibraryEntryRow({
                     {([MediaRating.RPlus, MediaRating.Rx].includes(
                         // May be null/undefined but that's fine. The ! is just
                         // for type checking.
-                        entry.media!.rating!
+                        entry.media?.rating ?? MediaRating.G
                     ) ||
                         !!entry.media!.isAdult) && (
                         <>
