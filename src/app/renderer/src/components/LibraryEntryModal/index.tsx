@@ -7,6 +7,7 @@ import {
     ChevronDownIcon,
     ChevronUpIcon,
     HeartIcon,
+    InformationCircleIcon,
     PlusIcon,
     StarIcon,
     XMarkIcon,
@@ -19,11 +20,11 @@ import ImageModal from "../ImageModal";
 import Modal from "../Modal";
 import AddToListModal from "../AddToListModal";
 import ConfirmModal from "../ConfirmModal";
+import MediaDetailsModal from "../MediaDetailsModal";
 import {
     LibraryEntry,
     LibraryStatus,
     Mapping,
-    MediaGenre,
     MediaRating,
     MediaType,
 } from "@/lib/db/types";
@@ -73,6 +74,7 @@ function FormModal({
     const [isImageModalOpen, setIsImageModalOpen] = React.useState(false);
     const [isAddToListModalOpen, setIsAddToListModalOpen] =
         React.useState(false);
+    const [isDetailsModalOpen, setIsDetailsModalOpen] = React.useState(false);
 
     const [isRemoveFromLibraryModalOpen, setIsRemoveFromLibraryModalOpen] =
         React.useState(false);
@@ -134,6 +136,10 @@ function FormModal({
                     ></div>
                     <div className="flex flex-row px-8 py-4 gap-4 relative h-40 items-end">
                         <div className="absolute top-2 right-2 flex flex-row items-center gap-2">
+                            <button className="flex flex-row items-center gap-2 text-xs p-2 leading-none rounded hover:bg-zinc-950/20 transition" onClick={() => setIsDetailsModalOpen(true)}>
+                                <InformationCircleIcon className="h-4 w-4 stroke-2" />
+                                Details
+                            </button>
                             <button
                                 className="flex flex-row items-center gap-2 text-xs p-2 leading-none rounded hover:bg-zinc-950/20 transition"
                                 onClick={() => {
@@ -391,6 +397,10 @@ function FormModal({
                 }}
                 isOpen={isRemoveFromLibraryModalOpen}
                 closeModal={() => setIsRemoveFromLibraryModalOpen(false)}
+            />
+            <MediaDetailsModal
+                mapping={isDetailsModalOpen ? mapping : null}
+                closeModal={() => setIsDetailsModalOpen(false)}
             />
         </>
     );
