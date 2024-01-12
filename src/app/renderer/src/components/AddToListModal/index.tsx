@@ -40,29 +40,32 @@ function FormModal({
         () => getMedia(mapping, selectedProvider),
         [mapping, selectedProvider]
     );
-    const lists = useLiveQuery(() =>
-        db.lists.toArray(async (lists) => {
-            let mediaMappings: Array<Mapping> = [];
+    const lists: ListWithMedia[] | undefined = useLiveQuery(
+        () =>
+            db.lists.toArray(async (lists) => {
+                let mediaMappings: Array<Mapping> = [];
 
-            for (const list of lists) {
-                list.items.map((mapping: Mapping) =>
-                    mediaMappings.push(mapping)
-                );
-            }
+                for (const list of lists) {
+                    list.items.map((mapping: Mapping) =>
+                        mediaMappings.push(mapping)
+                    );
+                }
 
-            const media: Media[] = (await getBulkMedia(
-                [...new Set(mediaMappings)],
-                selectedProvider
-            )) as Media[];
+                const mappingsSet = [...new Set(mediaMappings)];
+                const media: Media[] = (await getBulkMedia(
+                    mappingsSet,
+                    selectedProvider
+                )) as Media[];
 
-            return lists.map((list) => {
-                const listWithMedia: ListWithMedia = list as ListWithMedia;
-                listWithMedia.media = media.filter((v) =>
-                    list.items.includes(v!.mapping)
-                );
-                return listWithMedia;
-            });
-        })
+                return lists.map((list) => {
+                    const listWithMedia = list as ListWithMedia;
+                    listWithMedia.media = media.filter((v, i) =>
+                        list.items.includes(mappingsSet[i])
+                    );
+                    return listWithMedia;
+                });
+            }),
+        [selectedProvider]
     );
 
     const [isCreateListModalOpen, setIsCreateListModalOpen] =
@@ -175,11 +178,11 @@ function ListButton({
             ) : (
                 <div className="rounded h-10 w-10 bg-zinc-700 relative">
                     <img
-                        src={list.media![0].imageUrl!}
+                        src={list.media![0]?.imageUrl!}
                         className="rounded absolute top-0 left-0 bottom-0 aspect-cover h-full object-center object-cover z-10"
                     />
                     <img
-                        src={list.media![1].imageUrl!}
+                        src={list.media![1]?.imageUrl!}
                         className="rounded absolute top-0 right-0 bottom-0 aspect-cover h-full object-center object-cover"
                     />
                 </div>
