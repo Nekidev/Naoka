@@ -1,6 +1,7 @@
 import { Data } from "dataclass";
 import { ProviderAPI, providers } from "../providers";
 import { db } from ".";
+import { updateMappings } from "./utils";
 
 export type MediaType = "anime" | "manga";
 
@@ -181,7 +182,11 @@ export class ExternalAccount extends Data {
         method: ImportMethod = ImportMethod.Keep
     ) {
         const api = new ProviderAPI(this.provider);
-        const { entries } = await api.getLibrary(type, this);
+        const { entries, mappings: newMappings } = await api.getLibrary(type, this);
+
+        await Promise.all(
+            newMappings.map(updateMappings)
+        );
 
         const mappings = await db.mappings
             .where("mappings")
