@@ -4,7 +4,8 @@ export default function VirtualList({
     items,
     component,
     componentSize,
-    overscan = 1,
+    overscan = 10,
+    updateEvery = 5,
     ...props
 }: {
     items: any[];
@@ -18,10 +19,13 @@ export default function VirtualList({
     const style = { ...(props.style ?? {}), overflow: "auto" };
     delete props.style;
 
-    const [[renderFrom, renderTo], setRenderRange] = React.useState([0, containerRef.current?.offsetHeight! / componentSize])
+    const [[renderFrom, renderTo], setRenderRange] = React.useState([
+        0,
+        containerRef.current?.offsetHeight! / componentSize,
+    ]);
 
     React.useEffect(() => {
-        function handleScroll(e: any) {
+        function handleScroll(e: any, force = false) {
             const rf = Math.floor(e.target.scrollTop / componentSize);
             const rt = rf + Math.ceil(e.target.offsetHeight / componentSize);
 
@@ -29,20 +33,25 @@ export default function VirtualList({
             const rtState = Math.min(rt + overscan, items.length);
 
             if (renderFrom != rfState || renderTo != rtState) {
-                setRenderRange([rfState, rtState]);
+                if (
+                    force ||
+                    Math.abs(renderFrom - rfState) > updateEvery ||
+                    Math.abs(renderTo - rtState) > updateEvery
+                ) {
+                    setRenderRange([rfState, rtState]);
+                }
             }
         }
 
         if (containerRef.current) {
             containerRef.current.addEventListener("scroll", handleScroll);
-
-            handleScroll({ target: containerRef.current });
+            handleScroll({ target: containerRef.current }, true);
         }
 
         return () => {
             containerRef.current?.removeEventListener("scroll", handleScroll);
         };
-    }, [renderFrom, renderTo, items]);
+    }, [renderFrom, items]);
 
     return (
         <div ref={containerRef} style={style} {...props}>
