@@ -1,5 +1,17 @@
 import React from "react";
 
+/**
+ * Renders a virtual list of items.
+ *
+ * @param {Object} props - The props object.
+ * @param {Array} props.items - The array of items to render.
+ * @param {Function} props.component - The function that renders each item.
+ * @param {number} props.componentSize - The size of each item.
+ * @param {number} [props.overscan=10] - The number of items to render outside the visible range.
+ * @param {number} [props.updateEvery=5] - The number of items to scroll past before recalculating the overscanned elements.
+ * @param {Object} props.[key] - Additional props for the list's container.
+ * @returns {JSX.Element} The virtual list component.
+ */
 export default function VirtualList({
     items,
     component,
