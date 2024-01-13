@@ -18,12 +18,7 @@ export default function VirtualList({
     const style = { ...(props.style ?? {}), overflow: "auto" };
     delete props.style;
 
-    const [renderFrom, setRenderFrom] = React.useState(
-        0
-    );
-    const [renderTo, setRenderTo] = React.useState(
-        containerRef.current?.offsetHeight! / componentSize
-    );
+    const [[renderFrom, renderTo], setRenderRange] = React.useState([0, containerRef.current?.offsetHeight! / componentSize])
 
     React.useEffect(() => {
         function handleScroll(e: any) {
@@ -33,12 +28,8 @@ export default function VirtualList({
             const rfState = Math.max(rf - overscan, 0);
             const rtState = Math.min(rt + overscan, items.length);
 
-            if (renderFrom != rfState) {
-                setRenderFrom(rfState);
-            }
-
-            if (renderTo != rtState) {
-                setRenderTo(rtState);
+            if (renderFrom != rfState || renderTo != rtState) {
+                setRenderRange([rfState, rtState]);
             }
         }
 
