@@ -116,7 +116,7 @@ export async function getMedia(mapping: Mapping, provider: Provider) {
  * @param {Provider} provider - The provider to retrieve media from.
  * @return {Promise<Media[]>} - Returns a promise that resolves to an array of media objects.
  */
-export async function getBulkMedia(mappings: Mapping[], provider: Provider) {
+export async function getBulkMedia(mappings: Mapping[], provider: Provider): Promise<Media[]> {
     let allMappings = (
         await db.mappings.where("mappings").anyOf(mappings).distinct().toArray()
     ).map((m) => m.mappings);
