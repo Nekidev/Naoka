@@ -184,9 +184,9 @@ export class ExternalAccount extends Data {
         const api = new ProviderAPI(this.provider);
         const { entries, mappings: newMappings } = await api.getLibrary(type, this);
 
-        await Promise.all(
-            newMappings.map(updateMappings)
-        );
+        for (const mappings of newMappings) {
+            await updateMappings(mappings);
+        }
 
         const mappings = await db.mappings
             .where("mappings")

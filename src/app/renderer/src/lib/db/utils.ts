@@ -1,6 +1,6 @@
 import { IndexableType } from "dexie";
 import { db } from ".";
-import { Mapping, Media, Provider } from "./types";
+import { Mapping, Mappings, Media, Provider } from "./types";
 import { useLiveQuery } from "dexie-react-hooks";
 import { useSelectedProvider } from "../providers/hooks";
 
@@ -18,42 +18,35 @@ import { useSelectedProvider } from "../providers/hooks";
 export async function updateMappings(
     mappings: Mapping[]
 ): Promise<IndexableType> {
-    const existingEntries = db.mappings.where("mappings").anyOf(mappings);
-    const existingEntriesCount = await existingEntries.count();
-    const existingEntriesArray = await existingEntries.toArray();
+    const existingMappingsObjects = await db.mappings
+        .where("mappings")
+        .anyOf(mappings)
+        .toArray();
 
-    if (existingEntriesCount === 0) {
-        return await db.mappings.add({
-            mappings,
-        });
-    } else if (existingEntriesCount === 1) {
-        const existingEntry = await existingEntries.first();
-        const mergedEntry = {
-            // Remove duplicate mappings
-            mappings: [...new Set([...existingEntry!.mappings, ...mappings])],
-        };
-
-        return await db.mappings.update(existingEntry!.id!, mergedEntry);
+    if (existingMappingsObjects.length === 0) {
+        return await db.mappings.add({ mappings });
+    } else if (existingMappingsObjects.length === 1) {
+        let existingMappings = existingMappingsObjects[0];
+        existingMappings.mappings = [
+            ...new Set([...existingMappings.mappings, ...mappings]),
+        ];
+        return await db.mappings.update(existingMappings.id!, existingMappings);
     } else {
-        const existingMappings = existingEntriesArray.map(
-            (value) => value.mappings
+        let existingMappingsIDs = existingMappingsObjects.map(
+            (m: Mappings) => m.id!
         );
-        let newMappings: Mapping[] = mappings;
-
-        for (const entryMappings of existingMappings) {
-            for (const mapping of entryMappings) {
-                newMappings.push(mapping);
-            }
-        }
-
-        const newEntry = await db.mappings.add({
-            mappings: [...new Set(newMappings)],
-        });
-        await db.mappings.bulkDelete(
-            existingEntriesArray.map((value) => value.id) as number[]
-        );
-
-        return newEntry;
+        let newMappingsObject = {
+            mappings: [
+                ...new Set([
+                    ...existingMappingsObjects.flatMap(
+                        (m: Mappings) => m.mappings
+                    ),
+                    ...mappings,
+                ]),
+            ],
+        };
+        await db.mappings.bulkDelete(existingMappingsIDs);
+        return await db.mappings.add(newMappingsObject);
     }
 }
 
@@ -110,7 +103,7 @@ export async function getMedia(mapping: Mapping, provider: Provider) {
         if (mappingFromProvider)
             return (
                 (await db.media.get({ mapping: mappingFromProvider })) ??
-                db.media.get({ mapping })
+                (await db.media.get({ mapping }))
             );
     }
     return await db.media.get({ mapping });
@@ -123,67 +116,35 @@ export async function getMedia(mapping: Mapping, provider: Provider) {
  * @param {Provider} provider - The provider to retrieve media from.
  * @return {Promise<Media[]>} - Returns a promise that resolves to an array of media objects.
  */
-export async function getBulkMedia(mappings: Mapping[], provider: Provider) {
-    let providerMappings: Mapping[] = [];
-    let mappingsQueryMappings: Mapping[] = [];
+export async function getBulkMedia(mappings: Mapping[], provider: Provider): Promise<Media[]> {
+    let allMappings = (
+        await db.mappings.where("mappings").anyOf(mappings).distinct().toArray()
+    ).map((m) => m.mappings);
 
-    for (const mapping of mappings) {
-        if (isMappingFromProvider(mapping, provider)) {
-            providerMappings.push(mapping);
-        } else {
-            mappingsQueryMappings.push(mapping);
-        }
-    }
-
-    const mappingsObjects = await db.mappings
-        .where("mappings")
-        .anyOf(mappingsQueryMappings)
-        .distinct()
-        .toArray();
-
-    for (const mapping of mappingsQueryMappings) {
-        const mappingsObject = mappingsObjects.find((m) =>
-            m.mappings.includes(mapping)
+    allMappings.sort((a, b) => {
+        const indexA = mappings.indexOf(
+            a.find((item) => mappings.includes(item))!
+        );
+        const indexB = mappings.indexOf(
+            b.find((item) => mappings.includes(item))!
         );
 
-        if (mappingsObject) {
-            providerMappings.push(
-                mappingsObject.mappings.find((m: Mapping) =>
-                    isMappingFromProvider(m, provider)
-                ) ?? mapping
+        return indexA - indexB;
+    });
+
+    let media = await db.media.bulkGet(allMappings.flat());
+
+    return mappings.map((mapping: Mapping) => {
+        let mappingsObject = allMappings.find((ms) => ms.includes(mapping));
+        if (mappingsObject !== undefined) {
+            let matchingMedia = media.filter((m) =>
+                mappingsObject!.includes(m?.mapping!)
+            );
+            return (
+                matchingMedia.find((m) =>
+                    isMappingFromProvider(m!.mapping, provider)
+                ) ?? matchingMedia[0]
             );
         }
-    }
-
-    const media = await db.media.bulkGet(providerMappings);
-
-    // Items that haven't been found for the selected provider so must be
-    // queried by the original mappping (ignores the selected provider).
-    const originalMappingsQueryMappings: Mapping[] = mappingsQueryMappings
-        .map((value: Mapping, index: number) => {
-            if (!media[index]) {
-                return value;
-            }
-            return undefined;
-        })
-        .filter((value: Mapping | undefined) => !!value) as Mapping[];
-
-    const originalMappingsMedia =
-        originalMappingsQueryMappings.length > 0
-            ? await db.media.bulkGet(originalMappingsQueryMappings)
-            : [];
-
-    let sortedMedia: (Media | undefined)[] = [];
-
-    let undefinedCount = 0;
-    for (const m of media) {
-        if (m) {
-            sortedMedia.push(m);
-            continue;
-        }
-
-        sortedMedia.push(originalMappingsMedia[undefinedCount++]);
-    }
-
-    return sortedMedia;
+    });
 }

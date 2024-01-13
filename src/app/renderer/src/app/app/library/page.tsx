@@ -99,7 +99,6 @@ export default function Library() {
                 result[index].media = loadedMedia[index];
             }
 
-            console.log(debouncedQuery);
             if (debouncedQuery.length > 0) {
                 result = result.filter((entry: LibraryEntryWithMedia) => {
                     let q = debouncedQuery.toLowerCase();
@@ -419,7 +418,7 @@ function LibraryEntryRow({
                         // for type checking.
                         entry.media?.rating ?? MediaRating.G
                     ) ||
-                        !!entry.media!.isAdult) && (
+                        !!entry.media?.isAdult) && (
                         <>
                             <span className="text-red-500">Adult</span> —
                         </>
