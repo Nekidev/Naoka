@@ -193,7 +193,7 @@ function FormModal({
                                 setIsImageModalOpen(true);
                             }}
                         />
-                        <div className="flex-1">
+                        <div className="flex-1 flex flex-col gap-1">
                             <div className="text-xs text-zinc-400">
                                 {([MediaRating.RPlus, MediaRating.Rx].includes(
                                     // May be null/undefined but that's fine. The ! is just
@@ -213,7 +213,7 @@ function FormModal({
                                     `media_format_${media.format}` as keyof Messages
                                 ) || ""}
                             </div>
-                            <div className="text-lg flex-1">
+                            <div className="text-lg leading-tight flex-1">
                                 {getMediaTitle(media, titleLanguage)}
                             </div>
                         </div>
