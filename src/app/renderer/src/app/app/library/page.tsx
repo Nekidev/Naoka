@@ -311,7 +311,8 @@ export default function Library() {
                                     );
                                 }}
                                 componentSize={remToPx(3.5)}
-                                overscan={5}
+                                overscan={15}
+                                updateEvery={5}
                             />
                         ) : (
                             <div className="flex-1 flex flex-col justify-center items-center text-zinc-300">
