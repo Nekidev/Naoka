@@ -29,9 +29,16 @@ const config: Config = {
             },
             fontFamily: {
                 rubik: ["'Rubik'", "sans-serif"],
+                ubuntu: ["'Ubuntu'", "sans-serif"],
+                roboto: ["'Roboto'", "sans-serif"],
             },
         },
     },
+    safelist: [
+        "font-rubik",
+        "font-ubuntu",
+        "font-roboto",
+    ],
     plugins: [],
 };
 export default config;

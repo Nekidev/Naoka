@@ -1,13 +1,14 @@
 "use client";
 
 import { Header, Select, Setting } from "../components";
-import { useTheme } from "@/lib/settings";
+import { useFont, useTheme } from "@/lib/settings";
 import { Language, useLanguage, useMessages } from "@/lib/messages";
 import { languages } from "../../../lib/messages";
 
 export default function Appearance() {
     const m = useMessages();
 
+    const [font, setFont] = useFont();
     const [theme, setTheme] = useTheme();
     const [language, setLanguage] = useLanguage();
 
@@ -49,6 +50,19 @@ export default function Appearance() {
                             {lang.emoji} {lang.name}
                         </option>
                     ))}
+                </Select>
+            </Setting>
+            <Setting title="Font" subtitle="Change the theme's font family.">
+                <Select value={font} onChange={(e) => setFont(e.target.value)}>
+                    <option value="rubik">
+                        Rubik
+                    </option>
+                    <option value="ubuntu">
+                        Ubuntu
+                    </option>
+                    <option value="roboto">
+                        Roboto
+                    </option>
                 </Select>
             </Setting>
         </>
