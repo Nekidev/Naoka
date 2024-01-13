@@ -61,12 +61,35 @@ function FormModalContent(props: FormModalProps) {
                 return field.step === currentStep && !field.valid;
             }).length === 0;
 
+    function submit() {
+        if (!isCurrentStepInputValid) return;
+
+        if (currentStep < props.steps.length - 1) {
+            setCurrentStep((v) => v + 1);
+        } else {
+            var values: { [key: string]: string } = {};
+
+            Array.from(
+                new FormData(formRef.current!).entries()
+            ).map(([key, value]) => {
+                values[key as keyof typeof values] =
+                    value as string;
+            });
+
+            props.onSubmit(values);
+            props.closeModal();
+        }
+    }
+
     return (
         <Modal closeModal={props.closeModal}>
             <div className="w-screen max-w-md bg-zinc-800 relative rounded overflow-x-hidden overflow-y-auto shadow-2xl p-4 flex flex-col gap-4">
                 <form
                     ref={formRef}
-                    onSubmit={(e) => e.preventDefault()}
+                    onSubmit={(e) => {
+                        e.preventDefault();
+                        submit();
+                    }}
                     autoComplete="off"
                     className="flex flex-col gap-4 relative"
                 >
@@ -270,32 +293,29 @@ function FormModalContent(props: FormModalProps) {
                             className="py-2 px-4 leading-none bg-zinc-100 text-zinc-900 rounded hover:bg-zinc-300 transition disabled:opacity-60 disabled:hover:bg-zinc-100 disabled:cursor-not-allowed flex flex-col items-center justify-center"
                             type="button"
                             disabled={!isCurrentStepInputValid}
-                            onClick={(e) => {
-                                if (!isCurrentStepInputValid) return;
-
-                                if (currentStep < props.steps.length - 1) {
-                                    setCurrentStep((v) => v + 1);
-                                } else {
-                                    var values: { [key: string]: string } = {};
-
-                                    Array.from(
-                                        new FormData(formRef.current!).entries()
-                                    ).map(([key, value]) => {
-                                        values[key as keyof typeof values] =
-                                            value as string;
-                                    });
-
-                                    props.onSubmit(values);
-                                    props.closeModal();
-                                }
-                            }}
+                            onClick={submit}
                         >
-                            <div style={{
-                                opacity: currentStep === props.steps.length - 1 ? 1 : 0
-                            }}>Accept</div>
-                            <div className="-mt-4" style={{
-                                opacity: currentStep === props.steps.length - 1 ? 0 : 1
-                            }}>Next</div>
+                            <div
+                                style={{
+                                    opacity:
+                                        currentStep === props.steps.length - 1
+                                            ? 1
+                                            : 0,
+                                }}
+                            >
+                                Accept
+                            </div>
+                            <div
+                                className="-mt-4"
+                                style={{
+                                    opacity:
+                                        currentStep === props.steps.length - 1
+                                            ? 0
+                                            : 1,
+                                }}
+                            >
+                                Next
+                            </div>
                         </button>
                     </div>
                 </form>
