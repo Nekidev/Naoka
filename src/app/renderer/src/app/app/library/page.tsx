@@ -311,7 +311,7 @@ export default function Library() {
                                     );
                                 }}
                                 componentSize={remToPx(3.5)}
-                                overscan={10}
+                                overscan={15}
                                 updateEvery={5}
                             />
                         ) : (
