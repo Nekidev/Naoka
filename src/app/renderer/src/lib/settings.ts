@@ -59,5 +59,5 @@ export function useAdultFilter() {
  * @return {string} The font preference.
  */
 export function useFont() {
-    return useLocalStorage("Naoka:Settings:Font", "Rubik");
+    return useLocalStorage("Naoka:Settings:Font", "rubik");
 }

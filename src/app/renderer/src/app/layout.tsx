@@ -3,7 +3,7 @@
 import React from "react";
 import "./globals.css";
 import { useIsClient } from "@uidotdev/usehooks";
-import { useTheme } from "@/lib/settings";
+import { useFont, useTheme } from "@/lib/settings";
 
 export default function RootLayout({
     children,
@@ -45,13 +45,15 @@ function Layout({ children }: { children: React.ReactNode }) {
             break;
     }
 
+    const [font] = useFont();
+
     return (
         <html lang="en" className={themeClass}>
             <head>
                 <title>Naoka</title>
             </head>
             <body
-                className="font-rubik"
+                className={`font-${font}`}
                 onContextMenu={(e) => {
                     e.preventDefault();
                 }}
