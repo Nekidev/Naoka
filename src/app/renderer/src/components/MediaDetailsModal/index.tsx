@@ -40,7 +40,7 @@ function Content({
     return (
         <Modal closeModal={closeModal}>
             <div className="w-screen max-w-xs max-h-[calc(100vh-8rem)] bg-zinc-800 relative rounded">
-                <div className="p-4 flex flex-row items-center gap-2 border-b border-b-zinc-700">
+                <div className="p-4 flex flex-row items-center gap-4 border-b border-b-zinc-700">
                     <img
                         src={media?.imageUrl!}
                         className="h-10 w-10 rounded object-cover object-center"
@@ -67,11 +67,9 @@ function Content({
                             ) || ""}
                         </div>
                     </div>
-                    <button onClick={closeModal} className="p-2 -m-2">
-                        <XMarkIcon className="h-6 w-6" />
-                    </button>
                 </div>
-                <div className="p-4 flex flex-col gap-4 overflow-y-auto overflow-x-hidden">
+                {/* I wanted to make the div below scrollable instead of the whole modal, but I couldn't. If you know how to do it, make a PR! */}
+                <div className="p-4 flex flex-col gap-4">
                     {media?.format && (
                         <Detail title="Format">
                             {m(
@@ -94,7 +92,7 @@ function Content({
                             {media?.title.english}
                         </Detail>
                     )}
-                    {media?.genres && (
+                    {(media?.genres.length > 0) && (
                         <Detail title="Genres">
                             {media?.genres
                                 .map((genre: MediaGenre) => {
@@ -117,12 +115,16 @@ function Content({
                     )}
                     {media?.status && (
                         <Detail title="Status">
-                            {m(`${media?.type}_status_${media?.status}` as keyof Messages)}
+                            {m(
+                                `${media?.type}_status_${media?.status}` as keyof Messages
+                            )}
                         </Detail>
                     )}
                     {media?.rating && (
                         <Detail title="Rating">
-                            {m(`media_rating_${media?.rating}` as keyof Messages)}
+                            {m(
+                                `media_rating_${media?.rating}` as keyof Messages
+                            )}
                         </Detail>
                     )}
                 </div>

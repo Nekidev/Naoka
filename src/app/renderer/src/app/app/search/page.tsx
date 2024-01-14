@@ -15,6 +15,7 @@ import { VerticalNavSpacer, LeftNavSpacer } from "@/components/NavigationBar";
 import { cn } from "@/lib/utils";
 import styles from "./styles.module.css";
 import LibraryEntryModal from "@/components/LibraryEntryModal";
+import MediaDetailsModal from "@/components/MediaDetailsModal";
 import { useLiveQuery } from "dexie-react-hooks";
 import { db } from "@/lib/db";
 import { defaultLibraryEntry } from "@/lib/db/defaults";
@@ -53,7 +54,8 @@ export default function Search() {
     const api = new ProviderAPI(selectedProvider as Provider);
 
     const [displayMode, setDisplayMode] = useLocalStorage<"list" | "grid">(
-        "Naoka:Search:DisplayMode", "list"
+        "Naoka:Search:DisplayMode",
+        "list"
     );
     const [query, setQuery] = React.useState<string>("");
     const [results, setResults] = React.useState<Media[]>([]);
@@ -66,6 +68,8 @@ export default function Search() {
     const [libraryEntryModalMapping, setLibraryEntryModalMapping] =
         React.useState<Mapping | null>(null);
     const [addToListModalMapping, setAddToListModalMapping] =
+        React.useState<Mapping | null>(null);
+    const [mediaDetailsModalMapping, setMediaDetailsModalMapping] =
         React.useState<Mapping | null>(null);
 
     const search = async () => {
@@ -247,12 +251,18 @@ export default function Search() {
                                         openAddToListModal={
                                             setAddToListModalMapping
                                         }
+                                        openMediaDetailsModal={
+                                            setMediaDetailsModalMapping
+                                        }
                                     />
                                 ) : (
                                     <Grid
                                         results={results}
                                         openLibraryEntryModal={
                                             setLibraryEntryModalMapping
+                                        }
+                                        openMediaDetailsModal={
+                                            setMediaDetailsModalMapping
                                         }
                                     />
                                 )}
@@ -298,6 +308,10 @@ export default function Search() {
             <AddToListModal
                 mapping={addToListModalMapping || undefined}
                 closeModal={() => setAddToListModalMapping(null)}
+            />
+            <MediaDetailsModal
+                mapping={mediaDetailsModalMapping}
+                closeModal={() => setMediaDetailsModalMapping(null)}
             />
         </>
     );
@@ -400,7 +414,15 @@ function ToggleButton({
     );
 }
 
-function MediaCard({ media, onClick }: { media: Media; onClick: any }) {
+function MediaCard({
+    media,
+    onClick,
+    onContextMenu,
+}: {
+    media: Media;
+    onClick: any;
+    onContextMenu: any;
+}) {
     const libraryEntry = useLiveQuery(
         () => db.library.get({ mapping: media.mapping }),
         [media],
@@ -417,6 +439,7 @@ function MediaCard({ media, onClick }: { media: Media; onClick: any }) {
         <div
             className="w-full h-full rounded relative cursor-pointer flex flex-col gap-2 group"
             onClick={onClick}
+            onContextMenu={onContextMenu}
         >
             <div className="relative">
                 <img
@@ -436,10 +459,7 @@ function MediaCard({ media, onClick }: { media: Media; onClick: any }) {
                     {getMediaTitle(media)}
                 </div>
                 <div className="text-xs text-zinc-400 line-clamp-1 mt-auto">
-                    {([
-                        MediaRating.RPlus,
-                        MediaRating.Rx,
-                    ].includes(
+                    {([MediaRating.RPlus, MediaRating.Rx].includes(
                         // May be null/undefined but that's fine. The ! is just
                         // for type checking.
                         media.rating!
@@ -477,9 +497,11 @@ function MediaCard({ media, onClick }: { media: Media; onClick: any }) {
 function Grid({
     results,
     openLibraryEntryModal,
+    openMediaDetailsModal,
 }: {
     results: Media[];
     openLibraryEntryModal: any;
+    openMediaDetailsModal: any;
 }) {
     return (
         <div className="grid grid-cols-4 lg:grid-cols-6 relative gap-4 p-4">
@@ -488,6 +510,7 @@ function Grid({
                     key={media.mapping}
                     media={media}
                     onClick={() => openLibraryEntryModal(media.mapping)}
+                    onContextMenu={() => openMediaDetailsModal(media.mapping)}
                 />
             ))}
         </div>
@@ -497,10 +520,12 @@ function Grid({
 function MediaRow({
     media,
     onClick,
+    onContextMenu,
     addToList,
 }: {
     media: Media;
     onClick: any;
+    onContextMenu: any;
     addToList: any;
 }) {
     const m = useMessages();
@@ -521,18 +546,15 @@ function MediaRow({
             <img
                 className="w-10 rounded aspect-square object-cover object-center"
                 src={media.imageUrl || undefined}
-                alt={getMediaTitle(media)}
+                alt={getMediaTitle(media, titleLanguage)}
             />
             <div className="flex flex-col justify-center flex-1">
                 <div className="text-zinc-200 group-hover:text-white transition text-left line-clamp-1">
-                    {getMediaTitle(media)}
+                    {getMediaTitle(media, titleLanguage)}
                 </div>
                 <div className="flex flex-row items-center gap-2">
                     <div className="text-xs text-zinc-400 line-clamp-1 text-left">
-                        {([
-                            MediaRating.RPlus,
-                            MediaRating.Rx,
-                        ].includes(
+                        {([MediaRating.RPlus, MediaRating.Rx].includes(
                             // May be null/undefined but that's fine. The ! is just
                             // for type checking.
                             media.rating!
@@ -570,6 +592,7 @@ function MediaRow({
             <div
                 className="absolute top-0 bottom-0 left-0 right-0"
                 onClick={onClick}
+                onContextMenu={onContextMenu}
             ></div>
             <div className="opacity-0 group-hover:opacity-100 transition-all p-2 flex flex-row items-center gap-2 z-10">
                 <div className="relative">
@@ -659,10 +682,12 @@ function List({
     results,
     openLibraryEntryModal,
     openAddToListModal,
+    openMediaDetailsModal,
 }: {
     results: Media[];
     openLibraryEntryModal: (mapping: Mapping) => void;
     openAddToListModal: (mapping: Mapping) => void;
+    openMediaDetailsModal: (mapping: Mapping) => void;
 }) {
     return (
         <div className="flex flex-col p-2">
@@ -671,6 +696,7 @@ function List({
                     key={result.mapping}
                     media={result}
                     onClick={() => openLibraryEntryModal(result.mapping)}
+                    onContextMenu={() => openMediaDetailsModal(result.mapping)}
                     addToList={() => openAddToListModal(result.mapping)}
                 />
             ))}
