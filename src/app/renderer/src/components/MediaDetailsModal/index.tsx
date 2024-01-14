@@ -67,11 +67,9 @@ function Content({
                             ) || ""}
                         </div>
                     </div>
-                    <button onClick={closeModal} className="p-2 -m-2">
-                        <XMarkIcon className="h-6 w-6" />
-                    </button>
                 </div>
-                <div className="p-4 flex flex-col gap-4 overflow-y-auto overflow-x-hidden">
+                {/* I wanted to make the div below scrollable instead of the whole modal, but I couldn't. If you know how to do it, make a PR! */}
+                <div className="p-4 flex flex-col gap-4">
                     {media?.format && (
                         <Detail title="Format">
                             {m(
@@ -117,12 +115,16 @@ function Content({
                     )}
                     {media?.status && (
                         <Detail title="Status">
-                            {m(`${media?.type}_status_${media?.status}` as keyof Messages)}
+                            {m(
+                                `${media?.type}_status_${media?.status}` as keyof Messages
+                            )}
                         </Detail>
                     )}
                     {media?.rating && (
                         <Detail title="Rating">
-                            {m(`media_rating_${media?.rating}` as keyof Messages)}
+                            {m(
+                                `media_rating_${media?.rating}` as keyof Messages
+                            )}
                         </Detail>
                     )}
                 </div>
