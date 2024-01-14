@@ -120,7 +120,7 @@ export default function Library() {
         });
     }, [debouncedQuery, mediaTypeFilters, statusFilters, provider]);
 
-    const [openModalMapping, setOpenModalMapping] =
+    const [libraryModalMapping, openLibraryModalMapping] =
         React.useState<null | Mapping>(null);
 
     function handleOnStatusSelectorClick(status: LibraryStatus) {
@@ -303,7 +303,7 @@ export default function Library() {
                                             key={item.mapping}
                                             entry={item}
                                             openModal={() => {
-                                                setOpenModalMapping(
+                                                openLibraryModalMapping(
                                                     item.mapping
                                                 );
                                             }}
@@ -335,8 +335,8 @@ export default function Library() {
                 </div>
             </main>
             <LibraryEntryModal
-                mapping={openModalMapping}
-                closeModal={() => setOpenModalMapping(null)}
+                mapping={libraryModalMapping}
+                closeModal={() => openLibraryModalMapping(null)}
             />
         </>
     );
