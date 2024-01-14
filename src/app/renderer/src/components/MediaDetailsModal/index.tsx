@@ -40,7 +40,7 @@ function Content({
     return (
         <Modal closeModal={closeModal}>
             <div className="w-screen max-w-xs max-h-[calc(100vh-8rem)] bg-zinc-800 relative rounded">
-                <div className="p-4 flex flex-row items-center gap-2 border-b border-b-zinc-700">
+                <div className="p-4 flex flex-row items-center gap-4 border-b border-b-zinc-700">
                     <img
                         src={media?.imageUrl!}
                         className="h-10 w-10 rounded object-cover object-center"
@@ -92,7 +92,7 @@ function Content({
                             {media?.title.english}
                         </Detail>
                     )}
-                    {media?.genres && (
+                    {(media?.genres.length > 0) && (
                         <Detail title="Genres">
                             {media?.genres
                                 .map((genre: MediaGenre) => {
