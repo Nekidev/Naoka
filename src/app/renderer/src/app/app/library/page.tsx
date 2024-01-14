@@ -15,6 +15,7 @@ import colors from "tailwindcss/colors";
 import { db } from "@/lib/db";
 import { useLiveQuery } from "dexie-react-hooks";
 import LibraryEntryModal from "@/components/LibraryEntryModal";
+import MediaDetailsModal from "@/components/MediaDetailsModal";
 import { useDebounce } from "@uidotdev/usehooks";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -26,7 +27,7 @@ import {
     MediaRating,
 } from "@/lib/db/types";
 import { useSelectedProvider } from "@/lib/providers/hooks";
-import { getBulkMedia, getMedia } from "@/lib/db/utils";
+import { getBulkMedia } from "@/lib/db/utils";
 import { getMediaTitle } from "@/lib/settings";
 import { Messages } from "@/lib/messages/translations";
 import { useMessages } from "@/lib/messages";
@@ -103,15 +104,9 @@ export default function Library() {
                 result = result.filter((entry: LibraryEntryWithMedia) => {
                     let q = debouncedQuery.toLowerCase();
                     return (
-                        entry.media?.title.native
-                            ?.toLowerCase()
-                            .includes(q) ||
-                        entry.media?.title.romaji
-                            ?.toLowerCase()
-                            .includes(q) ||
-                        entry.media?.title.english
-                            ?.toLowerCase()
-                            .includes(q)
+                        entry.media?.title.native?.toLowerCase().includes(q) ||
+                        entry.media?.title.romaji?.toLowerCase().includes(q) ||
+                        entry.media?.title.english?.toLowerCase().includes(q)
                     );
                 });
             }
@@ -120,7 +115,9 @@ export default function Library() {
         });
     }, [debouncedQuery, mediaTypeFilters, statusFilters, provider]);
 
-    const [libraryModalMapping, openLibraryModalMapping] =
+    const [libraryModalMapping, setOpenLibraryModalMapping] =
+        React.useState<null | Mapping>(null);
+    const [mediaDetailsModalMapping, setOpenMediaDetailsModalMapping] =
         React.useState<null | Mapping>(null);
 
     function handleOnStatusSelectorClick(status: LibraryStatus) {
@@ -302,8 +299,13 @@ export default function Library() {
                                         <LibraryEntryRow
                                             key={item.mapping}
                                             entry={item}
-                                            openModal={() => {
-                                                openLibraryModalMapping(
+                                            openLibraryEntryModal={() => {
+                                                setOpenLibraryModalMapping(
+                                                    item.mapping
+                                                );
+                                            }}
+                                            openMediaDetailsModal={() => {
+                                                setOpenMediaDetailsModalMapping(
                                                     item.mapping
                                                 );
                                             }}
@@ -336,7 +338,11 @@ export default function Library() {
             </main>
             <LibraryEntryModal
                 mapping={libraryModalMapping}
-                closeModal={() => openLibraryModalMapping(null)}
+                closeModal={() => setOpenLibraryModalMapping(null)}
+            />
+            <MediaDetailsModal
+                mapping={mediaDetailsModalMapping}
+                closeModal={() => setOpenMediaDetailsModalMapping(null)}
             />
         </>
     );
@@ -375,17 +381,20 @@ function StatusSelector({
 
 function LibraryEntryRow({
     entry,
-    openModal,
+    openLibraryEntryModal,
+    openMediaDetailsModal,
 }: {
     entry: LibraryEntryWithMedia;
-    openModal: any;
+    openLibraryEntryModal: () => void;
+    openMediaDetailsModal: () => void;
 }) {
     const m = useMessages();
 
     return (
         <div
             className="flex flex-row items-strtetch gap-4 p-2 relative hover:bg-zinc-800 rounded transition cursor-pointer group"
-            onClick={() => openModal()}
+            onClick={openLibraryEntryModal}
+            onContextMenu={openMediaDetailsModal}
         >
             <div
                 className="w-1 rounded-full"
