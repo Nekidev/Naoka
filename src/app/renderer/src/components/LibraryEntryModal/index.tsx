@@ -629,7 +629,7 @@ function TextArea({ ...props }: { [key: string]: any }) {
         <div className="w-full relative">
             <textarea
                 autoComplete="none"
-                className="rounded p-2 bg-zinc-900 w-full text-sm outline-none peer placeholder:text-zinc-400 resize-y"
+                className="rounded px-2 py-1.5 bg-zinc-900 w-full text-sm outline-none peer placeholder:text-zinc-400 resize-y"
                 {...props}
             />
         </div>
