@@ -155,6 +155,7 @@ export class Review extends Data {
     summary!: string;
     isSpoiler!: boolean;
     recommendation!: RecommendationLevel;
+    isPrivate!: boolean;
     updatedAt!: Date;
 }
 
