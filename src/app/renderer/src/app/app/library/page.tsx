@@ -14,8 +14,6 @@ import TextInput from "@/components/TextInput";
 import colors from "tailwindcss/colors";
 import { db } from "@/lib/db";
 import { useLiveQuery } from "dexie-react-hooks";
-import LibraryEntryModal from "@/components/LibraryEntryModal";
-import MediaDetailsModal from "@/components/MediaDetailsModal";
 import { useDebounce } from "@uidotdev/usehooks";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -32,6 +30,11 @@ import { getMediaTitle } from "@/lib/settings";
 import { Messages } from "@/lib/messages/translations";
 import { useMessages } from "@/lib/messages";
 import VirtualList from "@/components/VirtualList";
+import dynamic from "next/dynamic";
+
+const LibraryEntryModal = dynamic(() => import("@/components/LibraryEntryModal"));
+
+const MediaDetailsModal = dynamic(() => import("@/components/MediaDetailsModal"))
 
 interface LibraryEntryWithMedia extends LibraryEntry {
     media?: Media;

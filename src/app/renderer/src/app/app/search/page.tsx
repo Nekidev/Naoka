@@ -14,14 +14,14 @@ import {
 import { VerticalNavSpacer, LeftNavSpacer } from "@/components/NavigationBar";
 import { cn } from "@/lib/utils";
 import styles from "./styles.module.css";
-import LibraryEntryModal from "@/components/LibraryEntryModal";
-import MediaDetailsModal from "@/components/MediaDetailsModal";
+// import LibraryEntryModal from "@/components/LibraryEntryModal";
+// import MediaDetailsModal from "@/components/MediaDetailsModal";
 import { useLiveQuery } from "dexie-react-hooks";
 import { db } from "@/lib/db";
 import { defaultLibraryEntry } from "@/lib/db/defaults";
 import Chip from "@/components/Chip";
 import TextInput from "@/components/TextInput";
-import AddToListModal from "@/components/AddToListModal";
+// import AddToListModal from "@/components/AddToListModal";
 import { ProviderAPI } from "@/lib/providers";
 import {
     LibraryStatus,
@@ -41,6 +41,11 @@ import {
     InputType,
 } from "@/lib/forms";
 import { getMediaTitle, useTitleLanguage } from "@/lib/settings";
+import dynamic from "next/dynamic";
+
+const LibraryEntryModal = dynamic(() => import("@/components/LibraryEntryModal"));
+const MediaDetailsModal = dynamic(() => import("@/components/MediaDetailsModal"));
+const AddToListModal = dynamic(() => import("@/components/AddToListModal"));
 
 export default function Search() {
     const m = useMessages();

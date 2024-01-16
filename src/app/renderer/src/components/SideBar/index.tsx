@@ -4,20 +4,17 @@ import { usePathname, useSearchParams } from "next/navigation";
 import {
     Bars3Icon,
     MagnifyingGlassIcon,
-    FireIcon,
     BookmarkIcon,
     Cog6ToothIcon,
     PlusIcon,
     RectangleStackIcon,
 } from "@heroicons/react/24/outline";
 import React from "react";
-import CreateListModal from "../CreateListModal";
 import { useLiveQuery } from "dexie-react-hooks";
 import { db } from "@/lib/db";
 import styles from "./styles.module.css";
 import { useAppWindow } from "@/lib/window";
 import Tooltip from "../Tooltip";
-import SettingsModal from "../SettingsModal";
 import Link from "../Link";
 import { useClickAway, useLocalStorage } from "@uidotdev/usehooks";
 import { List, Mapping, Media, Provider } from "@/lib/db/types";
@@ -27,10 +24,14 @@ import { useSidebarExpanded } from "./hooks";
 import { useMessages } from "@/lib/messages";
 import { getBulkMedia } from "@/lib/db/utils";
 import { useSelectedProvider } from "@/lib/providers/hooks";
+import dynamic from "next/dynamic";
 
 interface ListWithMedia extends List {
     media: Media[];
 }
+
+const SettingsModal = dynamic(() => import("../SettingsModal"));
+const CreateListModal = dynamic(() => import("../CreateListModal"));
 
 export default function SideBar() {
     const [isCreateListModalOpen, setIsCreateListModalOpen] =
@@ -163,11 +164,6 @@ function MenuButtons(): JSX.Element {
                     title={m("sidebar_search")}
                     href="/app/search/"
                 />
-                {/* <MenuItem
-                    icon={<FireIcon className="w-6 h-6" />}
-                    title="Explore"
-                    href="/"
-                 /> */}
                 <MenuButton
                     icon={<BookmarkIcon className="w-6 h-6" />}
                     title={m("sidebar_library")}

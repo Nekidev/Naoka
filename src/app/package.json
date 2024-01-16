@@ -11,7 +11,7 @@
     "main": "main/index.js",
     "scripts": {
         "clean": "rimraf dist renderer/.next renderer/out",
-        "dev": "next dev renderer",
+        "dev": "next dev renderer --turbo",
         "build": "next build renderer"
     },
     "postcss": {

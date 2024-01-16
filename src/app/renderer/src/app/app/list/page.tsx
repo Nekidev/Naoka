@@ -1,9 +1,10 @@
 "use client";
 
-import EditListModal from "@/components/EditListModal";
-import LibraryEntryModal from "@/components/LibraryEntryModal";
-import { LeftNavSpacer, VerticalNavSpacer } from "@/components/NavigationBar";
-import { db } from "@/lib/db";
+import React from "react";
+
+import dynamic from "next/dynamic";
+import { useRouter, useSearchParams } from "next/navigation";
+
 import {
     PencilIcon,
     RectangleStackIcon,
@@ -11,18 +12,25 @@ import {
     XMarkIcon,
 } from "@heroicons/react/24/outline";
 import { useLiveQuery } from "dexie-react-hooks";
-import { useRouter, useSearchParams } from "next/navigation";
-import React from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import ConfirmModal from "@/components/ConfirmModal";
+
+import { LeftNavSpacer, VerticalNavSpacer } from "@/components/NavigationBar";
+
+import { db } from "@/lib/db";
+import { getBulkMedia } from "@/lib/db/utils";
 import { List, Mapping, Media, MediaType } from "@/lib/db/types";
-import { useSelectedProvider } from "@/lib/providers/hooks";
-import { getBulkMedia, getMedia } from "@/lib/db/utils";
 import { getMediaTitle } from "@/lib/settings";
+import { useSelectedProvider } from "@/lib/providers/hooks";
 
 interface ListWithMedia extends List {
     media?: Media[];
 }
+
+const ConfirmModal = dynamic(() => import("@/components/ConfirmModal"));
+const EditListModal = dynamic(() => import("@/components/EditListModal"));
+const LibraryEntryModal = dynamic(
+    () => import("@/components/LibraryEntryModal")
+);
 
 export default function ListPage() {
     const searchParams = useSearchParams();
@@ -288,12 +296,12 @@ function MediaItem({
             <ConfirmModal
                 isOpen={isConfirmModalOpen}
                 title="Remove from this list"
-                content={`Do you want to remove '${getMediaTitle(media)}' from the list?`}
+                content={`Do you want to remove '${getMediaTitle(
+                    media
+                )}' from the list?`}
                 onConfirm={async () => {
                     await db.lists.update(list.id!, {
-                        items: list.items.filter(
-                            (v: string) => v != mapping
-                        ),
+                        items: list.items.filter((v: string) => v != mapping),
                     });
                 }}
                 closeModal={() => {
