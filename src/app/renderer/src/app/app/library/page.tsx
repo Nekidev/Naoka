@@ -9,7 +9,7 @@ import {
     XMarkIcon,
 } from "@heroicons/react/24/outline";
 import React from "react";
-import { cn } from "@/lib/utils";
+import { cn, remToPx } from "@/lib/utils";
 import TextInput from "@/components/TextInput";
 import colors from "tailwindcss/colors";
 import { db } from "@/lib/db";
@@ -32,9 +32,28 @@ import { useMessages } from "@/lib/messages";
 import VirtualList from "@/components/VirtualList";
 import dynamic from "next/dynamic";
 
-const LibraryEntryModal = dynamic(() => import("@/components/LibraryEntryModal"));
+const LibraryEntryModal = dynamic(
+    () => import("@/components/LibraryEntryModal")
+);
+const MediaDetailsModal = dynamic(
+    () => import("@/components/MediaDetailsModal")
+);
 
-const MediaDetailsModal = dynamic(() => import("@/components/MediaDetailsModal"))
+interface LibraryEntryModalContextProps {
+    mapping: Mapping | null;
+    open: (mapping: Mapping | null) => void;
+}
+const LibraryEntryModalContext = React.createContext(
+    {} as LibraryEntryModalContextProps
+);
+
+interface MediaDetailsModalContextProps {
+    mapping: Mapping | null;
+    open: (mapping: Mapping | null) => void;
+}
+const MediaDetailsModalContext = React.createContext(
+    {} as MediaDetailsModalContextProps
+);
 
 interface LibraryEntryWithMedia extends LibraryEntry {
     media?: Media;
@@ -48,12 +67,6 @@ const statusColors: { [key in LibraryStatus]: { [key: string]: string } } = {
     dropped: colors.red,
     completed: colors.green,
 };
-
-function remToPx(rem: number) {
-    return (
-        rem * parseFloat(getComputedStyle(document.documentElement).fontSize)
-    );
-}
 
 export default function Library() {
     const [mediaTypeFilters, setMediaTypeFilters] = React.useState<
@@ -134,220 +147,226 @@ export default function Library() {
     }
 
     return (
-        <>
-            <main className="flex flex-col min-h-full max-h-full">
-                <div className="shrink-0 bg-zinc-900 z-10">
-                    <div className="flex flex-row items-center">
-                        <VerticalNavSpacer />
-                        <LeftNavSpacer />
-                        <div className="flex flex-row gap-2 items-center">
-                            <button
-                                className={cn([
-                                    "p-2 rounded-full bg-zinc-800 transition hover:bg-zinc-700 disabled:opacity-60",
-                                    "disabled:hover:bg-zinc-800 disabled:cursor-not-allowed",
-                                ])}
-                                disabled={mediaTypeFilters.length === 0}
-                                onClick={() => {
-                                    setMediaTypeFilters([]);
-                                }}
-                            >
-                                <XMarkIcon className="h-4 w-4 stroke-2" />
-                            </button>
-                            {["favorites", "anime", "manga"].map((type) => (
-                                <Chip
-                                    key={type}
-                                    label={
-                                        type.slice(0, 1).toUpperCase() +
-                                        type.slice(1)
-                                    }
-                                    selected={mediaTypeFilters.includes(type)}
+        <LibraryEntryModalContext.Provider
+            value={{
+                mapping: libraryModalMapping,
+                open: setOpenLibraryModalMapping,
+            }}
+        >
+            <MediaDetailsModalContext.Provider
+                value={{
+                    mapping: mediaDetailsModalMapping,
+                    open: setOpenMediaDetailsModalMapping,
+                }}
+            >
+                <main className="flex flex-col min-h-full max-h-full">
+                    <div className="shrink-0 bg-zinc-900 z-10">
+                        <div className="flex flex-row items-center">
+                            <VerticalNavSpacer />
+                            <LeftNavSpacer />
+                            <div className="flex flex-row gap-2 items-center">
+                                <button
+                                    className={cn([
+                                        "p-2 rounded-full bg-zinc-800 transition hover:bg-zinc-700 disabled:opacity-60",
+                                        "disabled:hover:bg-zinc-800 disabled:cursor-not-allowed",
+                                    ])}
+                                    disabled={mediaTypeFilters.length === 0}
                                     onClick={() => {
-                                        setMediaTypeFilters((v) => {
-                                            if (v.includes(type)) {
-                                                return v.filter(
-                                                    (t) => t !== type
-                                                );
-                                            } else {
-                                                return [...v, type];
-                                            }
-                                        });
+                                        setMediaTypeFilters([]);
                                     }}
-                                />
-                            ))}
-                        </div>
-                    </div>
-                    <div className="px-4 py-2 flex flex-col gap-4">
-                        <TextInput
-                            name="search"
-                            icon={<MagnifyingGlassIcon className="h-6 w-6" />}
-                            label={`Search in your library`}
-                            value={query}
-                            onChange={(e: any) => setQuery(e.target.value)}
-                        />
-                        <div className="flex flex-row items-center gap-4">
-                            <AnimatePresence>
-                                {statusFilters.length > 0 && (
-                                    <motion.button
-                                        initial={{
-                                            marginLeft: "-1rem",
-                                            marginRight: "-1rem",
-                                            width: "0rem",
-                                            opacity: 0,
-                                        }}
-                                        animate={{
-                                            marginLeft: "-0.5rem",
-                                            marginRight: "-0.5rem",
-                                            width: "1rem",
-                                            opacity: 1,
-                                        }}
-                                        exit={{
-                                            marginLeft: "-1rem",
-                                            marginRight: "-1rem",
-                                            width: "0rem",
-                                            opacity: 0,
-                                        }}
-                                        transition={{
-                                            duration: 0.2,
-                                        }}
-                                        className="p-2 -mx-2 -my-3 box-content overflow-hidden"
+                                >
+                                    <XMarkIcon className="h-4 w-4 stroke-2" />
+                                </button>
+                                {["favorites", "anime", "manga"].map((type) => (
+                                    <Chip
+                                        key={type}
+                                        label={
+                                            type.slice(0, 1).toUpperCase() +
+                                            type.slice(1)
+                                        }
+                                        selected={mediaTypeFilters.includes(
+                                            type
+                                        )}
                                         onClick={() => {
-                                            setStatusFilters([]);
+                                            setMediaTypeFilters((v) => {
+                                                if (v.includes(type)) {
+                                                    return v.filter(
+                                                        (t) => t !== type
+                                                    );
+                                                } else {
+                                                    return [...v, type];
+                                                }
+                                            });
                                         }}
-                                    >
-                                        <XMarkIcon className="h-4 w-4 stroke-2" />
-                                    </motion.button>
-                                )}
-                            </AnimatePresence>
-                            <StatusSelector
-                                label="Not started"
-                                color={colors.yellow["400"]}
-                                selected={statusFilters.includes(
-                                    LibraryStatus.NotStarted
-                                )}
-                                onClick={handleOnStatusSelectorClick(
-                                    LibraryStatus.NotStarted
-                                )}
-                            />
-                            <StatusSelector
-                                label="Planned"
-                                color={colors.pink["400"]}
-                                selected={statusFilters.includes(
-                                    LibraryStatus.Planned
-                                )}
-                                onClick={handleOnStatusSelectorClick(
-                                    LibraryStatus.Planned
-                                )}
-                            />
-                            <StatusSelector
-                                label="In progress"
-                                color={colors.blue["400"]}
-                                selected={statusFilters.includes(
-                                    LibraryStatus.InProgress
-                                )}
-                                onClick={handleOnStatusSelectorClick(
-                                    LibraryStatus.InProgress
-                                )}
-                            />
-                            <StatusSelector
-                                label="Paused"
-                                color={colors.orange["400"]}
-                                selected={statusFilters.includes(
-                                    LibraryStatus.Paused
-                                )}
-                                onClick={handleOnStatusSelectorClick(
-                                    LibraryStatus.Paused
-                                )}
-                            />
-                            <StatusSelector
-                                label="Dropped"
-                                color={colors.red["400"]}
-                                selected={statusFilters.includes(
-                                    LibraryStatus.Dropped
-                                )}
-                                onClick={handleOnStatusSelectorClick(
-                                    LibraryStatus.Dropped
-                                )}
-                            />
-                            <StatusSelector
-                                label="Completed"
-                                color={colors.green["400"]}
-                                selected={statusFilters.includes(
-                                    LibraryStatus.Completed
-                                )}
-                                onClick={handleOnStatusSelectorClick(
-                                    LibraryStatus.Completed
-                                )}
-                            />
-                        </div>
-                    </div>
-                    <div className="h-px shrink-0 bg-zinc-800 mt-2"></div>
-                </div>
-                <div className="flex-1 flex flex-col overflow-y-auto relative">
-                    {libraryEntries ? (
-                        libraryEntries.length > 0 ? (
-                            <VirtualList
-                                className="flex flex-col flex-1"
-                                style={{
-                                    padding: "0.5rem",
-                                }}
-                                items={libraryEntries}
-                                component={({
-                                    item,
-                                    index,
-                                }: {
-                                    item: LibraryEntryWithMedia;
-                                    index: number;
-                                }) => {
-                                    return (
-                                        <LibraryEntryRow
-                                            key={item.mapping}
-                                            entry={item}
-                                            openLibraryEntryModal={() => {
-                                                setOpenLibraryModalMapping(
-                                                    item.mapping
-                                                );
-                                            }}
-                                            openMediaDetailsModal={() => {
-                                                setOpenMediaDetailsModalMapping(
-                                                    item.mapping
-                                                );
-                                            }}
-                                        />
-                                    );
-                                }}
-                                componentSize={remToPx(3.5)}
-                                overscan={15}
-                                updateEvery={5}
-                            />
-                        ) : (
-                            <div className="flex-1 flex flex-col justify-center items-center text-zinc-300">
-                                <div className="mb-2">(╥﹏╥)</div>
-                                <div>There's nothing here!</div>
-                                {(statusFilters.length > 0 ||
-                                    mediaTypeFilters.length > 0 ||
-                                    debouncedQuery.length > 0) && (
-                                    <div className="opacity-50 text-xs">
-                                        (Try clearing your filters)
-                                    </div>
-                                )}
+                                    />
+                                ))}
                             </div>
-                        )
-                    ) : (
-                        <div className="flex-1 flex flex-col items-center justify-center">
-                            <div className="h-6 w-6 border-2 border-white/90 border-t-transparent rounded-full animate-spin"></div>
                         </div>
-                    )}
-                </div>
-            </main>
-            <LibraryEntryModal
-                mapping={libraryModalMapping}
-                closeModal={() => setOpenLibraryModalMapping(null)}
-            />
-            <MediaDetailsModal
-                mapping={mediaDetailsModalMapping}
-                closeModal={() => setOpenMediaDetailsModalMapping(null)}
-            />
-        </>
+                        <div className="px-4 py-2 flex flex-col gap-4">
+                            <TextInput
+                                name="search"
+                                icon={
+                                    <MagnifyingGlassIcon className="h-6 w-6" />
+                                }
+                                label={`Search in your library`}
+                                value={query}
+                                onChange={(e: any) => setQuery(e.target.value)}
+                            />
+                            <div className="flex flex-row items-center gap-4">
+                                <AnimatePresence>
+                                    {statusFilters.length > 0 && (
+                                        <motion.button
+                                            initial={{
+                                                marginLeft: "-1rem",
+                                                marginRight: "-1rem",
+                                                width: "0rem",
+                                                opacity: 0,
+                                            }}
+                                            animate={{
+                                                marginLeft: "-0.5rem",
+                                                marginRight: "-0.5rem",
+                                                width: "1rem",
+                                                opacity: 1,
+                                            }}
+                                            exit={{
+                                                marginLeft: "-1rem",
+                                                marginRight: "-1rem",
+                                                width: "0rem",
+                                                opacity: 0,
+                                            }}
+                                            transition={{
+                                                duration: 0.2,
+                                            }}
+                                            className="p-2 -mx-2 -my-3 box-content overflow-hidden"
+                                            onClick={() => {
+                                                setStatusFilters([]);
+                                            }}
+                                        >
+                                            <XMarkIcon className="h-4 w-4 stroke-2" />
+                                        </motion.button>
+                                    )}
+                                </AnimatePresence>
+                                <StatusSelector
+                                    label="Not started"
+                                    color={colors.yellow["400"]}
+                                    selected={statusFilters.includes(
+                                        LibraryStatus.NotStarted
+                                    )}
+                                    onClick={handleOnStatusSelectorClick(
+                                        LibraryStatus.NotStarted
+                                    )}
+                                />
+                                <StatusSelector
+                                    label="Planned"
+                                    color={colors.pink["400"]}
+                                    selected={statusFilters.includes(
+                                        LibraryStatus.Planned
+                                    )}
+                                    onClick={handleOnStatusSelectorClick(
+                                        LibraryStatus.Planned
+                                    )}
+                                />
+                                <StatusSelector
+                                    label="In progress"
+                                    color={colors.blue["400"]}
+                                    selected={statusFilters.includes(
+                                        LibraryStatus.InProgress
+                                    )}
+                                    onClick={handleOnStatusSelectorClick(
+                                        LibraryStatus.InProgress
+                                    )}
+                                />
+                                <StatusSelector
+                                    label="Paused"
+                                    color={colors.orange["400"]}
+                                    selected={statusFilters.includes(
+                                        LibraryStatus.Paused
+                                    )}
+                                    onClick={handleOnStatusSelectorClick(
+                                        LibraryStatus.Paused
+                                    )}
+                                />
+                                <StatusSelector
+                                    label="Dropped"
+                                    color={colors.red["400"]}
+                                    selected={statusFilters.includes(
+                                        LibraryStatus.Dropped
+                                    )}
+                                    onClick={handleOnStatusSelectorClick(
+                                        LibraryStatus.Dropped
+                                    )}
+                                />
+                                <StatusSelector
+                                    label="Completed"
+                                    color={colors.green["400"]}
+                                    selected={statusFilters.includes(
+                                        LibraryStatus.Completed
+                                    )}
+                                    onClick={handleOnStatusSelectorClick(
+                                        LibraryStatus.Completed
+                                    )}
+                                />
+                            </div>
+                        </div>
+                        <div className="h-px shrink-0 bg-zinc-800 mt-2"></div>
+                    </div>
+                    <div className="flex-1 flex flex-col overflow-y-auto relative">
+                        {libraryEntries ? (
+                            libraryEntries.length > 0 ? (
+                                <VirtualList
+                                    className="flex flex-col flex-1"
+                                    style={{
+                                        padding: "0.5rem",
+                                    }}
+                                    items={libraryEntries}
+                                    component={({
+                                        item,
+                                        index,
+                                    }: {
+                                        item: LibraryEntryWithMedia;
+                                        index: number;
+                                    }) => {
+                                        return (
+                                            <LibraryEntryRow
+                                                key={item.mapping}
+                                                entry={item}
+                                            />
+                                        );
+                                    }}
+                                    componentSize={remToPx(3.5)}
+                                    overscan={15}
+                                    updateEvery={5}
+                                />
+                            ) : (
+                                <div className="flex-1 flex flex-col justify-center items-center text-zinc-300">
+                                    <div className="mb-2">(╥﹏╥)</div>
+                                    <div>There's nothing here!</div>
+                                    {(statusFilters.length > 0 ||
+                                        mediaTypeFilters.length > 0 ||
+                                        debouncedQuery.length > 0) && (
+                                        <div className="opacity-50 text-xs">
+                                            (Try clearing your filters)
+                                        </div>
+                                    )}
+                                </div>
+                            )
+                        ) : (
+                            <div className="flex-1 flex flex-col items-center justify-center">
+                                <div className="h-6 w-6 border-2 border-white/90 border-t-transparent rounded-full animate-spin"></div>
+                            </div>
+                        )}
+                    </div>
+                </main>
+                <LibraryEntryModal
+                    mapping={libraryModalMapping}
+                    closeModal={() => setOpenLibraryModalMapping(null)}
+                />
+                <MediaDetailsModal
+                    mapping={mediaDetailsModalMapping}
+                    closeModal={() => setOpenMediaDetailsModalMapping(null)}
+                />
+            </MediaDetailsModalContext.Provider>
+        </LibraryEntryModalContext.Provider>
     );
 }
 
@@ -382,22 +401,21 @@ function StatusSelector({
     );
 }
 
-function LibraryEntryRow({
-    entry,
-    openLibraryEntryModal,
-    openMediaDetailsModal,
-}: {
-    entry: LibraryEntryWithMedia;
-    openLibraryEntryModal: () => void;
-    openMediaDetailsModal: () => void;
-}) {
+function LibraryEntryRow({ entry }: { entry: LibraryEntryWithMedia }) {
     const m = useMessages();
+
+    const { open: openLibraryEntryModal } = React.useContext(
+        LibraryEntryModalContext
+    );
+    const { open: openMediaDetailsModal } = React.useContext(
+        MediaDetailsModalContext
+    );
 
     return (
         <div
             className="flex flex-row items-strtetch gap-4 p-2 relative hover:bg-zinc-800 rounded transition cursor-pointer group"
-            onClick={openLibraryEntryModal}
-            onContextMenu={openMediaDetailsModal}
+            onClick={() => openLibraryEntryModal(entry.mapping)}
+            onContextMenu={() => openMediaDetailsModal(entry.mapping)}
         >
             <div
                 className="w-1 rounded-full"

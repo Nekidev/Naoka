@@ -14,14 +14,11 @@ import {
 import { VerticalNavSpacer, LeftNavSpacer } from "@/components/NavigationBar";
 import { cn } from "@/lib/utils";
 import styles from "./styles.module.css";
-// import LibraryEntryModal from "@/components/LibraryEntryModal";
-// import MediaDetailsModal from "@/components/MediaDetailsModal";
 import { useLiveQuery } from "dexie-react-hooks";
 import { db } from "@/lib/db";
 import { defaultLibraryEntry } from "@/lib/db/defaults";
 import Chip from "@/components/Chip";
 import TextInput from "@/components/TextInput";
-// import AddToListModal from "@/components/AddToListModal";
 import { ProviderAPI } from "@/lib/providers";
 import {
     LibraryStatus,
@@ -43,9 +40,43 @@ import {
 import { getMediaTitle, useTitleLanguage } from "@/lib/settings";
 import dynamic from "next/dynamic";
 
-const LibraryEntryModal = dynamic(() => import("@/components/LibraryEntryModal"));
-const MediaDetailsModal = dynamic(() => import("@/components/MediaDetailsModal"));
+const LibraryEntryModal = dynamic(
+    () => import("@/components/LibraryEntryModal")
+);
+const MediaDetailsModal = dynamic(
+    () => import("@/components/MediaDetailsModal")
+);
 const AddToListModal = dynamic(() => import("@/components/AddToListModal"));
+
+interface LibraryEntryModalContextProps {
+    mapping: Mapping | null;
+    open: (mapping: Mapping | null) => void;
+}
+const LibraryEntryModalContext: React.Context<LibraryEntryModalContextProps> =
+    React.createContext({
+        mapping: null,
+        open: () => {},
+    } as LibraryEntryModalContextProps);
+
+interface MediaDetailsModalContextProps {
+    mapping: Mapping | null;
+    open: (mapping: Mapping | null) => void;
+}
+const MediaDetailsModalContext: React.Context<MediaDetailsModalContextProps> =
+    React.createContext({
+        mapping: null,
+        open: () => {},
+    } as MediaDetailsModalContextProps);
+
+interface AddToListModalContextProps {
+    mapping: Mapping | null;
+    open: (mapping: Mapping | null) => void;
+}
+const AddToListModalContext: React.Context<AddToListModalContextProps> =
+    React.createContext({
+        mapping: null,
+        open: () => {},
+    } as AddToListModalContextProps);
 
 export default function Search() {
     const m = useMessages();
@@ -142,183 +173,192 @@ export default function Search() {
     ];
 
     return (
-        <>
-            <main className="flex flex-col min-h-full">
-                <div className="flex flex-row items-stretch gap-4 flex-1 pr-4">
-                    <div className="flex-1 flex flex-col border-r border-r-zinc-800">
-                        <div className="flex flex-row items-center">
-                            <VerticalNavSpacer />
-                            <LeftNavSpacer />
-                            <div className="flex flex-row gap-2 items-center">
-                                {enabledSearchTypes.map((type) => (
-                                    <Chip
-                                        key={type}
-                                        label={
-                                            type.slice(0, 1).toUpperCase() +
-                                            type.slice(1)
-                                        }
-                                        selected={searchType === type}
-                                        onClick={() => {
-                                            setSearchType(type as MediaType);
-                                        }}
-                                    />
-                                ))}
-                            </div>
-                        </div>
-                        <div className="flex flex-col gap-2 border-b border-zinc-800 px-4 pb-2 mt-2">
-                            <div className="flex flex-row gap-4 items-center">
-                                <TextInput
-                                    name="search"
-                                    icon={
-                                        <MagnifyingGlassIcon className="h-6 w-6" />
-                                    }
-                                    label={`Search in ${api.name}`}
-                                    value={query}
-                                    onChange={(e: any) =>
-                                        setQuery(e.target.value)
-                                    }
-                                />
-                                <div className="flex flex-row items-center rounded bg-zinc-800 overflow-hidden">
-                                    <ToggleButton
-                                        selected={displayMode == "list"}
-                                        onClick={() => setDisplayMode("list")}
-                                    >
-                                        <Bars4Icon className="h-6 w-6" />
-                                    </ToggleButton>
-                                    <ToggleButton
-                                        selected={displayMode == "grid"}
-                                        onClick={() => setDisplayMode("grid")}
-                                    >
-                                        <Squares2X2Icon className="h-6 w-6" />
-                                    </ToggleButton>
-                                </div>
-                            </div>
-                            {api.config.search[searchType]?.sortBy && (
-                                <div className="relative text-zinc-400 cursor-pointer transition hover:text-zinc-300 w-fit">
-                                    <select
-                                        className="bg-zinc-900 text-sm appearance-none pl-5 pr-2 outline-none cursor-pointer"
-                                        ref={sortByRef}
-                                        onChange={() => {
-                                            search();
-                                        }}
-                                    >
-                                        {api.config.search[
-                                            searchType
-                                        ]?.sortBy?.map((s: any) => (
-                                            <option
-                                                key={s.value}
-                                                value={s.value}
-                                                className="text-zinc-300"
-                                            >
-                                                {s.label}
-                                            </option>
+        <LibraryEntryModalContext.Provider
+            value={{
+                mapping: libraryEntryModalMapping,
+                open: setLibraryEntryModalMapping,
+            }}
+        >
+            <MediaDetailsModalContext.Provider
+                value={{
+                    mapping: mediaDetailsModalMapping,
+                    open: setMediaDetailsModalMapping,
+                }}
+            >
+                <AddToListModalContext.Provider
+                    value={{
+                        mapping: addToListModalMapping,
+                        open: setAddToListModalMapping,
+                    }}
+                >
+                    <main className="flex flex-col min-h-full">
+                        <div className="flex flex-row items-stretch gap-4 flex-1 pr-4">
+                            <div className="flex-1 flex flex-col border-r border-r-zinc-800">
+                                <div className="flex flex-row items-center">
+                                    <VerticalNavSpacer />
+                                    <LeftNavSpacer />
+                                    <div className="flex flex-row gap-2 items-center">
+                                        {enabledSearchTypes.map((type) => (
+                                            <Chip
+                                                key={type}
+                                                label={
+                                                    type
+                                                        .slice(0, 1)
+                                                        .toUpperCase() +
+                                                    type.slice(1)
+                                                }
+                                                selected={searchType === type}
+                                                onClick={() => {
+                                                    setSearchType(
+                                                        type as MediaType
+                                                    );
+                                                }}
+                                            />
                                         ))}
-                                    </select>
-                                    <ChevronUpDownIcon className="h-4 w-4 absolute top-0 bottom-0 left-0 my-auto stroke-2 pointer-events-none" />
+                                    </div>
                                 </div>
-                            )}
-                        </div>
-                        <div className="flex-1 relative">
-                            <div
-                                className={cn([
-                                    "absolute top-0 bottom-0 left-0 right-0",
-                                    styles.scrollable,
-                                ])}
-                            >
-                                {loading ? (
-                                    <div className="flex flex-col items-center justify-center h-full">
-                                        <div className="h-6 w-6 border-2 border-white/90 border-t-transparent rounded-full animate-spin"></div>
+                                <div className="flex flex-col gap-2 border-b border-zinc-800 px-4 pb-2 mt-2">
+                                    <div className="flex flex-row gap-4 items-center">
+                                        <TextInput
+                                            name="search"
+                                            icon={
+                                                <MagnifyingGlassIcon className="h-6 w-6" />
+                                            }
+                                            label={`Search in ${api.name}`}
+                                            value={query}
+                                            onChange={(e: any) =>
+                                                setQuery(e.target.value)
+                                            }
+                                        />
+                                        <div className="flex flex-row items-center rounded bg-zinc-800 overflow-hidden">
+                                            <ToggleButton
+                                                selected={displayMode == "list"}
+                                                onClick={() =>
+                                                    setDisplayMode("list")
+                                                }
+                                            >
+                                                <Bars4Icon className="h-6 w-6" />
+                                            </ToggleButton>
+                                            <ToggleButton
+                                                selected={displayMode == "grid"}
+                                                onClick={() =>
+                                                    setDisplayMode("grid")
+                                                }
+                                            >
+                                                <Squares2X2Icon className="h-6 w-6" />
+                                            </ToggleButton>
+                                        </div>
                                     </div>
-                                ) : error ? (
-                                    <div className="h-full w-full flex flex-col items-center justify-center text-center">
-                                        (╯°□°）╯︵ ┻━┻
-                                        <br />
-                                        Oops, an error occurred!
+                                    {api.config.search[searchType]?.sortBy && (
+                                        <div className="relative text-zinc-400 cursor-pointer transition hover:text-zinc-300 w-fit">
+                                            <select
+                                                className="bg-zinc-900 text-sm appearance-none pl-5 pr-2 outline-none cursor-pointer"
+                                                ref={sortByRef}
+                                                onChange={() => {
+                                                    search();
+                                                }}
+                                            >
+                                                {api.config.search[
+                                                    searchType
+                                                ]?.sortBy?.map((s: any) => (
+                                                    <option
+                                                        key={s.value}
+                                                        value={s.value}
+                                                        className="text-zinc-300"
+                                                    >
+                                                        {s.label}
+                                                    </option>
+                                                ))}
+                                            </select>
+                                            <ChevronUpDownIcon className="h-4 w-4 absolute top-0 bottom-0 left-0 my-auto stroke-2 pointer-events-none" />
+                                        </div>
+                                    )}
+                                </div>
+                                <div className="flex-1 relative">
+                                    <div
+                                        className={cn([
+                                            "absolute top-0 bottom-0 left-0 right-0",
+                                            styles.scrollable,
+                                        ])}
+                                    >
+                                        {loading ? (
+                                            <div className="flex flex-col items-center justify-center h-full">
+                                                <div className="h-6 w-6 border-2 border-white/90 border-t-transparent rounded-full animate-spin"></div>
+                                            </div>
+                                        ) : error ? (
+                                            <div className="h-full w-full flex flex-col items-center justify-center text-center">
+                                                (╯°□°）╯︵ ┻━┻
+                                                <br />
+                                                Oops, an error occurred!
+                                            </div>
+                                        ) : results.length == 0 &&
+                                          query == "" ? (
+                                            <div className="h-full w-full flex flex-col items-center justify-center text-center">
+                                                (◕‿◕✿)
+                                                <br />
+                                                Start typing to search!
+                                            </div>
+                                        ) : results.length == 0 ? (
+                                            <div className="h-full w-full flex flex-col items-center justify-center text-center">
+                                                (╥﹏╥)
+                                                <br />
+                                                Oops, No results for that query!
+                                            </div>
+                                        ) : displayMode == "list" ? (
+                                            <List results={results} />
+                                        ) : (
+                                            <Grid results={results} />
+                                        )}
                                     </div>
-                                ) : results.length == 0 && query == "" ? (
-                                    <div className="h-full w-full flex flex-col items-center justify-center text-center">
-                                        (◕‿◕✿)
-                                        <br />
-                                        Start typing to search!
-                                    </div>
-                                ) : results.length == 0 ? (
-                                    <div className="h-full w-full flex flex-col items-center justify-center text-center">
-                                        (╥﹏╥)
-                                        <br />
-                                        Oops, No results for that query!
-                                    </div>
-                                ) : displayMode == "list" ? (
-                                    <List
-                                        results={results}
-                                        openLibraryEntryModal={
-                                            setLibraryEntryModalMapping
-                                        }
-                                        openAddToListModal={
-                                            setAddToListModalMapping
-                                        }
-                                        openMediaDetailsModal={
-                                            setMediaDetailsModalMapping
-                                        }
-                                    />
-                                ) : (
-                                    <Grid
-                                        results={results}
-                                        openLibraryEntryModal={
-                                            setLibraryEntryModalMapping
-                                        }
-                                        openMediaDetailsModal={
-                                            setMediaDetailsModalMapping
-                                        }
-                                    />
-                                )}
+                                </div>
                             </div>
-                        </div>
-                    </div>
-                    <form
-                        className="w-60 flex flex-col gap-4"
-                        ref={filtersFormRef}
-                    >
-                        <VerticalNavSpacer />
-                        <div className="text-lg -mt-3">Filters</div>
-                        {api.config.search[searchType]?.filters.map(
-                            (filter: any, index: number) => {
-                                switch (filter.type) {
-                                    case InputType.Select:
-                                        return (
-                                            <SelectFilter
-                                                key={index}
-                                                onChange={search}
-                                                {...filter}
-                                            />
-                                        );
+                            <form
+                                className="w-60 flex flex-col gap-4"
+                                ref={filtersFormRef}
+                            >
+                                <VerticalNavSpacer />
+                                <div className="text-lg -mt-3">Filters</div>
+                                {api.config.search[searchType]?.filters.map(
+                                    (filter: any, index: number) => {
+                                        switch (filter.type) {
+                                            case InputType.Select:
+                                                return (
+                                                    <SelectFilter
+                                                        key={index}
+                                                        onChange={search}
+                                                        {...filter}
+                                                    />
+                                                );
 
-                                    case InputType.CheckboxInput:
-                                        return (
-                                            <CheckboxFilter
-                                                key={index}
-                                                onChange={search}
-                                                {...filter}
-                                            />
-                                        );
-                                }
-                            }
-                        )}
-                    </form>
-                </div>
-            </main>
-            <LibraryEntryModal
-                mapping={libraryEntryModalMapping}
-                closeModal={() => setLibraryEntryModalMapping(null)}
-            />
-            <AddToListModal
-                mapping={addToListModalMapping || undefined}
-                closeModal={() => setAddToListModalMapping(null)}
-            />
-            <MediaDetailsModal
-                mapping={mediaDetailsModalMapping}
-                closeModal={() => setMediaDetailsModalMapping(null)}
-            />
-        </>
+                                            case InputType.CheckboxInput:
+                                                return (
+                                                    <CheckboxFilter
+                                                        key={index}
+                                                        onChange={search}
+                                                        {...filter}
+                                                    />
+                                                );
+                                        }
+                                    }
+                                )}
+                            </form>
+                        </div>
+                    </main>
+                    <LibraryEntryModal
+                        mapping={libraryEntryModalMapping}
+                        closeModal={() => setLibraryEntryModalMapping(null)}
+                    />
+                    <AddToListModal
+                        mapping={addToListModalMapping || undefined}
+                        closeModal={() => setAddToListModalMapping(null)}
+                    />
+                    <MediaDetailsModal
+                        mapping={mediaDetailsModalMapping}
+                        closeModal={() => setMediaDetailsModalMapping(null)}
+                    />
+                </AddToListModalContext.Provider>
+            </MediaDetailsModalContext.Provider>
+        </LibraryEntryModalContext.Provider>
     );
 }
 
@@ -419,15 +459,7 @@ function ToggleButton({
     );
 }
 
-function MediaCard({
-    media,
-    onClick,
-    onContextMenu,
-}: {
-    media: Media;
-    onClick: any;
-    onContextMenu: any;
-}) {
+function MediaCard({ media }: { media: Media }) {
     const libraryEntry = useLiveQuery(
         () => db.library.get({ mapping: media.mapping }),
         [media],
@@ -438,13 +470,20 @@ function MediaCard({
         }
     );
 
+    const { open: openLibraryEntryModal } = React.useContext(
+        LibraryEntryModalContext
+    );
+    const { open: openMediaDetailsModal } = React.useContext(
+        MediaDetailsModalContext
+    );
+
     const m = useMessages();
 
     return (
         <div
             className="w-full h-full rounded relative cursor-pointer flex flex-col gap-2 group"
-            onClick={onClick}
-            onContextMenu={onContextMenu}
+            onClick={() => openLibraryEntryModal(media.mapping)}
+            onContextMenu={() => openMediaDetailsModal(media.mapping)}
         >
             <div className="relative">
                 <img
@@ -499,42 +538,29 @@ function MediaCard({
     );
 }
 
-function Grid({
-    results,
-    openLibraryEntryModal,
-    openMediaDetailsModal,
-}: {
-    results: Media[];
-    openLibraryEntryModal: any;
-    openMediaDetailsModal: any;
-}) {
+function Grid({ results }: { results: Media[] }) {
     return (
         <div className="grid grid-cols-4 lg:grid-cols-6 relative gap-4 p-4">
             {results.map((media) => (
-                <MediaCard
-                    key={media.mapping}
-                    media={media}
-                    onClick={() => openLibraryEntryModal(media.mapping)}
-                    onContextMenu={() => openMediaDetailsModal(media.mapping)}
-                />
+                <MediaCard key={media.mapping} media={media} />
             ))}
         </div>
     );
 }
 
-function MediaRow({
-    media,
-    onClick,
-    onContextMenu,
-    addToList,
-}: {
-    media: Media;
-    onClick: any;
-    onContextMenu: any;
-    addToList: any;
-}) {
+function MediaRow({ media }: { media: Media }) {
     const m = useMessages();
     const [titleLanguage] = useTitleLanguage();
+
+    const { open: openLibraryEntryModal } = React.useContext(
+        LibraryEntryModalContext
+    );
+    const { open: openMediaDetailsModal } = React.useContext(
+        MediaDetailsModalContext
+    );
+    const { open: openAddToListModal } = React.useContext(
+        AddToListModalContext
+    );
 
     const libraryEntry = useLiveQuery(
         () => db.library.get({ mapping: media.mapping }),
@@ -596,8 +622,8 @@ function MediaRow({
                 modal from being opened when the buttons are clicked */}
             <div
                 className="absolute top-0 bottom-0 left-0 right-0"
-                onClick={onClick}
-                onContextMenu={onContextMenu}
+                onClick={() => openLibraryEntryModal(media.mapping)}
+                onContextMenu={() => openMediaDetailsModal(media.mapping)}
             ></div>
             <div className="opacity-0 group-hover:opacity-100 transition-all p-2 flex flex-row items-center gap-2 z-10">
                 <div className="relative">
@@ -674,7 +700,7 @@ function MediaRow({
                 </button>
                 <button
                     className="rounded-full bg-zinc-700 p-1 transition hover:bg-zinc-600"
-                    onClick={addToList}
+                    onClick={() => openAddToListModal(media.mapping)}
                 >
                     <PlusIcon className="w-4 h-4 stroke-2" />
                 </button>
@@ -683,27 +709,11 @@ function MediaRow({
     );
 }
 
-function List({
-    results,
-    openLibraryEntryModal,
-    openAddToListModal,
-    openMediaDetailsModal,
-}: {
-    results: Media[];
-    openLibraryEntryModal: (mapping: Mapping) => void;
-    openAddToListModal: (mapping: Mapping) => void;
-    openMediaDetailsModal: (mapping: Mapping) => void;
-}) {
+function List({ results }: { results: Media[] }) {
     return (
         <div className="flex flex-col p-2">
             {results.map((result) => (
-                <MediaRow
-                    key={result.mapping}
-                    media={result}
-                    onClick={() => openLibraryEntryModal(result.mapping)}
-                    onContextMenu={() => openMediaDetailsModal(result.mapping)}
-                    addToList={() => openAddToListModal(result.mapping)}
-                />
+                <MediaRow key={result.mapping} media={result} />
             ))}
         </div>
     );
