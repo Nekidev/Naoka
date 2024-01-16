@@ -134,6 +134,30 @@ export interface List {
     items: Mapping[];
 }
 
+export enum RecommendationLevel {
+    NotRecommended = "not_recommended",
+    MixedFeelings = "mixed_feelings",
+    Recommended = "recommended"
+}
+
+export class Review extends Data {
+    mapping!: Mapping;
+    charactersScore!: number | null;
+    illustrationScore!: number | null;
+    soundtrackScore!: number | null;
+    animationScore!: number | null;
+    creativityScore!: number | null;
+    voiceScore!: number | null;
+    writingScore!: number | null;
+    engagementScore!: number | null;
+    overallScore!: number | null;
+    review!: string;
+    summary!: string;
+    isSpoiler!: boolean;
+    recommendation!: RecommendationLevel;
+    updatedAt!: Date;
+}
+
 export enum ImportMethod {
     // Keep the current library entry
     Keep = "keep",
