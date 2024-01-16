@@ -1,9 +1,6 @@
 "use client";
 
 import React from "react";
-
-import dynamic from "next/dynamic";
-
 import {
     MagnifyingGlassIcon,
     Bars4Icon,
@@ -14,11 +11,18 @@ import {
     ChevronDownIcon,
     ChevronUpDownIcon,
 } from "@heroicons/react/24/outline";
-import { useLiveQuery } from "dexie-react-hooks";
-import { useLocalStorage } from "@uidotdev/usehooks";
-
+import { VerticalNavSpacer, LeftNavSpacer } from "@/components/NavigationBar";
+import { cn } from "@/lib/utils";
 import styles from "./styles.module.css";
-
+// import LibraryEntryModal from "@/components/LibraryEntryModal";
+// import MediaDetailsModal from "@/components/MediaDetailsModal";
+import { useLiveQuery } from "dexie-react-hooks";
+import { db } from "@/lib/db";
+import { defaultLibraryEntry } from "@/lib/db/defaults";
+import Chip from "@/components/Chip";
+import TextInput from "@/components/TextInput";
+// import AddToListModal from "@/components/AddToListModal";
+import { ProviderAPI } from "@/lib/providers";
 import {
     LibraryStatus,
     Mapping,
@@ -28,29 +32,20 @@ import {
     MediaType,
     Provider,
 } from "@/lib/db/types";
-import { db } from "@/lib/db";
-import { cn } from "@/lib/utils";
+import { useLocalStorage } from "@uidotdev/usehooks";
+import { useMessages } from "@/lib/messages";
+import { Messages } from "@/lib/messages/translations";
 import {
     SelectInput as SelectInputInterface,
     CheckboxInput as CheckboxGroupInterface,
     InputType,
 } from "@/lib/forms";
-import Chip from "@/components/Chip";
-import { useMessages } from "@/lib/messages";
-import { ProviderAPI } from "@/lib/providers";
-import TextInput from "@/components/TextInput";
-import { Messages } from "@/lib/messages/translations";
-import { defaultLibraryEntry } from "@/lib/db/defaults";
 import { getMediaTitle, useTitleLanguage } from "@/lib/settings";
-import { VerticalNavSpacer, LeftNavSpacer } from "@/components/NavigationBar";
+import dynamic from "next/dynamic";
 
+const LibraryEntryModal = dynamic(() => import("@/components/LibraryEntryModal"));
+const MediaDetailsModal = dynamic(() => import("@/components/MediaDetailsModal"));
 const AddToListModal = dynamic(() => import("@/components/AddToListModal"));
-const MediaDetailsModal = dynamic(
-    () => import("@/components/MediaDetailsModal")
-);
-const LibraryEntryModal = dynamic(
-    () => import("@/components/LibraryEntryModal")
-);
 
 export default function Search() {
     const m = useMessages();
