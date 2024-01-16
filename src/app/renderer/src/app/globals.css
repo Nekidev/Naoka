@@ -66,9 +66,24 @@
     ::-webkit-scrollbar-thumb:hover {
         @apply bg-zinc-600;
     }
+    
+    ::-webkit-resizer, ::-moz-resizer {
+        display: none;
+    }
 
     *, *::after, *::before {
         -webkit-user-drag: none;
         -webkit-app-region: no-drag;
+    }
+}
+
+@layer utilities {
+    .no-scrollbar::-webkit-scrollbar {
+        width: 0;
+        height: 0;
+    }
+    .no-scrollbar::-webkit-scrollbar-thumb {
+        width: 0;
+        height: 0;
     }
 }

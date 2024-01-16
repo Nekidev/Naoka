@@ -12,6 +12,7 @@ import {
 } from "@heroicons/react/24/outline";
 import React from "react";
 import { allTrim } from "@/lib/utils";
+import Popover from "../Popover";
 
 interface Options {
     mapping?: Mapping;
@@ -39,7 +40,7 @@ function FormModal(props: Options) {
 
     return (
         <Modal closeModal={props.closeModal}>
-            <div className="w-screen max-w-3xl max-h-[calc(100vh-8rem)] bg-zinc-800 rounded overflow-x-hidden overflow-y-auto text-sm">
+            <div className="w-screen max-w-3xl bg-zinc-800 rounded text-sm">
                 <div className="flex flex-col gap-2 p-4">
                     <h2 className="text-xl leading-none">Write a Review</h2>
                     <div className="text-zinc-400 leading-none">
@@ -74,7 +75,7 @@ function FormModal(props: Options) {
                         </div>
                     </div>
                 </div>
-                <div className="flex flex-row items-center gap-4 bg-zinc-800 p-4">
+                <div className="flex flex-row items-center gap-4 p-4">
                     <button className="leading-none py-2 px-4 rounded bg-zinc-700 hover:bg-zinc-600 transition text-zinc-300 relative">
                         Delete review
                     </button>
@@ -91,7 +92,7 @@ function FormModal(props: Options) {
                         <div className="border border-zinc-300 rounded-sm h-3 w-3 peer-checked:bg-zinc-300 transition">
                             <CheckIcon className="h-3 w-3 text-zinc-800 stroke-2" />
                         </div>
-                        <div>Is private</div>
+                        <div>Private</div>
                     </label>
                     <button className="leading-none py-2 px-4 rounded bg-zinc-300 hover:bg-zinc-400 transition text-zinc-800 relative">
                         Publish review
@@ -136,14 +137,33 @@ function ReviewEditor() {
     const [reviewContent, setReviewContent] = React.useState("");
 
     return (
-        <div className="bg-zinc-900 rounded overflow-hidden relative">
+        <div className="bg-zinc-900 rounded relative">
             <div className="border-b border-b-zinc-800 w-full flex flex-row items-center px-2">
                 <EditorTab label="Write" active={true} />
                 <EditorTab label="Preview" active={false} />
                 <div className="flex-1"></div>
-                <button className="p-1 rounded hover:bg-zinc-800 transition">
-                    <QuestionMarkCircleIcon className="h-4 w-4 stroke-2" />
-                </button>
+                <Popover
+                    content={
+                        <div className="p-2 w-96 flex flex-col gap-1">
+                            <div className="text-zinc-200">Tips for new writers</div>
+                            <div className="text-zinc-400 text-xs">
+                                <ol className="list-decimal list-inside flex flex-col gap-1">
+                                    <li>Your first 105 words will be visible above the read more: Make them interesting!</li>
+                                    <li>The best reviews use pronouns (I, me, my, you) very rarely.</li>
+                                    <li>Avoid unnecessary openers: “This is my first review, please forgive any mistakes.”</li>
+                                    <li>You can describe what the work is about, but keep in mind that readers have already seen the synopsis.</li>
+                                    <li>Leave an extra line between paragraphs for easier reading.</li>
+                                </ol>
+                            </div>
+                        </div>
+                    }
+                    position="left"
+                    spacing={0.5}
+                >
+                    <button className="p-1 rounded hover:bg-zinc-800 transition">
+                        <QuestionMarkCircleIcon className="h-4 w-4 stroke-2" />
+                    </button>
+                </Popover>
             </div>
             <textarea
                 className="text-zinc-300 p-4 w-full bg-transparent placeholder:text-zinc-400 resize-y"
