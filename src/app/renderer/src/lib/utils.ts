@@ -32,3 +32,15 @@ export function serializeURL(obj: { [key: string]: any }) {
 export function allTrim(str: string): string {
     return str.replace(/\s+/g, " ").replace(/^\s+|\s+$/, "");
 }
+
+/**
+ * Converts a value in REM units to pixels.
+ *
+ * @param {number} rem - The value in REM units to convert.
+ * @return {number} The converted value in pixels.
+ */
+export function remToPx(rem: number): number {
+    return (
+        rem * parseFloat(getComputedStyle(document.documentElement).fontSize)
+    );
+}

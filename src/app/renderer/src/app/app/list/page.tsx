@@ -1,9 +1,10 @@
 "use client";
 
-import EditListModal from "@/components/EditListModal";
-import LibraryEntryModal from "@/components/LibraryEntryModal";
-import { LeftNavSpacer, VerticalNavSpacer } from "@/components/NavigationBar";
-import { db } from "@/lib/db";
+import React from "react";
+
+import dynamic from "next/dynamic";
+import { useRouter, useSearchParams } from "next/navigation";
+
 import {
     PencilIcon,
     RectangleStackIcon,
@@ -11,18 +12,33 @@ import {
     XMarkIcon,
 } from "@heroicons/react/24/outline";
 import { useLiveQuery } from "dexie-react-hooks";
-import { useRouter, useSearchParams } from "next/navigation";
-import React from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import ConfirmModal from "@/components/ConfirmModal";
+
+import { LeftNavSpacer, VerticalNavSpacer } from "@/components/NavigationBar";
+
+import { db } from "@/lib/db";
+import { getBulkMedia } from "@/lib/db/utils";
 import { List, Mapping, Media, MediaType } from "@/lib/db/types";
-import { useSelectedProvider } from "@/lib/providers/hooks";
-import { getBulkMedia, getMedia } from "@/lib/db/utils";
 import { getMediaTitle } from "@/lib/settings";
+import { useSelectedProvider } from "@/lib/providers/hooks";
 
 interface ListWithMedia extends List {
     media?: Media[];
 }
+
+const ConfirmModal = dynamic(() => import("@/components/ConfirmModal"));
+const EditListModal = dynamic(() => import("@/components/EditListModal"));
+const LibraryEntryModal = dynamic(
+    () => import("@/components/LibraryEntryModal")
+);
+
+interface LibraryEntryModalContextProps {
+    mapping: Mapping | null;
+    open: (mapping: Mapping | null) => void;
+}
+const LibraryEntryModalContext = React.createContext(
+    {} as LibraryEntryModalContextProps
+);
 
 export default function ListPage() {
     const searchParams = useSearchParams();
@@ -95,7 +111,12 @@ export default function ListPage() {
     }
 
     return (
-        <>
+        <LibraryEntryModalContext.Provider
+            value={{
+                mapping: libraryEntryModalMapping,
+                open: setLibraryEntryModalMapping,
+            }}
+        >
             <main
                 className="flex flex-col min-h-full max-h-full overflow-y-auto"
                 ref={mainRef}
@@ -192,9 +213,6 @@ export default function ListPage() {
                                 list={list}
                                 media={item}
                                 mapping={list.items[index]}
-                                openLibraryEntryModal={
-                                    setLibraryEntryModalMapping
-                                }
                             />
                         ))}
                     </div>
@@ -238,7 +256,7 @@ export default function ListPage() {
                     setIsConfirmModalOpen(false);
                 }}
             />
-        </>
+        </LibraryEntryModalContext.Provider>
     );
 }
 
@@ -246,14 +264,15 @@ function MediaItem({
     list,
     media,
     mapping,
-    openLibraryEntryModal,
 }: {
     list: List;
     media: Media;
     mapping: Mapping;
-    openLibraryEntryModal: any;
 }) {
     const [isConfirmModalOpen, setIsConfirmModalOpen] = React.useState(false);
+    const { open: openLibraryEntryModal } = React.useContext(
+        LibraryEntryModalContext
+    );
 
     return (
         <>
@@ -288,12 +307,12 @@ function MediaItem({
             <ConfirmModal
                 isOpen={isConfirmModalOpen}
                 title="Remove from this list"
-                content={`Do you want to remove '${getMediaTitle(media)}' from the list?`}
+                content={`Do you want to remove '${getMediaTitle(
+                    media
+                )}' from the list?`}
                 onConfirm={async () => {
                     await db.lists.update(list.id!, {
-                        items: list.items.filter(
-                            (v: string) => v != mapping
-                        ),
+                        items: list.items.filter((v: string) => v != mapping),
                     });
                 }}
                 closeModal={() => {
