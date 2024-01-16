@@ -32,6 +32,14 @@ const LibraryEntryModal = dynamic(
     () => import("@/components/LibraryEntryModal")
 );
 
+interface LibraryEntryModalContextProps {
+    mapping: Mapping | null;
+    open: (mapping: Mapping | null) => void;
+}
+const LibraryEntryModalContext = React.createContext(
+    {} as LibraryEntryModalContextProps
+);
+
 export default function ListPage() {
     const searchParams = useSearchParams();
     const router = useRouter();
@@ -103,7 +111,12 @@ export default function ListPage() {
     }
 
     return (
-        <>
+        <LibraryEntryModalContext.Provider
+            value={{
+                mapping: libraryEntryModalMapping,
+                open: setLibraryEntryModalMapping,
+            }}
+        >
             <main
                 className="flex flex-col min-h-full max-h-full overflow-y-auto"
                 ref={mainRef}
@@ -200,9 +213,6 @@ export default function ListPage() {
                                 list={list}
                                 media={item}
                                 mapping={list.items[index]}
-                                openLibraryEntryModal={
-                                    setLibraryEntryModalMapping
-                                }
                             />
                         ))}
                     </div>
@@ -246,7 +256,7 @@ export default function ListPage() {
                     setIsConfirmModalOpen(false);
                 }}
             />
-        </>
+        </LibraryEntryModalContext.Provider>
     );
 }
 
@@ -254,14 +264,15 @@ function MediaItem({
     list,
     media,
     mapping,
-    openLibraryEntryModal,
 }: {
     list: List;
     media: Media;
     mapping: Mapping;
-    openLibraryEntryModal: any;
 }) {
     const [isConfirmModalOpen, setIsConfirmModalOpen] = React.useState(false);
+    const { open: openLibraryEntryModal } = React.useContext(
+        LibraryEntryModalContext
+    );
 
     return (
         <>
