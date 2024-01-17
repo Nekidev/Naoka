@@ -70,13 +70,13 @@ export default function Popover({
         <div
             ref={ref}
             className={`relative ${className}`}
-            onClick={() => setIsActive(true)}
+            onClick={() => setIsActive((v) => !v)}
         >
             {children}
             <AnimatePresence>
                 {isActive && enabled && (
                     <motion.div
-                        className="absolute m-auto bg-zinc-800 border border-zinc-700 z-50 h-fit w-fit text-sm leading-none rounded drop-shadow-xl pointer-events-none"
+                        className="absolute m-auto bg-zinc-800 border border-zinc-700 z-50 h-fit w-fit text-sm leading-none rounded drop-shadow-xl"
                         style={popoverStyle}
                         initial={animationHidden}
                         animate={{

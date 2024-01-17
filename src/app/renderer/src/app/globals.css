@@ -66,10 +66,6 @@
     ::-webkit-scrollbar-thumb:hover {
         @apply bg-zinc-600;
     }
-    
-    ::-webkit-resizer, ::-moz-resizer {
-        display: none;
-    }
 
     *, *::after, *::before {
         -webkit-user-drag: none;

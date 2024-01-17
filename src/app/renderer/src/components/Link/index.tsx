@@ -1,14 +1,17 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import React from "react";
+import { useRouter } from "next/navigation";
+import { open } from "@tauri-apps/api/shell";
 
 export default function Link({
     href,
     children,
+    target,
     ...props
 }: {
     href: string;
+    target?: string;
     children: React.ReactNode;
     [key: string]: any;
 }) {
@@ -26,11 +29,17 @@ export default function Link({
                 props.onClick && props.onClick(e);
 
                 if (followLink) {
-                    router.push(href);
+                    if (target === "_blank") {
+                        open(href);
+                    } else {
+                        router.push(href);
+                    }
                 }
             }}
             style={{
                 cursor: "pointer",
+                width: "fit-content",
+                display: "inline-block",
                 ...(props.style || {}),
             }}
             {...props}
