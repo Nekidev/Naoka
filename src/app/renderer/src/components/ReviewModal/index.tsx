@@ -245,7 +245,7 @@ function ReviewEditor() {
                                             create a line/separator
                                         </li>
                                     </ol>
-                                    <div className="mt-1">
+                                    <div className="mt-2">
                                         You can find the{" "}
                                         <Link
                                             href="https://github.github.com/gfm/"

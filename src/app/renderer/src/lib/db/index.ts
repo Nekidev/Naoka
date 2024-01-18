@@ -20,7 +20,7 @@ export class NaokaDB extends Dexie {
             externalAccounts: "++id, provider",
         });
         this.version(2).stores({
-            reviews: "&mapping"
+            reviews: "++id, mapping"
         });
         
         this.externalAccounts.mapToClass(ExternalAccount);
