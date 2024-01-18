@@ -1,4 +1,4 @@
-import { Mapping } from "@/lib/db/types";
+import { Mapping, RecommendationLevel } from "@/lib/db/types";
 import { AnimatePresence } from "framer-motion";
 import Modal from "../Modal";
 import { useLiveQuery } from "dexie-react-hooks";
@@ -75,6 +75,27 @@ function FormModal(props: Options) {
                             </div>
                             <RatingInput />
                         </div>
+                        <div className="flex flex-col gap-2 w-40 relative">
+                            <div className="text-xs text-zinc-400 leading-none">
+                                Would you recommend this?
+                            </div>
+                            <SelectInput>
+                                <option value="null">Select</option>
+                                <option value={RecommendationLevel.Recommended}>
+                                    Recommended
+                                </option>
+                                <option
+                                    value={RecommendationLevel.MixedFeelings}
+                                >
+                                    Mixed feelings
+                                </option>
+                                <option
+                                    value={RecommendationLevel.NotRecommended}
+                                >
+                                    Not recommended
+                                </option>
+                            </SelectInput>
+                        </div>
                     </div>
                 </div>
                 <div className="flex flex-row items-center gap-4 p-4">
@@ -116,19 +137,27 @@ function ScoringCell({ title }: { title: string }) {
 
 function RatingInput() {
     return (
+        <SelectInput>
+            <option value="null">Select</option>
+            <option value="100">(10) Masterpiece</option>
+            <option value="90">(9) Great</option>
+            <option value="80">(8) Very good</option>
+            <option value="70">(7) Good</option>
+            <option value="60">(6) Fine</option>
+            <option value="50">(5) Average</option>
+            <option value="40">(4) Bad</option>
+            <option value="30">(3) Very bad</option>
+            <option value="20">(2) Horrible</option>
+            <option value="10">(1) Awful</option>
+        </SelectInput>
+    );
+}
+
+function SelectInput({ children }: { children: React.ReactNode }) {
+    return (
         <div className="relative w-full">
             <select className="bg-zinc-900 text-zinc-300 rounded outline-none p-2 appearance-none w-full cursor-pointer peer leading-[1.20]">
-                <option value="null">Select</option>
-                <option value="100">(10) Masterpiece</option>
-                <option value="90">(9) Great</option>
-                <option value="80">(8) Very good</option>
-                <option value="70">(7) Good</option>
-                <option value="60">(6) Fine</option>
-                <option value="50">(5) Average</option>
-                <option value="40">(4) Bad</option>
-                <option value="30">(3) Very bad</option>
-                <option value="20">(2) Horrible</option>
-                <option value="10">(1) Awful</option>
+                {children}
             </select>
             <ChevronDownIcon className="h-4 w-4 stroke-2 absolute top-0 bottom-0 right-2 m-auto peer-focus:rotate-180 transition-transform pointer-events-none" />
         </div>
@@ -185,8 +214,12 @@ function ReviewEditor() {
             return <li>{children}</li>;
         },
         blockquote(children: React.ReactNode) {
-            return <blockquote className="border-l-4 border-l-zinc-800 bg-zinc-850 rounded p-2 flex flex-col gap-2">{children}</blockquote>
-        }
+            return (
+                <blockquote className="border-l-4 border-l-zinc-800 bg-zinc-850 rounded p-2 flex flex-col gap-2">
+                    {children}
+                </blockquote>
+            );
+        },
     };
 
     return (
@@ -307,6 +340,17 @@ function ReviewEditor() {
                                             paragraphs for easier reading.
                                         </li>
                                     </ol>
+                                    <div className="mt-2">
+                                        
+                                        <Link
+                                            href="https://myanimelist.net/forum/?topicid=575725"
+                                            target="_blank"
+                                            className="text-blue-400 hover:underline"
+                                        >
+                                            Read the complete MAL post
+                                        </Link>
+                                        .
+                                    </div>
                                 </div>
                             </div>
                         }
