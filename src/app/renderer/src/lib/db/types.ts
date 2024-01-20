@@ -143,22 +143,22 @@ export enum RecommendationLevel {
 export class Review extends Data {
     id?: number;
     mapping!: Mapping;
-    providers: Provider[] = Object.getOwnPropertyNames(providers) as Provider[];
-    isPublished!: boolean;
-    charactersScore!: number | null;
-    illustrationScore!: number | null;
-    soundtrackScore!: number | null;
-    animationScore!: number | null;
-    creativityScore!: number | null;
-    voiceScore!: number | null;
-    writingScore!: number | null;
-    engagementScore!: number | null;
-    overallScore!: number | null;
-    review!: string;
-    summary!: string;
-    isSpoiler!: boolean;
-    recommendation!: RecommendationLevel;
-    isPrivate!: boolean;
+    accounts: number[] = [];
+    isPublished: boolean = false;
+    charactersScore: number | null = null;
+    illustrationScore: number | null = null;
+    soundtrackScore: number | null = null;
+    animationScore: number | null = null;
+    creativityScore: number | null = null;
+    voiceScore: number | null = null;
+    writingScore: number | null = null;
+    engagementScore: number | null = null;
+    overallScore: number | null = null;
+    review: string = "";
+    summary: string = "";
+    isSpoiler: boolean = false;
+    recommendation: RecommendationLevel | null = null;
+    isPrivate: boolean = false;
     updatedAt!: Date;
 }
 
