@@ -5,9 +5,9 @@ export class NaokaDB extends Dexie {
     media!: Table<Media>;
     lists!: Table<List>;
     library!: Table<LibraryEntry>;
-    reviews!: Table<Review>;
+    reviews!: Table<Review, number>;
     mappings!: Table<Mappings>;
-    externalAccounts!: Table<ExternalAccount>;
+    externalAccounts!: Table<ExternalAccount, number>;
 
     constructor() {
         super("Naoka");
@@ -24,7 +24,7 @@ export class NaokaDB extends Dexie {
         });
         
         this.externalAccounts.mapToClass(ExternalAccount);
-        this.reviews.mapToClass(Review);
+        // this.reviews.mapToClass(Review);
     }
 }
 

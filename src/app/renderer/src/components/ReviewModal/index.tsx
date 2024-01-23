@@ -1,13 +1,14 @@
-import { Mapping, RecommendationLevel } from "@/lib/db/types";
+import { Mapping, Media, RecommendationLevel, Review } from "@/lib/db/types";
 import { AnimatePresence } from "framer-motion";
 import Modal from "../Modal";
 import { useLiveQuery } from "dexie-react-hooks";
-import { getMedia } from "@/lib/db/utils";
+import { getMedia, isMappingFromProvider } from "@/lib/db/utils";
 import { useSelectedProvider } from "@/lib/providers/hooks";
 import { getMediaTitle, useTitleLanguage } from "@/lib/settings";
 import {
     CheckIcon,
     ChevronDownIcon,
+    ChevronUpIcon,
     QuestionMarkCircleIcon,
 } from "@heroicons/react/24/outline";
 import React from "react";
@@ -15,6 +16,7 @@ import { allTrim } from "@/lib/utils";
 import Popover from "../Popover";
 import Markdown from "marked-react";
 import Link from "../Link";
+import { db } from "@/lib/db";
 
 interface Options {
     mapping?: Mapping;
@@ -33,16 +35,86 @@ function FormModal(props: Options) {
     const [selectedProvider] = useSelectedProvider();
     const [titleLanguage] = useTitleLanguage();
 
-    const media = useLiveQuery(
-        () => getMedia(props.mapping!, selectedProvider),
-        [props.mapping, selectedProvider]
-    );
+    const formRef = React.useRef<HTMLFormElement | null>(null);
 
-    if (!media) return null;
+    const data = useLiveQuery(async () => {
+        const mappings = (await db.mappings
+            .where("mappings")
+            .equals(props.mapping!)
+            .first())!.mappings;
+        const allMedia = await db.media
+            .where("mapping")
+            .anyOf(mappings)
+            .toArray();
+
+        const media =
+            allMedia.find((media: Media) =>
+                isMappingFromProvider(media.mapping, selectedProvider)
+            ) ??
+            allMedia.find((media: Media) => media.mapping === props.mapping) ??
+            allMedia[0]!;
+
+        const review = await db.reviews
+            .where("mapping")
+            .anyOf(mappings)
+            .first();
+
+        return { media, review };
+    });
+
+    if (!data) return null;
+    const { media, review } = data;
+
+    async function save() {
+        let values: { [key: string]: string } = {};
+
+        Array.from(new FormData(formRef.current!).entries()).map(
+            ([key, value]) => {
+                values[key as keyof typeof values] = value as string;
+            }
+        );
+
+        const numberOrNull = (n: string) => (n === "null" ? null : Number(n));
+
+        let updatedReview: Review = {
+            ...(review || {
+                mapping: props.mapping!,
+            }),
+            accounts: [],
+            isPrivate: !!values.isPrivate,
+            isSpoiler: !!values.isSpoiler,
+            isPublished: false,
+            illustrationScore: numberOrNull(values.illustrationScore),
+            soundtrackScore: numberOrNull(values.soundtrackScore),
+            animationScore: numberOrNull(values.animationScore),
+            charactersScore: numberOrNull(values.charactersScore),
+            creativityScore: numberOrNull(values.creativityScore),
+            voiceScore: numberOrNull(values.voiceScore),
+            writingScore: numberOrNull(values.writingScore),
+            engagementScore: numberOrNull(values.engagementScore),
+            overallScore: numberOrNull(values.overallScore),
+            review: values.review,
+            summary: values.summary || "",
+            recommendation:
+                values.recommendation === "null"
+                    ? null
+                    : (values.recommendation as RecommendationLevel),
+            updatedAt: new Date(),
+        };
+
+        await db.reviews.put(updatedReview, review?.id || -1);
+    }
 
     return (
         <Modal closeModal={props.closeModal}>
-            <div className="w-screen max-w-3xl bg-zinc-800 rounded text-sm">
+            <form
+                className="w-screen max-w-3xl bg-zinc-800 rounded text-sm"
+                ref={formRef}
+                onSubmit={(e) => {
+                    e.preventDefault();
+                }}
+                autoComplete="none"
+            >
                 <div className="flex flex-col gap-2 p-4">
                     <h2 className="text-xl leading-none">Write a Review</h2>
                     <div className="text-zinc-400 leading-none">
@@ -51,35 +123,54 @@ function FormModal(props: Options) {
                 </div>
                 <div className="grid grid-cols-4 gap-px py-px bg-zinc-700">
                     {[
-                        ["Characters"],
-                        ["Illustration"],
-                        ["Soundtrack"],
-                        ["Animation/Visuals"],
-                        ["Creativity"],
-                        ["Voice Acting"],
-                        ["Writing/Dialogue"],
-                        ["Engagement"],
-                    ].map(([title]) => (
-                        <ScoringCell title={title} />
+                        ["Characters", "charactersScore"],
+                        ["Illustration", "illustrationScore"],
+                        ["Soundtrack", "soundtrackScore"],
+                        ["Animation/Visuals", "animationScore"],
+                        ["Creativity", "creativityScore"],
+                        ["Voice Acting", "voiceScore"],
+                        ["Writing/Dialogue", "writingScore"],
+                        ["Engagement", "engagementScore"],
+                    ].map(([title, name]) => (
+                        <ScoringCell
+                            title={title}
+                            name={name}
+                            defaultValue={
+                                review
+                                    ? review[name as keyof Review]
+                                    : undefined
+                            }
+                        />
                     ))}
                 </div>
                 <div className="p-4 flex flex-col gap-4">
-                    <ReviewEditor />
+                    <ReviewEditor
+                        defaultValue={review ? review.review : ""}
+                        defaultIsSpoiler={!!(review && review.isSpoiler)}
+                    />
                     <div className="flex flex-row items-center gap-4">
                         <div className="flex-1 flex flex-col">
-                            <SummaryEditor />
+                            <SummaryEditor
+                                defaultValue={review ? review.summary : ""}
+                            />
                         </div>
                         <div className="flex flex-col gap-2 w-40 relative">
                             <div className="text-xs text-zinc-400 leading-none">
                                 Overall Critical Rating
                             </div>
-                            <RatingInput />
+                            <RatingInput
+                                name="overallScore"
+                                defaultValue={review && review.overallScore}
+                            />
                         </div>
                         <div className="flex flex-col gap-2 w-40 relative">
                             <div className="text-xs text-zinc-400 leading-none">
                                 Would you recommend this?
                             </div>
-                            <SelectInput>
+                            <SelectInput
+                                name="recommendation"
+                                defaultValue={review && review.recommendation}
+                            >
                                 <option value="null">Select</option>
                                 <option value={RecommendationLevel.Recommended}>
                                     Recommended
@@ -100,7 +191,7 @@ function FormModal(props: Options) {
                 </div>
                 <div className="flex flex-row items-center gap-4 p-4">
                     <button className="leading-none py-2 px-4 rounded bg-zinc-700 hover:bg-zinc-600 transition text-zinc-300 relative">
-                        Delete review
+                        Delete
                     </button>
                     <div className="flex-1"></div>
                     <label
@@ -110,34 +201,59 @@ function FormModal(props: Options) {
                         <input
                             type="checkbox"
                             id="is-private"
+                            name="isPrivate"
                             className="peer hidden"
+                            defaultChecked={review && review.isPrivate}
                         />
                         <div className="border border-zinc-300 rounded-sm h-3 w-3 peer-checked:bg-zinc-300 transition">
                             <CheckIcon className="h-3 w-3 text-zinc-800 stroke-2" />
                         </div>
                         <div>Private</div>
                     </label>
-                    <button className="leading-none py-2 px-4 rounded bg-zinc-300 hover:bg-zinc-400 transition text-zinc-800 relative">
-                        Publish review
-                    </button>
+                    <div className="flex flex-row items-center gap-2">
+                        <button
+                            className="leading-none py-2 px-4 rounded bg-zinc-700 hover:bg-zinc-600 transition text-zinc-300 relative"
+                            onClick={() => {
+                                save();
+                            }}
+                        >
+                            Save
+                        </button>
+                        <div className="flex flex-row gap-px items-stretch">
+                            <button className="leading-none py-2 px-4 rounded-l bg-zinc-300 hover:bg-zinc-400 transition text-zinc-800 relative">
+                                Publish review
+                            </button>
+                            <button className="leading-none rounded-r bg-zinc-300 hover:bg-zinc-400 transition text-zinc-800 relative w-8 flex flex-col items-center justify-center">
+                                <ChevronUpIcon className="h-4 w-4 stroke-2" />
+                            </button>
+                        </div>
+                    </div>
                 </div>
-            </div>
+            </form>
         </Modal>
     );
 }
 
-function ScoringCell({ title }: { title: string }) {
+function ScoringCell({
+    title,
+    name,
+    defaultValue,
+}: {
+    title: string;
+    name: string;
+    defaultValue: any;
+}) {
     return (
         <div className="bg-zinc-800 p-4 flex flex-col gap-2 items-start justify-center relative">
             <div className="text-zinc-400 leading-none text-xs">{title}</div>
-            <RatingInput />
+            <RatingInput name={name} defaultValue={defaultValue} />
         </div>
     );
 }
 
-function RatingInput() {
+function RatingInput({ ...props }: { [key: string]: any }) {
     return (
-        <SelectInput>
+        <SelectInput {...props}>
             <option value="null">Select</option>
             <option value="100">(10) Masterpiece</option>
             <option value="90">(9) Great</option>
@@ -153,10 +269,19 @@ function RatingInput() {
     );
 }
 
-function SelectInput({ children }: { children: React.ReactNode }) {
+function SelectInput({
+    children,
+    ...props
+}: {
+    children: React.ReactNode;
+    [key: string]: any;
+}) {
     return (
         <div className="relative w-full">
-            <select className="bg-zinc-900 text-zinc-300 rounded outline-none p-2 appearance-none w-full cursor-pointer peer leading-[1.20]">
+            <select
+                className="bg-zinc-900 text-zinc-300 rounded outline-none p-2 appearance-none w-full cursor-pointer peer leading-[1.20]"
+                {...props}
+            >
                 {children}
             </select>
             <ChevronDownIcon className="h-4 w-4 stroke-2 absolute top-0 bottom-0 right-2 m-auto peer-focus:rotate-180 transition-transform pointer-events-none" />
@@ -164,8 +289,14 @@ function SelectInput({ children }: { children: React.ReactNode }) {
     );
 }
 
-function ReviewEditor() {
-    const [reviewContent, setReviewContent] = React.useState("");
+function ReviewEditor({
+    defaultValue,
+    defaultIsSpoiler,
+}: {
+    defaultValue: string;
+    defaultIsSpoiler: boolean;
+}) {
+    const [reviewContent, setReviewContent] = React.useState(defaultValue);
     const [tab, setTab] = React.useState(0);
 
     const renderer = {
@@ -341,7 +472,6 @@ function ReviewEditor() {
                                         </li>
                                     </ol>
                                     <div className="mt-2">
-                                        
                                         <Link
                                             href="https://myanimelist.net/forum/?topicid=575725"
                                             target="_blank"
@@ -372,6 +502,7 @@ function ReviewEditor() {
                     }}
                     value={reviewContent}
                     rows={5}
+                    name="review"
                 ></textarea>
             ) : (
                 <div className="p-4 text-zinc-300 flex flex-col gap-3 break-words">
@@ -405,7 +536,9 @@ function ReviewEditor() {
                         <input
                             type="checkbox"
                             id="is-spoiler"
+                            name="isSpoiler"
                             className="peer hidden"
+                            defaultChecked={defaultIsSpoiler}
                         />
                         <div className="border border-zinc-300 rounded-sm h-3 w-3 peer-checked:bg-zinc-300 transition">
                             <CheckIcon className="h-3 w-3 text-zinc-800 stroke-2" />
@@ -439,7 +572,7 @@ function EditorTab({
     );
 }
 
-function SummaryEditor() {
+function SummaryEditor({ defaultValue }: { defaultValue: string }) {
     return (
         <div className="flex flex-col gap-2 leading-none">
             <div className="text-zinc-400 text-xs leading-none">Summary</div>
@@ -448,6 +581,9 @@ function SummaryEditor() {
                 type="text"
                 placeholder="Summarize your review in 140 characters or less"
                 max={140}
+                name="summary"
+                autoComplete="off"
+                defaultValue={defaultValue}
             />
         </div>
     );
