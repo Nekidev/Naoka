@@ -1,0 +1,3 @@
+I had already forgotten about how nice plain text looks in the browser. What are you looking for? Something secret? You won't find it, or at least not here...
+
+kill-this-machine.js

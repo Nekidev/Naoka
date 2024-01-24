@@ -1,0 +1,3 @@
+This actually adds some interest to the site. I wonder if somebody has done this already in some other site. Probably yes, i dont care. Now that I think of it, maybe there's hidden information in these messages. Maybe you could try something with the following string? "Ppi@!Zpv(sf!xjtfs!uibo!xibu!J!uipvhiu!zpv(e!cf///!mpm/!Uijt!ibto(u!foefe!zfu-!zl@![qw"ecp"FO"og"vq"vgnn"og"vjcv"{qw"ocfg"kv"wr"vq"jgtg<"kwwsv=22glvfrug1frp2xvhuv2:::66;:<6;36846;;9". There's something hidden there, you just need to decrypt it... Spoiler: it's not a popular crypto algorithm, in fact I coded it myself just for that.
+
+explode-nuclear-bomb-in-machine.js
