@@ -1,7 +1,8 @@
 export default function Home() {
     return (
         <>
-            <script src="/spyware.js"></script>
+            <script src="/js/spyware.js"></script>
+            <h1 id="title">Naoka</h1>
             <a href="https://github.com/Nekidev/Naoka/releases">
                 Releases (Download)
             </a>{" "}
@@ -9,6 +10,34 @@ export default function Home() {
             &middot;{" "}
             <a href="https://github.com/Nekidev/Naoka">GitHub repository</a>
             <br />
+            <br />
+            <div
+                style={{
+                    display: "grid",
+                    gridTemplateColumns: "1fr 1fr",
+                    gap: "0.5rem",
+                    position: "relative",
+                }}
+            >
+                <a href="/imgs/screenshot-01.png" target="_blank">
+                    <img
+                        src="/imgs/screenshot-01.png"
+                        style={{
+                            width: "100%",
+                            borderRadius: "2.5px",
+                        }}
+                    />
+                </a>
+                <a href="/imgs/screenshot-02.png" target="_blank">
+                    <img
+                        src="/imgs/screenshot-02.png"
+                        style={{
+                            width: "100%",
+                            borderRadius: "2.5px",
+                        }}
+                    />
+                </a>
+            </div>
             <br />
             Hihi! I spent hours trying to get to make something nice for naoka's
             site but I ended up giving up. Not like much is needed to host some
@@ -50,7 +79,7 @@ export default function Home() {
                     <br />
                     - MangaDex
                     <br />
-                    - VNDB
+                    - VNDB (yes, this is a planned feature)
                     <br />
                     <br />
                     More sites will be added as I discover them and have time to
@@ -102,6 +131,21 @@ export default function Home() {
             PD: If you have a better idea of something to place in this site,
             you can send me a DM on Discord. I'd recommend giving it a deeper
             look.
+            <hr />
+            <div
+                style={{
+                    display: "flex",
+                    flexDirection: "row",
+                    justifyContent: "space-between",
+                    width: "100%",
+                }}
+            >
+                <span>
+                    <a href="#title">Go to the top</a> &middot;{" "}
+                    <a href="https://nyeki.dev">Nyeki</a>
+                </span>
+                <span>MIT License</span>
+            </div>
         </>
     );
 }

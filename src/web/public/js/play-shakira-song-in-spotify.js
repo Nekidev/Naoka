@@ -2,4 +2,4 @@ I'm running out of ideas on what to write here. Maybe from now on the content wi
 
 This is definetly getting boring so I'll finish it in the next file.
 
-ransomware-download.jsr
+ransomware-download.js
