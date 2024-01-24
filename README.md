@@ -28,7 +28,7 @@
     <a href="#license">License</a>
 </p>
 
-![screenshot](https://raw.githubusercontent.com/naoka-dev/naoka/main/wsrc/web/public/imgs/screenshot-01.png)
+![screenshot](https://raw.githubusercontent.com/naoka-dev/naoka/main/src/web/public/imgs/screenshot-01.png)
 
 ## Key Features
 
