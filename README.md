@@ -6,7 +6,7 @@
     <br>
 </h1>
 
-<h4 align="center">An anime and manga tracking desktop app.</h4>
+<h4 align="center">Enhance Your Anime and Manga Tracking Experience</h4>
 
 <p align="center">
     <a href="https://discord.gg/7UAxjtmmea">
