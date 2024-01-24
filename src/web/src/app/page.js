@@ -6,7 +6,7 @@ export default function Home() {
             <a href="https://github.com/Nekidev/Naoka/releases">
                 Releases (Download)
             </a>{" "}
-            &middot; <a href="https://discord.gg/7UAxjtmmea">Discord server</a>
+            &middot; <a href="https://discord.gg/7UAxjtmmea">Discord server</a>{" "}
             &middot;{" "}
             <a href="https://github.com/Nekidev/Naoka">GitHub repository</a>
             <br />
