@@ -1,11 +1,12 @@
 import Dexie, { Table } from "dexie";
-import { ExternalAccount, LibraryEntry, List, Mappings, Media } from "./types";
+import { ExternalAccount, LibraryEntry, List, Mappings, Media, Review } from "./types";
 
 export class NaokaDB extends Dexie {
     media!: Table<Media>;
-    mappings!: Table<Mappings>;
-    library!: Table<LibraryEntry>;
     lists!: Table<List>;
+    library!: Table<LibraryEntry>;
+    reviews!: Table<Review, number>;
+    mappings!: Table<Mappings>;
     externalAccounts!: Table<ExternalAccount, number>;
 
     constructor() {
@@ -18,8 +19,12 @@ export class NaokaDB extends Dexie {
             lists: "++id, name",
             externalAccounts: "++id, provider",
         });
-
+        this.version(2).stores({
+            reviews: "++id, mapping"
+        });
+        
         this.externalAccounts.mapToClass(ExternalAccount);
+        // this.reviews.mapToClass(Review);
     }
 }
 

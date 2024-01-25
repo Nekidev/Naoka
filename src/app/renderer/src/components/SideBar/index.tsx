@@ -107,7 +107,7 @@ function MenuButton({
         >
             <Link
                 href={href}
-                className={`flex flex-row items-center p-2 gap-4 hover:bg-zinc-700 active:bg-zinc-800 rounded transition cursor-pointer w-full flex-1 ${
+                className={`!flex flex-row items-center p-2 gap-4 hover:bg-zinc-700 active:bg-zinc-800 rounded transition cursor-pointer !w-full flex-1 ${
                     pathname == href && "bg-zinc-800"
                 }`}
             >

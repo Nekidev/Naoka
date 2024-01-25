@@ -61,7 +61,7 @@ export enum MediaFormat {
     Manhwa = "manhwa",
     Manhua = "manhua",
     Oel = "oel",
-    Unknown = "unknown"
+    Unknown = "unknown",
 }
 
 export enum MediaStatus {
@@ -134,6 +134,34 @@ export interface List {
     items: Mapping[];
 }
 
+export enum RecommendationLevel {
+    NotRecommended = "not_recommended",
+    MixedFeelings = "mixed_feelings",
+    Recommended = "recommended",
+}
+
+export interface Review {
+    id?: number;
+    mapping: Mapping;
+    accounts: number[];
+    isPublished: boolean;
+    charactersScore: number | null;
+    illustrationScore: number | null;
+    soundtrackScore: number | null;
+    animationScore: number | null;
+    creativityScore: number | null;
+    voiceScore: number | null;
+    writingScore: number | null;
+    engagementScore: number | null;
+    overallScore: number | null;
+    review: string;
+    summary: string;
+    isSpoiler: boolean;
+    recommendation: RecommendationLevel | null;
+    isPrivate: boolean;
+    updatedAt: Date;
+}
+
 export enum ImportMethod {
     // Keep the current library entry
     Keep = "keep",
@@ -182,7 +210,10 @@ export class ExternalAccount extends Data {
         method: ImportMethod = ImportMethod.Keep
     ) {
         const api = new ProviderAPI(this.provider);
-        const { entries, mappings: newMappings } = await api.getLibrary(type, this);
+        const { entries, mappings: newMappings } = await api.getLibrary(
+            type,
+            this
+        );
 
         for (const mappings of newMappings) {
             await updateMappings(mappings);

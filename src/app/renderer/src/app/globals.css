@@ -72,3 +72,14 @@
         -webkit-app-region: no-drag;
     }
 }
+
+@layer utilities {
+    .no-scrollbar::-webkit-scrollbar {
+        width: 0;
+        height: 0;
+    }
+    .no-scrollbar::-webkit-scrollbar-thumb {
+        width: 0;
+        height: 0;
+    }
+}

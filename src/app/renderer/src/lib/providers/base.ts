@@ -4,6 +4,7 @@ import {
     Mapping,
     Media,
     MediaType,
+    Review,
     UserData,
 } from "../db/types";
 import Input from "../forms";
@@ -36,6 +37,9 @@ export interface Config {
     };
     search: {
         [key in MediaType]: SearchConfig;
+    };
+    reviews?: {
+        validator?: (review: Review, media: Media) => boolean;
     };
 }
 

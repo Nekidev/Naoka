@@ -28,7 +28,9 @@
         "dataclass": "^2.1.1",
         "dexie": "^3.2.4",
         "dexie-react-hooks": "^1.1.7",
-        "framer-motion": "^10.16.5"
+        "framer-motion": "^10.16.5",
+        "marked": "^11.1.1",
+        "marked-react": "^2.0.0"
     },
     "devDependencies": {
         "@tauri-apps/cli": "^1.5.9",

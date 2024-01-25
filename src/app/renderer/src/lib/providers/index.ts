@@ -13,7 +13,6 @@ import { AniList } from "./anilist";
 import { MyAnimeList } from "./myanimelist";
 
 import { updateMappings } from "../db/utils";
-import { useAdultFilter } from "../settings";
 
 // Add new providers here
 export const providers = {
