@@ -1,8 +1,8 @@
 import { Mapping, Media, RecommendationLevel, Review } from "@/lib/db/types";
-import { AnimatePresence } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import Modal from "../Modal";
 import { useLiveQuery } from "dexie-react-hooks";
-import { getMedia, isMappingFromProvider } from "@/lib/db/utils";
+import { isMappingFromProvider } from "@/lib/db/utils";
 import { useSelectedProvider } from "@/lib/providers/hooks";
 import { getMediaTitle, useTitleLanguage } from "@/lib/settings";
 import {
@@ -17,11 +17,20 @@ import Popover from "../Popover";
 import Markdown from "marked-react";
 import Link from "../Link";
 import { db } from "@/lib/db";
+import { ProviderAPI, providers } from "@/lib/providers";
+import { useClickAway } from "@uidotdev/usehooks";
+import Tooltip from "../Tooltip";
+import ConfirmModal from "../ConfirmModal";
 
 interface Options {
     mapping?: Mapping;
     closeModal: () => void;
 }
+
+const ReviewContext = React.createContext<{
+    media: Media | null;
+    review: Review | null;
+}>({ media: null, review: null });
 
 export default function ReviewModal(props: Options) {
     return (
@@ -36,6 +45,9 @@ function FormModal(props: Options) {
     const [titleLanguage] = useTitleLanguage();
 
     const formRef = React.useRef<HTMLFormElement | null>(null);
+
+    const [isConfirmDeleteModalOpen, setIsConfirmDeleteModalOpen] =
+        React.useState(false);
 
     const data = useLiveQuery(async () => {
         const mappings = (await db.mappings
@@ -54,10 +66,8 @@ function FormModal(props: Options) {
             allMedia.find((media: Media) => media.mapping === props.mapping) ??
             allMedia[0]!;
 
-        const review = await db.reviews
-            .where("mapping")
-            .anyOf(mappings)
-            .first();
+        const review =
+            (await db.reviews.where("mapping").anyOf(mappings).first()) ?? null;
 
         return { media, review };
     });
@@ -106,131 +116,169 @@ function FormModal(props: Options) {
     }
 
     return (
-        <Modal closeModal={props.closeModal}>
-            <form
-                className="w-screen max-w-3xl bg-zinc-800 rounded text-sm"
-                ref={formRef}
-                onSubmit={(e) => {
-                    e.preventDefault();
-                }}
-                autoComplete="none"
-            >
-                <div className="flex flex-col gap-2 p-4">
-                    <h2 className="text-xl leading-none">Write a Review</h2>
-                    <div className="text-zinc-400 leading-none">
-                        {getMediaTitle(media, titleLanguage)}
+        <ReviewContext.Provider
+            value={{
+                review,
+                media,
+            }}
+        >
+            <Modal closeModal={props.closeModal}>
+                <form
+                    className="w-screen max-w-3xl bg-zinc-800 rounded text-sm"
+                    ref={formRef}
+                    onSubmit={(e) => {
+                        e.preventDefault();
+                    }}
+                    autoComplete="none"
+                >
+                    <div className="flex flex-col gap-2 p-4">
+                        <h2 className="text-xl leading-none">Write a Review</h2>
+                        <div className="text-zinc-400 leading-none">
+                            {getMediaTitle(media, titleLanguage)}
+                        </div>
                     </div>
-                </div>
-                <div className="grid grid-cols-4 gap-px py-px bg-zinc-700">
-                    {[
-                        ["Characters", "charactersScore"],
-                        ["Illustration", "illustrationScore"],
-                        ["Soundtrack", "soundtrackScore"],
-                        ["Animation/Visuals", "animationScore"],
-                        ["Creativity", "creativityScore"],
-                        ["Voice Acting", "voiceScore"],
-                        ["Writing/Dialogue", "writingScore"],
-                        ["Engagement", "engagementScore"],
-                    ].map(([title, name]) => (
-                        <ScoringCell
-                            title={title}
-                            name={name}
-                            defaultValue={
-                                review
-                                    ? review[name as keyof Review]
-                                    : undefined
-                            }
+                    <div className="grid grid-cols-4 gap-px py-px bg-zinc-700">
+                        {[
+                            ["Characters", "charactersScore"],
+                            ["Illustration", "illustrationScore"],
+                            ["Soundtrack", "soundtrackScore"],
+                            ["Animation/Visuals", "animationScore"],
+                            ["Creativity", "creativityScore"],
+                            ["Voice Acting", "voiceScore"],
+                            ["Writing/Dialogue", "writingScore"],
+                            ["Engagement", "engagementScore"],
+                        ].map(([title, name]) => (
+                            <ScoringCell
+                                title={title}
+                                name={name}
+                                defaultValue={
+                                    review
+                                        ? review[name as keyof Review]
+                                        : undefined
+                                }
+                            />
+                        ))}
+                    </div>
+                    <div className="p-4 flex flex-col gap-4">
+                        <ReviewEditor
+                            defaultValue={review ? review.review : ""}
+                            defaultIsSpoiler={!!(review && review.isSpoiler)}
                         />
-                    ))}
-                </div>
-                <div className="p-4 flex flex-col gap-4">
-                    <ReviewEditor
-                        defaultValue={review ? review.review : ""}
-                        defaultIsSpoiler={!!(review && review.isSpoiler)}
-                    />
-                    <div className="flex flex-row items-center gap-4">
-                        <div className="flex-1 flex flex-col">
-                            <SummaryEditor
-                                defaultValue={review ? review.summary : ""}
-                            />
-                        </div>
-                        <div className="flex flex-col gap-2 w-40 relative">
-                            <div className="text-xs text-zinc-400 leading-none">
-                                Overall Critical Rating
+                        <div className="flex flex-row items-center gap-4">
+                            <div className="flex-1 flex flex-col">
+                                <SummaryEditor
+                                    defaultValue={review ? review.summary : ""}
+                                />
                             </div>
-                            <RatingInput
-                                name="overallScore"
-                                defaultValue={review && review.overallScore}
-                            />
-                        </div>
-                        <div className="flex flex-col gap-2 w-40 relative">
-                            <div className="text-xs text-zinc-400 leading-none">
-                                Would you recommend this?
+                            <div className="flex flex-col gap-2 w-40 relative">
+                                <div className="text-xs text-zinc-400 leading-none">
+                                    Overall Critical Rating
+                                </div>
+                                <RatingInput
+                                    name="overallScore"
+                                    defaultValue={review && review.overallScore}
+                                />
                             </div>
-                            <SelectInput
-                                name="recommendation"
-                                defaultValue={review && review.recommendation}
+                            <div className="flex flex-col gap-2 w-40 relative">
+                                <div className="text-xs text-zinc-400 leading-none">
+                                    Would you recommend this?
+                                </div>
+                                <SelectInput
+                                    name="recommendation"
+                                    defaultValue={
+                                        review && review.recommendation
+                                    }
+                                >
+                                    <option value="null">Select</option>
+                                    <option
+                                        value={RecommendationLevel.Recommended}
+                                    >
+                                        Recommended
+                                    </option>
+                                    <option
+                                        value={
+                                            RecommendationLevel.MixedFeelings
+                                        }
+                                    >
+                                        Mixed feelings
+                                    </option>
+                                    <option
+                                        value={
+                                            RecommendationLevel.NotRecommended
+                                        }
+                                    >
+                                        Not recommended
+                                    </option>
+                                </SelectInput>
+                            </div>
+                        </div>
+                    </div>
+                    <div className="flex flex-row items-center gap-4 p-4">
+                        {review && (
+                            <button
+                                className="leading-none py-2 px-4 rounded bg-zinc-700 hover:bg-red-400/50 transition text-zinc-300 relative"
+                                onClick={() =>
+                                    setIsConfirmDeleteModalOpen(true)
+                                }
                             >
-                                <option value="null">Select</option>
-                                <option value={RecommendationLevel.Recommended}>
-                                    Recommended
-                                </option>
-                                <option
-                                    value={RecommendationLevel.MixedFeelings}
-                                >
-                                    Mixed feelings
-                                </option>
-                                <option
-                                    value={RecommendationLevel.NotRecommended}
-                                >
-                                    Not recommended
-                                </option>
-                            </SelectInput>
-                        </div>
-                    </div>
-                </div>
-                <div className="flex flex-row items-center gap-4 p-4">
-                    <button className="leading-none py-2 px-4 rounded bg-zinc-700 hover:bg-zinc-600 transition text-zinc-300 relative">
-                        Delete
-                    </button>
-                    <div className="flex-1"></div>
-                    <label
-                        htmlFor="is-private"
-                        className="flex flex-row items-center gap-2 relative cursor-pointer"
-                    >
-                        <input
-                            type="checkbox"
-                            id="is-private"
-                            name="isPrivate"
-                            className="peer hidden"
-                            defaultChecked={review && review.isPrivate}
-                        />
-                        <div className="border border-zinc-300 rounded-sm h-3 w-3 peer-checked:bg-zinc-300 transition">
-                            <CheckIcon className="h-3 w-3 text-zinc-800 stroke-2" />
-                        </div>
-                        <div>Private</div>
-                    </label>
-                    <div className="flex flex-row items-center gap-2">
-                        <button
-                            className="leading-none py-2 px-4 rounded bg-zinc-700 hover:bg-zinc-600 transition text-zinc-300 relative"
-                            onClick={() => {
-                                save();
-                            }}
+                                Delete
+                            </button>
+                        )}
+                        <div className="flex-1"></div>
+                        <label
+                            htmlFor="is-private"
+                            className="flex flex-row items-center gap-2 relative cursor-pointer"
                         >
-                            Save
-                        </button>
-                        <div className="flex flex-row gap-px items-stretch">
-                            <button className="leading-none py-2 px-4 rounded-l bg-zinc-300 hover:bg-zinc-400 transition text-zinc-800 relative">
-                                Publish review
+                            <input
+                                type="checkbox"
+                                id="is-private"
+                                name="isPrivate"
+                                className="peer hidden"
+                                defaultChecked={
+                                    review ? review.isPrivate : undefined
+                                }
+                            />
+                            <div className="border border-zinc-300 rounded-sm h-3 w-3 peer-checked:bg-zinc-300 transition">
+                                <CheckIcon className="h-3 w-3 text-zinc-800 stroke-2" />
+                            </div>
+                            <div>Private</div>
+                        </label>
+                        <div className="flex flex-row items-center gap-2">
+                            <button
+                                className="leading-none py-2 px-4 rounded bg-zinc-700 hover:bg-zinc-600 transition text-zinc-300 relative"
+                                onClick={() => {
+                                    save();
+                                }}
+                            >
+                                Save review
                             </button>
-                            <button className="leading-none rounded-r bg-zinc-300 hover:bg-zinc-400 transition text-zinc-800 relative w-8 flex flex-col items-center justify-center">
-                                <ChevronUpIcon className="h-4 w-4 stroke-2" />
-                            </button>
+                            <Tooltip
+                                label="In a future version. Stay tuned!"
+                                spacing={0.5}
+                            >
+                                <button className="leading-none py-2 px-4 rounded bg-zinc-300 opacity-70 cursor-not-allowed transition text-zinc-900 relative">
+                                    Publish review
+                                </button>
+                            </Tooltip>
+                            {/* <PublishButton /> */}
                         </div>
                     </div>
-                </div>
-            </form>
-        </Modal>
+                </form>
+            </Modal>
+            <ConfirmModal
+                isOpen={isConfirmDeleteModalOpen}
+                title="Are you sure?"
+                content={`This will completely delete your ${getMediaTitle(
+                    media,
+                    titleLanguage
+                )} review.`}
+                onConfirm={async () => {
+                    await db.reviews.delete(review?.id!);
+                    props.closeModal();
+                }}
+                closeModal={() => setIsConfirmDeleteModalOpen(false)}
+            />
+        </ReviewContext.Provider>
     );
 }
 
@@ -585,6 +633,90 @@ function SummaryEditor({ defaultValue }: { defaultValue: string }) {
                 autoComplete="off"
                 defaultValue={defaultValue}
             />
+        </div>
+    );
+}
+
+function PublishButton() {
+    const accounts = useLiveQuery(() =>
+        db.externalAccounts
+            .where("provider")
+            .anyOf(
+                Object.getOwnPropertyNames(providers).filter(
+                    (value) =>
+                        !!providers[value as keyof typeof providers].config
+                            .reviews
+                )
+            )
+            .toArray()
+    );
+
+    const [isDropdownOpen, setIsDropdownOpen] = React.useState(false);
+    const dropdownButtonRef = useClickAway<HTMLButtonElement>(() =>
+        setIsDropdownOpen(false)
+    );
+
+    return (
+        <div className="flex flex-row gap-px items-stretch">
+            <button className="leading-none py-2 px-4 rounded-l bg-zinc-300 hover:bg-zinc-400 transition text-zinc-800 relative">
+                Publish review
+            </button>
+            <div className="relative">
+                <AnimatePresence>
+                    {isDropdownOpen && accounts && (
+                        <motion.div
+                            initial={{
+                                opacity: 0,
+                                y: 5,
+                            }}
+                            animate={{
+                                opacity: 1,
+                                y: 0,
+                            }}
+                            exit={{
+                                opacity: 0,
+                                y: 5,
+                            }}
+                            transition={{
+                                duration: 0.15,
+                            }}
+                            className="absolute bottom-[calc(100%+0.5rem)] right-0 w-60 bg-zinc-800 border border-zinc-700 drop-shadow-lg p-1 rounded flex flex-col"
+                        >
+                            {accounts.map((account, index) => {
+                                const provider = new ProviderAPI(
+                                    account.provider
+                                );
+                                return (
+                                    <button
+                                        className="p-1 rounded hover:bg-zinc-700 transition flex flex-row items-center gap-2"
+                                        key={index}
+                                    >
+                                        <img
+                                            src={account.user?.imageUrl}
+                                            className="h-8 w-8 rounded object-center object-cover"
+                                        />
+                                        <div className="flex flex-col items-start flex-1 gap-0.5">
+                                            <div className="text-sm leading-none line-clamp-1">
+                                                {account.user?.name}
+                                            </div>
+                                            <div className="text-xs leading-none line-clamp-1 text-zinc-400">
+                                                {provider.name}
+                                            </div>
+                                        </div>
+                                    </button>
+                                );
+                            })}
+                        </motion.div>
+                    )}
+                </AnimatePresence>
+                <button
+                    className="leading-none rounded-r bg-zinc-300 hover:bg-zinc-400 transition text-zinc-800 relative w-8 h-full flex flex-col items-center justify-center"
+                    onClick={() => setIsDropdownOpen((v) => !v)}
+                    ref={dropdownButtonRef}
+                >
+                    <ChevronUpIcon className="h-4 w-4 stroke-2" />
+                </button>
+            </div>
         </div>
     );
 }
