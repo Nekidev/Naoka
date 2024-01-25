@@ -1,5 +1,6 @@
 import { InputType } from "@/lib/forms";
 import { Config } from "../base";
+import { Media, Review } from "@/lib/db/types";
 
 const sortBy = [
     {
@@ -292,6 +293,16 @@ const config: Config = {
                     ],
                 },
             ],
+        },
+    },
+    reviews: {
+        validator(review: Review, media: Media) {
+            return (
+                review.review.length >= 2200 &&
+                review.summary.length >= 20 &&
+                review.summary.length <= 120 &&
+                review.overallScore != null
+            );
         },
     },
 };
