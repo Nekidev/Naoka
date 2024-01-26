@@ -5,7 +5,7 @@ import { type NextRequest } from "next/server";
 
 export const dynamic = "force-dynamic";
 
-function encrypt(string: string, key: string, iv: string): string {
+function encrypt(string: string, key: string, iv: Buffer): string {
     const cipher = crypto.createCipheriv("aes-256-cbc", key, iv);
     let encryptedString = cipher.update(string, "utf-8", "hex");
     encryptedString += cipher.final("hex");
@@ -40,7 +40,7 @@ export async function GET(request: NextRequest) {
         `/code?status=success&key=${encrypt(
             json.access_token,
             cookieStore.get("key")?.value!,
-            cookieStore.get("iv")?.value!
+            Buffer.from(cookieStore.get("iv")?.value!, "hex")
         )}`
     );
 }
