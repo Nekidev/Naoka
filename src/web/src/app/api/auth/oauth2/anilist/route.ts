@@ -1,4 +1,3 @@
-import * as crypto from "crypto";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { type NextRequest } from "next/server";
@@ -16,9 +15,11 @@ export async function GET(request: NextRequest) {
     const cookieStore = cookies();
     cookieStore.set("key", key, {
         expires: new Date(new Date().getTime() + 5 * 60 * 1000),
+        secure: true
     });
     cookieStore.set("iv", iv, {
         expires: new Date(new Date().getTime() + 5 * 60 * 1000),
+        secure: true
     });
 
     redirect(

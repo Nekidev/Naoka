@@ -1,16 +1,9 @@
-import * as crypto from "crypto";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { type NextRequest } from "next/server";
+import { encrypt } from "@/lib/crypto";
 
 export const dynamic = "force-dynamic";
-
-function encrypt(string: string, key: Buffer, iv: Buffer): string {
-    const cipher = crypto.createCipheriv("aes-256-cbc", key, iv);
-    let encryptedString = cipher.update(string, "utf-8", "hex");
-    encryptedString += cipher.final("hex");
-    return encryptedString;
-}
 
 export async function GET(request: NextRequest) {
     const res = await fetch("https://anilist.co/api/v2/oauth/token", {
