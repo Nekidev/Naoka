@@ -39,7 +39,7 @@ export async function GET(request: NextRequest) {
     redirect(
         `/code?status=success&key=${encrypt(
             json.access_token,
-            cookieStore.get("key")?.value!,
+            Buffer.from(cookieStore.get("key")?.value!, "hex"),
             Buffer.from(cookieStore.get("iv")?.value!, "hex")
         )}`
     );
