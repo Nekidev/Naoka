@@ -1,8 +1,17 @@
 "use client";
 
+import { Suspense } from 'react';
 import { useSearchParams } from "next/navigation";
 
 export default function Code() {
+    return (
+        <Suspense fallback={<div>Loading...</div>}>
+            <Content />
+        </Suspense>
+    );
+}
+
+function Content() {
     const searchParams = useSearchParams();
 
     if (searchParams.get("status") !== "success") {
@@ -22,6 +31,7 @@ export default function Code() {
             </div>
         );
     }
+
     return (
         <div>
             <h1>Success!</h1>
