@@ -69,7 +69,7 @@ function Content() {
                 </button>
             </div>
             <p>
-                <i>You can close this tab after pasting the code in Naoka.</i>
+                <i>You can close this tab after pasting the code in the app.</i>
             </p>
         </div>
     );
