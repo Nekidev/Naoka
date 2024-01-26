@@ -188,7 +188,9 @@ export class ExternalAccount extends Data {
     provider: Provider = "myanimelist";
     auth?: {
         accessToken?: string;
+        accessTokenExpiresAt?: Date;
         refreshToken?: string;
+        refreshTokenExpiresAt?: Date;
         username?: string;
         password?: string;
     };

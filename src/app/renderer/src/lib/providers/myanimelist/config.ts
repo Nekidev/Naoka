@@ -5,7 +5,7 @@ const config: Config = {
     mediaTypes: ["anime", "manga"],
     syncing: {
         auth: {
-            type: "username",
+            type: "oauth",
         },
         import: {
             mediaTypes: ["anime", "manga"],

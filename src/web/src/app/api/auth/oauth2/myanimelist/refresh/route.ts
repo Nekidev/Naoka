@@ -8,7 +8,7 @@ export async function POST(request: NextRequest) {
     const res = await fetch("https://myanimelist.net/v1/oauth2/token", {
         method: "POST",
         headers: {
-            "Content-Type": "multipart/x-www-form-urlencoded",
+            "Content-Type": "application/x-www-form-urlencoded",
             Accept: "application/json",
         },
         body: `client_id=${encodeURIComponent(

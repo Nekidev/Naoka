@@ -446,9 +446,9 @@ function ConnectAccountOAuthModal({
             );
 
             open(
-                `https://naoka.nyeki.dev/api/auth/oauth2/anilist?key=${encodeURIComponent(
-                    key
-                )}&iv=${encodeURIComponent(iv)}`
+                `https://naoka.nyeki.dev/api/auth/oauth2/${
+                    providerAPI.code
+                }?key=${encodeURIComponent(key)}&iv=${encodeURIComponent(iv)}`
             );
         }
     }, [isOpen]);

@@ -8,7 +8,7 @@ export function encrypt(string: string, key: Buffer, iv: Buffer): string {
 }
 
 export function generateCodeVerifier() {
-    return base64URLEncode(crypto.randomBytes(32));
+    return base64URLEncode(crypto.randomBytes(40));
 }
 
 export function generateCodeChallenge(codeVerifier: string) {

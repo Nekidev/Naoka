@@ -22,6 +22,7 @@ export const providers = {
 
 export class ProviderAPI {
     private api!: BaseProvider;
+    code!: Provider;
 
     get config() {
         return this.api.config;
@@ -34,6 +35,7 @@ export class ProviderAPI {
     constructor(code: Provider) {
         const api: BaseProvider = providers[code as keyof typeof providers];
         this.api = api;
+        this.code = code;
     }
 
     async search(
@@ -60,9 +62,7 @@ export class ProviderAPI {
             media = media.filter(
                 (m: Media) =>
                     !m.isAdult &&
-                    ![MediaRating.RPlus, MediaRating.Rx].includes(
-                        m.rating!
-                    )
+                    ![MediaRating.RPlus, MediaRating.Rx].includes(m.rating!)
             );
         }
 
