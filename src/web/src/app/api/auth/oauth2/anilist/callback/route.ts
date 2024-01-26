@@ -5,7 +5,7 @@ import { type NextRequest } from "next/server";
 
 export const dynamic = "force-dynamic";
 
-function encrypt(string: string, key: string, iv: Buffer): string {
+function encrypt(string: string, key: Buffer, iv: Buffer): string {
     const cipher = crypto.createCipheriv("aes-256-cbc", key, iv);
     let encryptedString = cipher.update(string, "utf-8", "hex");
     encryptedString += cipher.final("hex");
