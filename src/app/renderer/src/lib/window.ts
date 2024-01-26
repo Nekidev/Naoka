@@ -1,6 +1,6 @@
 import React from "react";
 
-import { WebviewWindow } from "@tauri-apps/api/window";
+import { Window, getCurrent } from "@tauri-apps/plugin-window";
 
 export enum MaximixedStatus {
     Toggle,
@@ -11,13 +11,13 @@ export enum MaximixedStatus {
 /**
  * Sets the maximized state of the app window.
  *
- * @param {WebviewWindow | undefined} appWindow - The app window to toggle.
  * @param {MaximixedStatus} status - The desired maximize state.
  */
 export async function setWindowMaximizedStatus(
-    appWindow: WebviewWindow | undefined,
     status: MaximixedStatus = MaximixedStatus.Toggle
 ) {
+    const appWindow = getCurrent();
+
     if (status === MaximixedStatus.Toggle) {
         if (await appWindow?.isMaximized()) {
             document.body.classList.remove("maximized");
@@ -39,13 +39,12 @@ export async function setWindowMaximizedStatus(
 /**
  * Returns a boolean value indicating whether the given appWindow is maximized.
  *
- * @param {WebviewWindow | undefined} appWindow - The window to check for maximization.
  * @return {boolean} The boolean value indicating whether the appWindow is maximized.
  */
-export function useMaximized(appWindow: WebviewWindow | undefined) {
+export function useMaximized(): boolean {
     const [isMaximized, setIsMaximized] = React.useState(false);
 
-    const update = async () => {
+    const update = async (appWindow: Window) => {
         if (await appWindow?.isMaximized()) {
             setIsMaximized(true);
         } else {
@@ -53,30 +52,19 @@ export function useMaximized(appWindow: WebviewWindow | undefined) {
         }
     };
 
-    appWindow?.onResized(() => {
-        update();
-    });
-    update();
-
-    return isMaximized;
-}
-
-/**
- * Retrieves the Tauri application window.
- *
- * @returns {WebviewWindow | undefined} The application window if found, otherwise undefined.
- */
-export function useAppWindow(): WebviewWindow | undefined {
-    const [appWindow, setAppWindow] = React.useState<
-        WebviewWindow | undefined
-    >();
-
     React.useEffect(() => {
         (async () => {
-            const aw = (await import("@tauri-apps/api/window")).appWindow;
-            setAppWindow(aw);
+            if ("__TAURI__" in window) {
+                const appWindow = getCurrent();
+
+                appWindow?.onResized(() => {
+                    update(appWindow);
+                });
+
+                update(appWindow);
+            }
         })();
     }, []);
 
-    return appWindow;
+    return isMaximized;
 }

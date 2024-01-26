@@ -3,7 +3,7 @@
 import { Header, Paragraph } from "../components";
 import { useMessages } from "@/lib/messages";
 import pkg from "../../../../../package.json";
-import { open } from "@tauri-apps/api/shell";
+import { open } from "@tauri-apps/plugin-shell";
 
 export default function About() {
     const m = useMessages();

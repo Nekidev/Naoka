@@ -13,7 +13,6 @@ import React from "react";
 import { useLiveQuery } from "dexie-react-hooks";
 import { db } from "@/lib/db";
 import styles from "./styles.module.css";
-import { useAppWindow } from "@/lib/window";
 import Tooltip from "../Tooltip";
 import Link from "../Link";
 import { useClickAway, useLocalStorage } from "@uidotdev/usehooks";
@@ -25,6 +24,7 @@ import { useMessages } from "@/lib/messages";
 import { getBulkMedia } from "@/lib/db/utils";
 import { useSelectedProvider } from "@/lib/providers/hooks";
 import dynamic from "next/dynamic";
+import { getCurrent } from "@tauri-apps/api/window";
 
 interface ListWithMedia extends List {
     media: Media[];
@@ -136,7 +136,6 @@ function IconButton({
 }
 
 function MenuButtons(): JSX.Element {
-    const appWindow = useAppWindow();
     const [isExpanded, setIsExpanded] = useSidebarExpanded();
     const m = useMessages();
 
@@ -154,7 +153,7 @@ function MenuButtons(): JSX.Element {
                 <div
                     className="flex-1 cursor-grab active:cursor-grabbing"
                     onMouseDown={() => {
-                        appWindow?.startDragging();
+                        getCurrent().startDragging();
                     }}
                 ></div>
             </div>

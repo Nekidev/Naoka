@@ -1,6 +1,6 @@
 import { BaseProvider, Config } from "@/lib/providers/base";
 import { serializeURL } from "@/lib/utils";
-import { fetch } from "@tauri-apps/api/http";
+import { fetch } from "@tauri-apps/plugin-http";
 import config from "./config";
 import {
     ExternalAccount,

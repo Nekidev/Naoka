@@ -23,7 +23,11 @@
     },
     "dependencies": {
         "@heroicons/react": "^2.0.18",
-        "@tauri-apps/api": "^1.5.3",
+        "@tauri-apps/api": "2.0.0-alpha.14",
+        "@tauri-apps/plugin-http": "2.0.0-alpha.6",
+        "@tauri-apps/plugin-notification": "2.0.0-alpha.5",
+        "@tauri-apps/plugin-shell": "2.0.0-alpha.5",
+        "@tauri-apps/plugin-window": "2.0.0-alpha.1",
         "@uidotdev/usehooks": "^2.4.1",
         "dataclass": "^2.1.1",
         "dexie": "^3.2.4",
@@ -33,7 +37,7 @@
         "marked-react": "^2.0.0"
     },
     "devDependencies": {
-        "@tauri-apps/cli": "^1.5.9",
+        "@tauri-apps/cli": "2.0.0-alpha.21",
         "@types/node": "^20",
         "@types/react": "^18",
         "@types/react-dom": "^18",

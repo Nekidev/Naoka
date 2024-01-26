@@ -11,14 +11,14 @@ import {
 } from "@heroicons/react/24/outline";
 import {
     setWindowMaximizedStatus,
-    useAppWindow,
     useMaximized,
 } from "@/lib/window";
 import { useLocalStorage } from "@uidotdev/usehooks";
+import { getCurrent } from "@tauri-apps/api/window";
 
 export default function NavigationBar(): JSX.Element {
-    const appWindow = useAppWindow();
-    const isMaximized = useMaximized(appWindow);
+    const isMaximized = useMaximized();
+    const appWindow = getCurrent();
 
     const [isExpanded, setIsExpanded] = useLocalStorage(
         "Naoka:SideBar:Expanded",
@@ -63,7 +63,7 @@ export default function NavigationBar(): JSX.Element {
                 </button>
                 <button
                     className="p-2 rounded hover:bg-zinc-800 transition"
-                    onClick={() => setWindowMaximizedStatus(appWindow)}
+                    onClick={() => setWindowMaximizedStatus()}
                 >
                     {isMaximized ? (
                         <Square2StackIcon className="h-4 w-4" />
