@@ -13,6 +13,8 @@ import { ProviderAPI, providers } from "@/lib/providers";
 import { ExternalAccount, ImportMethod, MediaType } from "@/lib/db/types";
 import { useMessages } from "@/lib/messages";
 import { InputType } from "@/lib/forms";
+import { open } from "@tauri-apps/api/shell";
+import * as crypto from "crypto";
 
 export default function Connections() {
     const m = useMessages();
@@ -173,7 +175,7 @@ function Account({ account }: { account: ExternalAccount }) {
                                     setIsConnectAccountModalOpen(true);
                                 }}
                             >
-                                {account.auth?.username
+                                {account.isAuthed
                                     ? m(
                                           "settings_connections_account_reconnect"
                                       )
@@ -183,7 +185,7 @@ function Account({ account }: { account: ExternalAccount }) {
                         <div className="flex flex-row items-center gap-2">
                             <Button
                                 disabled={
-                                    !account.auth?.username ||
+                                    !account.isAuthed ||
                                     api.config.syncing?.import?.mediaTypes
                                         .length === 0
                                 }
@@ -201,55 +203,21 @@ function Account({ account }: { account: ExternalAccount }) {
                     </div>
                 </div>
             </div>
-            <FormModal
-                isOpen={isConnectAccountModalOpen}
-                closeModal={() => setIsConnectAccountModalOpen(false)}
-                steps={[
-                    {
-                        title: m("settings_connections_connect_title", {
-                            provider: api.name,
-                        }),
-                        subtitle: m("settings_connections_connect_subtitle"),
-                        fields: [
-                            {
-                                type: InputType.Text,
-                                name: "username",
-                                label: m(
-                                    "settings_connections_connect_username"
-                                ),
-                                defaultValue: account.auth?.username || "",
-                            },
-                        ],
-                    },
-                ]}
-                onSubmit={({ username }) => {
-                    const oldAuth = account.auth;
-                    const newAuth = {
-                        ...(oldAuth || {}),
-                        username,
-                    };
-
-                    db.externalAccounts
-                        .update(account.id!, {
-                            auth: newAuth,
-                        })
-                        .then(() => {
-                            account.auth = newAuth;
-                            api.getUser(account)
-                                .then((user) => {
-                                    db.externalAccounts.update(account.id!, {
-                                        user,
-                                    });
-                                })
-                                .catch((e) => {
-                                    // Revert changes
-                                    db.externalAccounts.update(account.id!, {
-                                        auth: oldAuth,
-                                    });
-                                });
-                        });
-                }}
-            />
+            {api.config.syncing?.auth.type === "username" ? (
+                <ConnectAccountUsernameModal
+                    isOpen={isConnectAccountModalOpen}
+                    closeModal={() => setIsConnectAccountModalOpen(false)}
+                    account={account}
+                    providerAPI={api}
+                />
+            ) : (
+                <ConnectAccountOAuthModal
+                    isOpen={isConnectAccountModalOpen}
+                    closeModal={() => setIsConnectAccountModalOpen(false)}
+                    account={account}
+                    providerAPI={api}
+                />
+            )}
             <FormModal
                 isOpen={isSelectListTypeImportModalOpen}
                 closeModal={() => setIsSelectListTypeImportModalOpen(false)}
@@ -403,5 +371,111 @@ function Account({ account }: { account: ExternalAccount }) {
                 }}
             />
         </>
+    );
+}
+
+function ConnectAccountUsernameModal({
+    isOpen,
+    closeModal,
+    account,
+    providerAPI,
+}: {
+    isOpen: boolean;
+    closeModal: () => void;
+    account: ExternalAccount;
+    providerAPI: ProviderAPI;
+}) {
+    const m = useMessages();
+
+    return (
+        <FormModal
+            isOpen={isOpen}
+            closeModal={closeModal}
+            steps={[
+                {
+                    title: m("settings_connections_connect_username_title", {
+                        provider: providerAPI.name,
+                    }),
+                    subtitle: m(
+                        "settings_connections_connect_username_subtitle"
+                    ),
+                    fields: [
+                        {
+                            type: InputType.Text,
+                            name: "username",
+                            label: m(
+                                "settings_connections_connect_username_username"
+                            ),
+                            defaultValue: account.auth?.username || "",
+                        },
+                    ],
+                },
+            ]}
+            onSubmit={(props) => {
+                account.authorize(props);
+            }}
+        />
+    );
+}
+
+function ConnectAccountOAuthModal({
+    isOpen,
+    closeModal,
+    account,
+    providerAPI,
+}: {
+    isOpen: boolean;
+    closeModal: () => void;
+    account: ExternalAccount;
+    providerAPI: ProviderAPI;
+}) {
+    const m = useMessages();
+
+    React.useEffect(() => {
+        if (isOpen) {
+            const key = crypto.randomBytes(32).toString("hex");
+            const iv = crypto.randomBytes(16).toString("hex");
+
+            sessionStorage.setItem(
+                `Naoka:Provider:${providerAPI.name}:OAuthKey`,
+                key
+            );
+            sessionStorage.setItem(
+                `Naoka:Provider:${providerAPI.name}:OAuthIV`,
+                iv
+            );
+
+            open(
+                `https://naoka.nyeki.dev/api/auth/oauth2/anilist?key=${encodeURIComponent(
+                    key
+                )}&iv=${encodeURIComponent(iv)}`
+            );
+        }
+    }, [isOpen]);
+
+    return (
+        <FormModal
+            isOpen={isOpen}
+            closeModal={closeModal}
+            steps={[
+                {
+                    title: m("settings_connections_connect_oauth_title", {
+                        provider: providerAPI.name,
+                    }),
+                    subtitle: m("settings_connections_connect_oauth_subtitle"),
+                    fields: [
+                        {
+                            type: InputType.Text,
+                            name: "code",
+                            label: m("settings_connections_connect_oauth_code"),
+                            defaultValue: account.auth?.username || "",
+                        },
+                    ],
+                },
+            ]}
+            onSubmit={(props) => {
+                account.authorize(props);
+            }}
+        />
     );
 }

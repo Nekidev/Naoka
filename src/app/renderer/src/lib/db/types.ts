@@ -124,6 +124,7 @@ export interface LibraryEntry {
     startDate: Date | null;
     finishDate: Date | null;
     notes: string;
+    isPrivate: boolean;
     mapping: Mapping;
     updatedAt: Date;
 }
@@ -201,6 +202,28 @@ export class ExternalAccount extends Data {
     async getData() {
         const api = new ProviderAPI(this.provider);
         return api.getUser(this);
+    }
+
+    async authorize(props: { [key: string]: any }) {
+        const api = new ProviderAPI(this.provider);
+        return api.authorize(this, props);
+    }
+
+    get isAuthed(): boolean {
+        const api = new ProviderAPI(this.provider);
+
+        switch (api.config.syncing?.auth.type) {
+            case "username":
+                return !!this.auth?.username;
+
+            case "oauth":
+                return !!this.auth?.accessToken;
+
+            case "basic":
+                return !!this.auth?.username && !!this.auth?.password;
+        }
+
+        return false;
     }
 
     // I burnt out my brain working on this function, so I wouldn't be suprised

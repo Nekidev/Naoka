@@ -69,7 +69,7 @@ export default function EditListModal({
                                 type="text"
                                 className="w-full border border-zinc-900 rounded bg-zinc-900 p-2 leading-none outline-none placeholder:text-zinc-400 focus:border-zinc-100 transition"
                                 placeholder="Name"
-                                autoComplete="none"
+                                autoComplete="off"
                                 value={name}
                                 onChange={(e) => {
                                     setName(e.target.value);

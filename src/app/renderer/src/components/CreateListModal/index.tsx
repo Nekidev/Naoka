@@ -58,7 +58,7 @@ export default function CreateListModal({
                                 className="w-full border border-zinc-900 rounded bg-zinc-900 p-2 leading-none outline-none placeholder:text-zinc-400 focus:border-zinc-100 transition"
                                 placeholder="Name"
                                 value={name}
-                                autoComplete="none"
+                                autoComplete="off"
                                 onChange={(e) => {
                                     setName(e.target.value);
                                 }}

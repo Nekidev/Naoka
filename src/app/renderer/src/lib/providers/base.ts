@@ -24,7 +24,7 @@ export interface Config {
     mediaTypes: MediaType[];
     syncing?: {
         auth: {
-            type: "oauth" | "basic" | "client" | "none";
+            type: "oauth" | "basic" | "username" | "none";
         };
         import?: {
             // Importable list types.
@@ -105,6 +105,13 @@ export class BaseProvider {
     async getUser(account: ExternalAccount): Promise<UserData> {
         /*
         Returns basic user data from the external account.
+        */
+        throw Error("Not implemented");
+    }
+
+    async authorize(account: ExternalAccount, props: { [key: string]: any }) {
+        /*
+        Authorizes and updates the external account.
         */
         throw Error("Not implemented");
     }

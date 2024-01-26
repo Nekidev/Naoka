@@ -27,6 +27,7 @@ query Library($username: String, $type: MediaType, $page: Int) {
                 day
             }
             notes
+            private
             updatedAt
             media {
                 id

@@ -168,7 +168,7 @@ function FormModalContent(props: FormModalProps) {
                                                                 );
                                                             }}
                                                             className="leading-none p-2 rounded bg-zinc-900 w-full border border-zinc-900 focus:border-zinc-100 transition placeholder:text-zinc-400"
-                                                            autoComplete="none"
+                                                            autoComplete="off"
                                                         />
                                                     </div>
                                                 );
