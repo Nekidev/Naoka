@@ -37,7 +37,7 @@ export async function GET(request: NextRequest) {
     const cookieStore = cookies();
 
     redirect(
-        `/code?status=success&key=${encrypt(
+        `/code?status=success&code=${encrypt(
             json.access_token,
             Buffer.from(cookieStore.get("key")?.value!, "hex"),
             Buffer.from(cookieStore.get("iv")?.value!, "hex")
