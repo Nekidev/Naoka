@@ -1,7 +1,8 @@
-import userQuery from "./queries/user";
-import mediaQuery from "./queries/media";
-import searchQuery from "./queries/search";
-import libraryQuery from "./queries/library";
+import userQuery from "./queries/User";
+import mediaQuery from "./queries/Media";
+import searchQuery from "./queries/Search";
+import viewerQuery from "./queries/Viewer";
+import libraryQuery from "./queries/Library";
 import config from "./config";
 import { BaseProvider } from "../base";
 import {
@@ -16,6 +17,8 @@ import {
     MediaType,
     UserData,
 } from "@/lib/db/types";
+import { decrypt } from "@/lib/crypto";
+import { db } from "@/lib/db";
 
 function normalizeGenre(genre: string): MediaGenre | undefined {
     return {
@@ -202,9 +205,11 @@ export class AniList extends BaseProvider {
                               countryOfOrigin: options.countryOfOrigin,
                           }
                         : {}),
-                    ...(!options.adult ? {
-                        isAdult: false
-                    } : {})
+                    ...(!options.adult
+                        ? {
+                              isAdult: false,
+                          }
+                        : {}),
                 },
             }),
         }).then((res) => res.json());
@@ -375,6 +380,7 @@ export class AniList extends BaseProvider {
                     chapterProgress: entry.progress,
                     volumeProgress: entry.progressVolumes,
                     notes: entry.notes,
+                    isPrivate: entry.private,
                     mapping: media.mapping,
                     updatedAt: new Date(entry.updatedAt),
                 });
@@ -386,5 +392,44 @@ export class AniList extends BaseProvider {
             mappings: newMappings,
             entries: newLibraryEntries,
         };
+    }
+
+    async authorize(account: ExternalAccount, { code }: { code: string }) {
+        const accessToken = decrypt(
+            code,
+            Buffer.from(
+                sessionStorage.getItem(`Naoka:Provider:${this.name}:OAuthKey`)!,
+                "hex"
+            ),
+            Buffer.from(
+                sessionStorage.getItem(`Naoka:Provider:${this.name}:OAuthIV`)!,
+                "hex"
+            )
+        );
+
+        account.auth = {
+            accessToken: accessToken,
+        };
+
+        const res = await fetch("https://graphql.anilist.co", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                Accept: "application/json",
+                Authorization: `Bearer ${accessToken}`,
+            },
+            body: JSON.stringify({
+                query: viewerQuery,
+                variables: {
+                    accessToken: accessToken,
+                },
+            }),
+        });
+
+        if (!res.ok) throw Error("Could not login");
+
+        account.user = await this.getUser(account);
+
+        await db.externalAccounts.update(account.id!, account);
     }
 }

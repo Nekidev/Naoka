@@ -103,4 +103,8 @@ export class ProviderAPI {
     async getUser(account: ExternalAccount): Promise<UserData> {
         return this.api.getUser(account);
     }
+
+    async authorize(account: ExternalAccount, props: { [key: string]: any }) {
+        return this.api.authorize(account, props);
+    }
 }

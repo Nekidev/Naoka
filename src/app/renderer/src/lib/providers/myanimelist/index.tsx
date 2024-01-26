@@ -322,6 +322,7 @@ export class MyAnimeList extends BaseProvider {
             startDate: entry.start_date ? new Date(entry.start_date) : null,
             finishDate: entry.finish_date ? new Date(entry.finish_date) : null,
             notes: entry.comments,
+            isPrivate: false,
             updatedAt: new Date(entry.updated_at),
             mapping,
         };

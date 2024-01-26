@@ -565,7 +565,7 @@ function NumberInput({ ...props }: { [key: string]: any }) {
         <div className="w-full relative">
             <input
                 type="number"
-                autoComplete="none"
+                autoComplete="off"
                 className="rounded p-2 leading-none bg-zinc-900 w-full text-sm outline-none peer h-8"
                 onChange={(e) => {
                     setValue(e.target.value);
@@ -626,7 +626,7 @@ function DateInput({ ...props }: { [key: string]: any }) {
         <div className="w-full relative">
             <input
                 type="date"
-                autoComplete="none"
+                autoComplete="off"
                 className="rounded p-2 leading-none bg-zinc-900 w-full text-sm outline-none peer h-8 placeholder:text-zinc-400"
                 {...props}
             />
@@ -639,7 +639,7 @@ function TextArea({ ...props }: { [key: string]: any }) {
     return (
         <div className="w-full relative">
             <textarea
-                autoComplete="none"
+                autoComplete="off"
                 className="rounded px-2 py-1.5 bg-zinc-900 w-full text-sm outline-none peer placeholder:text-zinc-400 resize-y"
                 {...props}
             />
