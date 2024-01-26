@@ -7,7 +7,7 @@ export default function Code() {
 
     if (searchParams.get("status") !== "success") {
         return (
-            <>
+            <div>
                 <h1>Something went wrong</h1>
                 <p>
                     For some reason you couldn't be authenticated. You can close
@@ -19,11 +19,11 @@ export default function Code() {
                         server. You can find the link <a href="/">here</a>.
                     </i>
                 </p>
-            </>
+            </div>
         );
     }
     return (
-        <>
+        <div>
             <h1>Success!</h1>
             <p>Go back to Naoka and paste the following code:</p>
             <div
@@ -61,6 +61,6 @@ export default function Code() {
             <p>
                 <i>You can close this tab after pasting the code in Naoka.</i>
             </p>
-        </>
+        </div>
     );
 }

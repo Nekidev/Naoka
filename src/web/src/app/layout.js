@@ -1,6 +1,6 @@
 export default function RootLayout({ children }) {
     return (
-        <html lang="en" suppressHydrationWarning>
+        <html lang="en">
             <body
                 style={{
                     display: "flex",
@@ -19,23 +19,21 @@ export default function RootLayout({ children }) {
                 >
                     {children}
                     <hr />
-                    <p>
-                        <div
-                            style={{
-                                display: "flex",
-                                flexDirection: "row",
-                                justifyContent: "space-between",
-                                width: "100%",
-                            }}
-                        >
-                            <span>
-                                <a href="#top">Go to the top</a> &middot;{" "}
-                                <a href="/">Home</a>{" "}
-                                &middot; <a href="https://nyeki.dev">Nyeki</a>
-                            </span>
-                            <span>MIT License</span>
-                        </div>
-                    </p>
+                    <div
+                        style={{
+                            display: "flex",
+                            flexDirection: "row",
+                            justifyContent: "space-between",
+                            width: "100%",
+                        }}
+                    >
+                        <span>
+                            <a href="#top">Go to the top</a> &middot;{" "}
+                            <a href="/">Home</a> &middot;{" "}
+                            <a href="https://nyeki.dev">Nyeki</a>
+                        </span>
+                        <span>MIT License</span>
+                    </div>
                 </div>
             </body>
         </html>
