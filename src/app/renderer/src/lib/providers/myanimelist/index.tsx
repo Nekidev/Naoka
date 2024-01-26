@@ -15,6 +15,8 @@ import {
     MediaType,
     UserData,
 } from "@/lib/db/types";
+import { decrypt } from "@/lib/crypto";
+import { db } from "@/lib/db";
 
 function normalizeTime(timeString: string) {
     const parts = timeString.split(" ");
@@ -124,7 +126,7 @@ function normalizeFormat(format: string): MediaFormat | undefined {
         manhwa: MediaFormat.Manhwa,
         manhua: MediaFormat.Manhua,
         oel: MediaFormat.Oel,
-        unknown: MediaFormat.Unknown
+        unknown: MediaFormat.Unknown,
     }[format.toLowerCase()];
 }
 
@@ -220,7 +222,9 @@ export class MyAnimeList extends BaseProvider {
                     .map((genre: any) => normalizeGenre(genre.name))
                     .filter((genre: string | undefined) => !!genre),
                 status: anime.status ? normalizeMalStatus(anime.status)! : null,
-                format: anime.media_type ? normalizeFormat(anime.media_type)! : null,
+                format: anime.media_type
+                    ? normalizeFormat(anime.media_type)!
+                    : null,
                 duration: anime.average_episode_duration
                     ? Math.round(anime.average_episode_duration / 60)
                     : null,
@@ -298,7 +302,9 @@ export class MyAnimeList extends BaseProvider {
                     .map((genre: any) => normalizeGenre(genre.name))
                     .filter((genre: string | undefined) => !!genre),
                 status: manga.status ? normalizeMalStatus(manga.status)! : null,
-                format: manga.media_type ? normalizeFormat(manga.media_type)! : null,
+                format: manga.media_type
+                    ? normalizeFormat(manga.media_type)!
+                    : null,
                 isAdult: manga.nsfw == "black",
                 mapping: `myanimelist:manga:${manga.id.toString()}`,
             },
@@ -606,5 +612,53 @@ export class MyAnimeList extends BaseProvider {
             name: data.username,
             imageUrl: data.images.webp.image_url,
         };
+    }
+
+    async authorize(account: ExternalAccount, { code }: { code: string }) {
+        const { access_token, refresh_token, expires_in } = JSON.parse(
+            decrypt(
+                code,
+                Buffer.from(
+                    sessionStorage.getItem(
+                        `Naoka:Provider:${this.name}:OAuthKey`
+                    )!,
+                    "hex"
+                ),
+                Buffer.from(
+                    sessionStorage.getItem(
+                        `Naoka:Provider:${this.name}:OAuthIV`
+                    )!,
+                    "hex"
+                )
+            )
+        );
+
+        account.auth = {
+            accessToken: access_token,
+            refreshToken: refresh_token,
+            // Expires in an hour
+            accessTokenExpiresAt: new Date(
+                new Date().getTime() + 1000 * 60 * 60
+            ),
+            refreshTokenExpiresAt: new Date(new Date().getTime() + expires_in),
+        };
+
+        const res = await fetch<any>(
+            "https://api.myanimelist.net/v2/users/@me?fields=id,name,picture",
+            {
+                method: "GET",
+                headers: {
+                    Authorization: `Bearer ${access_token}`,
+                },
+            }
+        );
+
+        account.user = {
+            id: res.data.id,
+            name: res.data.name,
+            imageUrl: res.data.picture,
+        };
+
+        await db.externalAccounts.update(account.id!, account);
     }
 }
