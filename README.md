@@ -30,6 +30,9 @@
 
 ![screenshot](https://raw.githubusercontent.com/naoka-dev/naoka/main/src/web/public/imgs/screenshot-01.png)
 
+
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2FNekidev%2FNaoka.svg?type=large)](https://app.fossa.com/projects/git%2Bgithub.com%2FNekidev%2FNaoka?ref=badge_large)
+
 ## Key Features
 
 - **Nice UI** — There's a lot of effort put on making everything look nice.
@@ -58,6 +61,7 @@ You can [download](https://github.com/naoka-dev/Naoka/releases/) the latest inst
 ## Support
 
 [![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/nekidev)
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2FNekidev%2FNaoka.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2FNekidev%2FNaoka?ref=badge_shield)
 
 ## Credits
 
