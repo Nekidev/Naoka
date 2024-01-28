@@ -18,8 +18,11 @@ export default function Link({
     const router = useRouter();
 
     return (
-        <div
+        <a
+            href="#"
             onClick={(e) => {
+                e.preventDefault();
+                
                 var followLink = true;
 
                 e.preventDefault = () => {
@@ -36,15 +39,9 @@ export default function Link({
                     }
                 }
             }}
-            style={{
-                cursor: "pointer",
-                width: "fit-content",
-                display: "inline-block",
-                ...(props.style || {}),
-            }}
             {...props}
         >
             {children}
-        </div>
+        </a>
     );
 }
