@@ -156,8 +156,6 @@ export class MyAnimeList extends BaseProvider {
     name: string = "MyAnimeList";
     config: Config = config;
 
-    private clientID = "bd5f6c8d2ebafac1378531805137ada3";
-
     private jikanAnimeToInteralValue(anime: any): {
         media: Media;
         mappings: Mapping[];
@@ -331,6 +329,7 @@ export class MyAnimeList extends BaseProvider {
             isPrivate: false,
             updatedAt: new Date(entry.updated_at),
             mapping,
+            missedSyncs: []
         };
     }
 
@@ -450,23 +449,19 @@ export class MyAnimeList extends BaseProvider {
         return this.jikanMangaToInternalValue(res.data.data);
     }
 
-    private async getAnimeList(account: ExternalAccount): Promise<{
+    private async *getAnimeList(account: ExternalAccount): AsyncGenerator<{
         media: Media[];
         entries: LibraryEntry[];
         mappings: Mapping[][];
     }> {
-        if (!account.auth?.username) {
-            throw Error("No username provided");
-        }
-
         let url = `https://api.myanimelist.net/v2/users/${encodeURIComponent(
-            account.auth!.username!
-        )}/animelist?limit=1000&fields=list_status{status,score,num_episodes_watched,is_rewatching,start_date,finish_date,priority,num_times_rewatched,rewatch_value,tags,comments,updated_at},start_date,end_date,nsfw,genres,media_type,num_episodes,rating,average_episode_duration,alternative_titles`;
+            account.user!.name!
+        )}/animelist?sort=list_updated_at&limit=1000&fields=list_status{status,score,num_episodes_watched,is_rewatching,start_date,finish_date,priority,num_times_rewatched,rewatch_value,tags,comments,updated_at},start_date,end_date,nsfw,genres,media_type,num_episodes,rating,average_episode_duration,alternative_titles`;
 
         const res = await fetch<any>(url, {
             method: "GET",
             headers: {
-                "X-Mal-Client-ID": this.clientID,
+                Authorization: `Bearer ${account.auth!.accessToken}`,
             },
         });
 
@@ -490,26 +485,26 @@ export class MyAnimeList extends BaseProvider {
             newLibraryEntries.push(libraryEntry);
         }
 
-        return {
+        yield {
             media: newMedia,
             mappings: newMappings,
             entries: newLibraryEntries,
         };
     }
 
-    private async getMangaList(account: ExternalAccount): Promise<{
+    private async *getMangaList(account: ExternalAccount): AsyncGenerator<{
         media: Media[];
         mappings: Mapping[][];
         entries: LibraryEntry[];
     }> {
         let url = `https://api.myanimelist.net/v2/users/${encodeURIComponent(
-            account.auth!.username!
-        )}/mangalist?limit=1000&fields=list_status{status,score,num_chapters_read,num_volumes_read,is_rereading,start_date,finish_date,priority,num_times_reread,reread_value,tags,comments,updated_at},start_date,end_date,nsfw,genres,media_type,num_chapters,num_volumes,alternative_titles`;
+            account.user!.name!
+        )}/mangalist?sort=list_updated_at&limit=1000&fields=list_status{status,score,num_chapters_read,num_volumes_read,is_rereading,start_date,finish_date,priority,num_times_reread,reread_value,tags,comments,updated_at},start_date,end_date,nsfw,genres,media_type,num_chapters,num_volumes,alternative_titles`;
 
         const res = await fetch<any>(url, {
             method: "GET",
             headers: {
-                "X-Mal-Client-ID": this.clientID,
+                Authorization: `Bearer ${account.auth!.accessToken}`,
             },
         });
 
@@ -533,7 +528,7 @@ export class MyAnimeList extends BaseProvider {
             newLibraryEntries.push(libraryEntry);
         }
 
-        return {
+        yield {
             media: newMedia,
             mappings: newMappings,
             entries: newLibraryEntries,
@@ -581,16 +576,13 @@ export class MyAnimeList extends BaseProvider {
         }
     }
 
-    async getLibrary(type: MediaType, account: ExternalAccount) {
-        switch (type) {
-            case "anime":
-                return this.getAnimeList(account);
-
-            case "manga":
-                return this.getMangaList(account);
-
-            default:
-                throw Error("Invalid media type");
+    async *getUserLibrary(type: MediaType, account: ExternalAccount) {
+        if (type === "anime") {
+            yield* this.getAnimeList(account);
+        } else if (type === "manga") {
+            yield* this.getMangaList(account);
+        } else {
+            throw Error("Invalid media type");
         }
     }
 

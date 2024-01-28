@@ -127,6 +127,10 @@ export interface LibraryEntry {
     isPrivate: boolean;
     mapping: Mapping;
     updatedAt: Date;
+    missedSyncs: {
+        provider: Provider;
+        type: "update" | "removal";
+    }[];
 }
 
 export interface List {
@@ -195,18 +199,19 @@ export class ExternalAccount extends Data {
         password?: string;
     };
     user?: UserData;
+    syncing: MediaType[] = [];
 
-    async getLibrary(type: MediaType) {
+    getUserLibrary(type: MediaType) {
         const api = new ProviderAPI(this.provider);
-        return api.getLibrary(type, this);
+        return api.getUserLibrary(type, this);
     }
 
-    async getData() {
+    getData() {
         const api = new ProviderAPI(this.provider);
         return api.getUser(this);
     }
 
-    async authorize(props: { [key: string]: any }) {
+    authorize(props: { [key: string]: any }) {
         const api = new ProviderAPI(this.provider);
         return api.authorize(this, props);
     }
@@ -214,12 +219,36 @@ export class ExternalAccount extends Data {
     get isAuthed(): boolean {
         const api = new ProviderAPI(this.provider);
 
-        switch (api.config.syncing?.auth.type) {
+        switch (api.config.syncing?.authType) {
             case "username":
                 return !!this.auth?.username;
 
             case "oauth":
-                return !!this.auth?.accessToken;
+                /**
+                 * If it has a token with no expiry date, it's still authorized.
+                 * Otherwise, check if the token has expired. The access token
+                 * may be expired but the auth is still valid if the refresh
+                 * token has not.
+                 */
+                if (this.auth?.refreshToken) {
+                    if (this.auth?.refreshTokenExpiresAt) {
+                        if (
+                            new Date().getTime() <
+                            this.auth.refreshTokenExpiresAt!.getTime()
+                        )
+                            return true;
+                    } else return true;
+                } else if (this.auth?.accessToken) {
+                    if (this.auth?.accessTokenExpiresAt) {
+                        if (
+                            new Date().getTime() <
+                            this.auth.accessTokenExpiresAt!.getTime()
+                        )
+                            return true;
+                    } else return true;
+                }
+
+                return false;
 
             case "basic":
                 return !!this.auth?.username && !!this.auth?.password;
@@ -231,125 +260,154 @@ export class ExternalAccount extends Data {
     // I burnt out my brain working on this function, so I wouldn't be suprised
     // if you cannot understand how tf it works.
     async importLibrary(
+        // What media library to import
         type: MediaType,
-        method: ImportMethod = ImportMethod.Keep
+
+        // What to do with the imported library
+        method: ImportMethod = ImportMethod.Keep,
+
+        // If true, all entries will be imported. Otherwise, the import will
+        // only include the entries updated after the last local update.
+        all: boolean = true
     ) {
         const api = new ProviderAPI(this.provider);
-        const { entries, mappings: newMappings } = await api.getLibrary(
-            type,
-            this
-        );
+        let newEntries: LibraryEntry[] = [];
+        let lastEntry = await db.library.orderBy("updatedAt").last();
 
-        for (const mappings of newMappings) {
-            await updateMappings(mappings);
-        }
+        for await (const {
+            entries,
+            mappings: newMappings,
+        } of api.getUserLibrary(type, this)) {
+            for (const mappings of newMappings) {
+                await updateMappings(mappings);
+            }
 
-        const mappings = await db.mappings
-            .where("mappings")
-            .anyOf(entries.map((e) => e.mapping))
-            .toArray();
+            const mappings = await db.mappings
+                .where("mappings")
+                .anyOf(entries.map((e) => e.mapping))
+                .toArray();
 
-        let conflictingEntries: {
-            entry: LibraryEntry;
-            mapping: Mapping;
-        }[] = [];
+            let conflictingEntries: {
+                entry: LibraryEntry;
+                mapping: Mapping;
+            }[] = [];
 
-        // Loop through the imported entries to see if any of them already exists
-        await Promise.all(
-            entries.map(async (e: LibraryEntry) => {
-                // Find the Mappings object that matches the imported entry's mapping
-                // for the current account's provider.
-                const linkedMappings = mappings.find(
-                    // Find the Mappings object that contains the
-                    // mapping of the imported entry
-                    (m: Mappings) =>
-                        !!m.mappings.find(
-                            (mapping: Mapping) => mapping === e.mapping
-                        )
-                )?.mappings;
+            // Loop through the imported entries to see if any of them already exists
+            await Promise.all(
+                entries.map(async (e: LibraryEntry) => {
+                    // Find the Mappings object that matches the imported entry's mapping
+                    // for the current account's provider.
+                    const linkedMappings = mappings.find(
+                        // Find the Mappings object that contains the
+                        // mapping of the imported entry
+                        (m: Mappings) =>
+                            !!m.mappings.find(
+                                (mapping: Mapping) => mapping === e.mapping
+                            )
+                    )?.mappings;
 
-                // No existing Mappings object for the entry's mapping. This means that it's also
-                // not in library so it's safe to add it.
-                if (linkedMappings === undefined) {
-                    return;
-                }
+                    // No existing Mappings object for the entry's mapping. This means that it's also
+                    // not in library so it's safe to add it.
+                    if (linkedMappings === undefined) {
+                        return;
+                    }
 
-                const entry = await db.library
-                    .where("mapping")
-                    .anyOf(linkedMappings)
-                    .first();
+                    const entry = await db.library
+                        .where("mapping")
+                        .anyOf(linkedMappings)
+                        .first();
 
-                if (!entry) return;
+                    if (!entry) return;
 
-                // Find the mapping of the library entry that matches the imported entry and
-                // replace it's mapping with the new one.
-                conflictingEntries.push({ entry, mapping: e.mapping }); // Local mapping
-            })
-        );
-
-        const newEntries = entries.map((newEntry: LibraryEntry) => {
-            let existingEntry = conflictingEntries.find(
-                (e) => e && e.mapping === newEntry.mapping
+                    // Find the mapping of the library entry that matches the imported entry and
+                    // replace it's mapping with the new one.
+                    conflictingEntries.push({ entry, mapping: e.mapping }); // Local mapping
+                })
             );
 
-            if (!!existingEntry) {
-                // Keep favorite status
-                newEntry.favorite = existingEntry.entry.favorite;
-
-                if (method === ImportMethod.Merge) {
-                    let newEntryInstance: { [key: string]: any } = {};
-
-                    Object.getOwnPropertyNames(newEntry).forEach(
-                        (value: string) => {
-                            if (
-                                newEntry.updatedAt >
-                                existingEntry!.entry.updatedAt
-                            ) {
-                                if (!!newEntry[value as keyof LibraryEntry]) {
-                                    newEntryInstance[value] =
-                                        newEntry[value as keyof LibraryEntry];
-                                } else {
-                                    newEntryInstance[value] =
-                                        existingEntry?.entry[
-                                            value as keyof LibraryEntry
-                                        ];
-                                }
-                            } else {
-                                if (
-                                    !!existingEntry?.entry[
-                                        value as keyof LibraryEntry
-                                    ]
-                                ) {
-                                    newEntryInstance[value] =
-                                        existingEntry?.entry[
-                                            value as keyof LibraryEntry
-                                        ];
-                                } else {
-                                    newEntryInstance[value] =
-                                        newEntry[value as keyof LibraryEntry];
-                                }
-                            }
-                        }
+            newEntries = newEntries.concat(
+                entries.map((newEntry: LibraryEntry) => {
+                    let existingEntry = conflictingEntries.find(
+                        (e) => e && e.mapping === newEntry.mapping
                     );
 
-                    newEntryInstance.mapping = existingEntry.entry.mapping;
-                    newEntry = newEntryInstance as LibraryEntry;
-                } else {
-                    if (
-                        (method === ImportMethod.Latest &&
-                            existingEntry.entry.updatedAt >
-                                newEntry.updatedAt) ||
-                        method === ImportMethod.Keep
-                    ) {
-                        return existingEntry.entry;
-                    } else {
-                        return newEntry;
+                    if (!!existingEntry) {
+                        // Keep favorite status
+                        newEntry.favorite = existingEntry.entry.favorite;
+
+                        if (method === ImportMethod.Merge) {
+                            let newEntryInstance: { [key: string]: any } = {};
+
+                            Object.getOwnPropertyNames(newEntry).forEach(
+                                (value: string) => {
+                                    if (
+                                        newEntry.updatedAt >
+                                        existingEntry!.entry.updatedAt
+                                    ) {
+                                        if (
+                                            !!newEntry[
+                                                value as keyof LibraryEntry
+                                            ]
+                                        ) {
+                                            newEntryInstance[value] =
+                                                newEntry[
+                                                    value as keyof LibraryEntry
+                                                ];
+                                        } else {
+                                            newEntryInstance[value] =
+                                                existingEntry?.entry[
+                                                    value as keyof LibraryEntry
+                                                ];
+                                        }
+                                    } else {
+                                        if (
+                                            !!existingEntry?.entry[
+                                                value as keyof LibraryEntry
+                                            ]
+                                        ) {
+                                            newEntryInstance[value] =
+                                                existingEntry?.entry[
+                                                    value as keyof LibraryEntry
+                                                ];
+                                        } else {
+                                            newEntryInstance[value] =
+                                                newEntry[
+                                                    value as keyof LibraryEntry
+                                                ];
+                                        }
+                                    }
+                                }
+                            );
+
+                            newEntryInstance.mapping =
+                                existingEntry.entry.mapping;
+                            newEntry = newEntryInstance as LibraryEntry;
+                        } else {
+                            if (
+                                (method === ImportMethod.Latest &&
+                                    existingEntry.entry.updatedAt >
+                                        newEntry.updatedAt) ||
+                                method === ImportMethod.Keep
+                            ) {
+                                return existingEntry.entry;
+                            } else {
+                                return newEntry;
+                            }
+                        }
+                    }
+
+                    return newEntry;
+                })
+            );
+
+            if (!all && api.config.syncing?.dateSorted) {
+                for (const entry of newEntries) {
+                    if (lastEntry && entry.updatedAt < lastEntry.updatedAt) {
+                        return await db.library.bulkPut(newEntries);
                     }
                 }
             }
-
-            return newEntry;
-        });
+        }
 
         return await db.library.bulkPut(newEntries);
     }

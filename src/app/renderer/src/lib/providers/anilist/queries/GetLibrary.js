@@ -9,7 +9,7 @@ query Library($username: String, $type: MediaType, $page: Int) {
         pageInfo {
             hasNextPage
         }
-        mediaList(userName: $username, type: $type) {
+        mediaList(userName: $username, type: $type, sort: UPDATED_TIME_DESC) {
             id
             status
             score

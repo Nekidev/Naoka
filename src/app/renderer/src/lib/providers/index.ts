@@ -80,24 +80,20 @@ export class ProviderAPI {
         return media;
     }
 
-    async getLibrary(type: MediaType, account: ExternalAccount) {
-        const { media, mappings, entries } = await this.api.getLibrary(
+    async *getUserLibrary(type: MediaType, account: ExternalAccount) {
+        for await (const { media, mappings, entries } of this.api.getUserLibrary(
             type,
             account
-        );
+        )) {
+            (async () => {
+                await db.media.bulkPut(media);
+                for (const ms of mappings) {
+                    await updateMappings(ms);
+                }
+            })();
 
-        (async () => {
-            await db.media.bulkPut(media);
-            for (const ms of mappings) {
-                await updateMappings(ms);
-            }
-        })().then(() => {});
-
-        return {
-            media,
-            entries,
-            mappings,
-        };
+            yield { media, mappings, entries };
+        }
     }
 
     async getUser(account: ExternalAccount): Promise<UserData> {

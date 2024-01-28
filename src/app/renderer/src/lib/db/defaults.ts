@@ -13,5 +13,7 @@ export const defaultLibraryEntry: LibraryEntry = {
     finishDate: null,
     notes: "",
     mapping: "myanimelist:anime:1",
+    isPrivate: false,
     updatedAt: new Date(),
+    missedSyncs: [],
 }

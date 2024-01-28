@@ -1,5 +1,12 @@
 import Dexie, { Table } from "dexie";
-import { ExternalAccount, LibraryEntry, List, Mappings, Media, Review } from "./types";
+import {
+    ExternalAccount,
+    LibraryEntry,
+    List,
+    Mappings,
+    Media,
+    Review,
+} from "./types";
 
 export class NaokaDB extends Dexie {
     media!: Table<Media>;
@@ -20,11 +27,18 @@ export class NaokaDB extends Dexie {
             externalAccounts: "++id, provider",
         });
         this.version(2).stores({
-            reviews: "++id, mapping"
+            reviews: "++id, mapping",
+            library:
+                "&mapping, type, favorite, status, updatedAt, *missedSyncs",
+            externalAccounts: "++id, provider, *syncing",
+        }).upgrade((tx) => {
+            tx.table("library").toCollection().modify((entry: LibraryEntry) => {
+                entry["missedSyncs"] = [];
+                return entry;
+            });
         });
-        
+
         this.externalAccounts.mapToClass(ExternalAccount);
-        // this.reviews.mapToClass(Review);
     }
 }
 

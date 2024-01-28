@@ -186,7 +186,7 @@ function Account({ account }: { account: ExternalAccount }) {
                             <Button
                                 disabled={
                                     !account.isAuthed ||
-                                    api.config.syncing?.import?.mediaTypes
+                                    api.config.syncing?.mediaTypes
                                         .length === 0
                                 }
                                 onClick={(e: any) => {
@@ -203,7 +203,7 @@ function Account({ account }: { account: ExternalAccount }) {
                     </div>
                 </div>
             </div>
-            {api.config.syncing?.auth.type === "username" ? (
+            {api.config.syncing?.authType === "username" ? (
                 <ConnectAccountUsernameModal
                     isOpen={isConnectAccountModalOpen}
                     closeModal={() => setIsConnectAccountModalOpen(false)}
@@ -237,7 +237,7 @@ function Account({ account }: { account: ExternalAccount }) {
                                 label: "Type",
                                 required: true,
                                 options: [
-                                    ...(api.config.syncing?.import?.mediaTypes.includes(
+                                    ...(api.config.syncing?.mediaTypes.includes(
                                         "anime"
                                     )
                                         ? [
@@ -255,7 +255,7 @@ function Account({ account }: { account: ExternalAccount }) {
                                               },
                                           ]
                                         : []),
-                                    ...(api.config.syncing?.import?.mediaTypes.includes(
+                                    ...(api.config.syncing?.mediaTypes.includes(
                                         "manga"
                                     )
                                         ? [
