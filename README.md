@@ -40,11 +40,11 @@
 
 ### Not supported
 
-- (Planned) Automatic syncing with external sites.
+- ([#7](https://github.com/Nekidev/Naoka/issues/7)) Automatic syncing with external sites.
 - (Planned) Notifications when a new episode/chapter is released.
 - (Maybe in the future) Anime streaming and manga reading.
 - (Not planned) Illegal anime streaming.
-- (Planned) Linux and macOS versions.
+- ([#171](https://github.com/Nekidev/Naoka/issues/171)) Linux and macOS versions.
 - (Maybe in the future) See anime/manga information.
 
 ## Download
