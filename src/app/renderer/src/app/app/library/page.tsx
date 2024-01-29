@@ -89,7 +89,7 @@ export default function Library() {
                 if (mediaTypeFilters.length > 0) {
                     if (
                         (mediaTypeFilters.includes("favorites") &&
-                            !entry.favorite) ||
+                            !entry.isFavorite) ||
                         ((mediaTypeFilters.includes("anime") ||
                             mediaTypeFilters.includes("manga")) &&
                             !mediaTypeFilters.includes(entry.type))
@@ -528,7 +528,7 @@ function LibraryEntryRow({ entry }: { entry: LibraryEntryWithMedia }) {
                         </div>
                     )}
                 <Stars rating={entry.score ? entry.score / 20 : 0} />
-                {entry.favorite ? (
+                {entry.isFavorite ? (
                     <HeartIcon className="h-4 w-4 text-red-400 fill-red-400" />
                 ) : (
                     <HeartIcon className="h-4 w-4 transition text-zinc-800 group-hover:text-zinc-700 fill-zinc-800 group-hover:fill-zinc-700" />

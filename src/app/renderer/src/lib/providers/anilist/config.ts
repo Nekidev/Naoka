@@ -42,7 +42,7 @@ const config: Config = {
     syncing: {
         authType: "oauth",
         mediaTypes: ["anime", "manga"],
-        dateSorted: true
+        dateSorted: true,
     },
     search: {
         anime: {
@@ -295,7 +295,7 @@ const config: Config = {
     reviews: {
         validate(review: Review, media: Media) {
             return (
-                review.review.length >= 2200 &&
+                review.body.length >= 2200 &&
                 review.summary.length >= 20 &&
                 review.summary.length <= 120 &&
                 review.overallScore != null

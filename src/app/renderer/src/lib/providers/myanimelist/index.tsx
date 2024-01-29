@@ -1,6 +1,6 @@
 import { BaseProvider, Config } from "@/lib/providers/base";
 import { serializeURL } from "@/lib/utils";
-import { fetch } from "@tauri-apps/api/http";
+import { Body, fetch } from "@tauri-apps/api/http";
 import config from "./config";
 import {
     ExternalAccount,
@@ -314,7 +314,7 @@ export class MyAnimeList extends BaseProvider {
         entry: any,
         mapping: Mapping
     ): LibraryEntry {
-        return {
+        return new LibraryEntry({
             type: mapping.split(":", 2)[1] as MediaType,
             favorite: false,
             status: normalizeLibraryStatus(entry.status),
@@ -329,8 +329,8 @@ export class MyAnimeList extends BaseProvider {
             isPrivate: false,
             updatedAt: new Date(entry.updated_at),
             mapping,
-            missedSyncs: []
-        };
+            missedSyncs: [],
+        });
     }
 
     private async searchAnime(options: {
@@ -454,42 +454,56 @@ export class MyAnimeList extends BaseProvider {
         entries: LibraryEntry[];
         mappings: Mapping[][];
     }> {
-        let url = `https://api.myanimelist.net/v2/users/${encodeURIComponent(
-            account.user!.name!
-        )}/animelist?sort=list_updated_at&limit=1000&fields=list_status{status,score,num_episodes_watched,is_rewatching,start_date,finish_date,priority,num_times_rewatched,rewatch_value,tags,comments,updated_at},start_date,end_date,nsfw,genres,media_type,num_episodes,rating,average_episode_duration,alternative_titles`;
+        let page = 1;
 
-        const res = await fetch<any>(url, {
-            method: "GET",
-            headers: {
-                Authorization: `Bearer ${account.auth!.accessToken}`,
-            },
-        });
+        while (true) {
+            let url = `https://api.myanimelist.net/v2/users/${encodeURIComponent(
+                account.user!.name!
+            )}/animelist?sort=list_updated_at&limit=${
+                page * 1000
+            }&fields=list_status{status,score,num_episodes_watched,is_rewatching,start_date,finish_date,priority,num_times_rewatched,rewatch_value,tags,comments,updated_at},start_date,end_date,nsfw,genres,media_type,num_episodes,rating,average_episode_duration,alternative_titles`;
 
-        if (res.ok === false) {
-            throw Error("Failed to get anime list");
+            const res = await fetch<any>(url, {
+                method: "GET",
+                headers: {
+                    Authorization: `Bearer ${await this.accessToken(account)}`,
+                },
+            });
+
+            console.log(res.data);
+
+            if (res.ok === false) {
+                throw Error("Failed to get anime list");
+            }
+
+            let newMedia: Media[] = [];
+            let newMappings: Mapping[][] = [];
+            let newLibraryEntries: LibraryEntry[] = [];
+
+            for (const entry of res.data.data) {
+                let normalized = this.malAnimeToInternalValue(entry.node);
+                let libraryEntry = this.libraryEntryToInternalValue(
+                    entry.list_status,
+                    `myanimelist:anime:${entry.node.id.toString()}`
+                );
+
+                newMedia.push(normalized.media);
+                newMappings.push(normalized.mappings);
+                newLibraryEntries.push(libraryEntry);
+            }
+
+            yield {
+                media: newMedia,
+                mappings: newMappings,
+                entries: newLibraryEntries,
+            };
+
+            if (!res.data.pagination.next) {
+                break;
+            }
+
+            page++;
         }
-
-        let newMedia: Media[] = [];
-        let newMappings: Mapping[][] = [];
-        let newLibraryEntries: LibraryEntry[] = [];
-
-        for (const entry of res.data.data) {
-            let normalized = this.malAnimeToInternalValue(entry.node);
-            let libraryEntry = this.libraryEntryToInternalValue(
-                entry.list_status,
-                `myanimelist:anime:${entry.node.id.toString()}`
-            );
-
-            newMedia.push(normalized.media);
-            newMappings.push(normalized.mappings);
-            newLibraryEntries.push(libraryEntry);
-        }
-
-        yield {
-            media: newMedia,
-            mappings: newMappings,
-            entries: newLibraryEntries,
-        };
     }
 
     private async *getMangaList(account: ExternalAccount): AsyncGenerator<{
@@ -497,42 +511,52 @@ export class MyAnimeList extends BaseProvider {
         mappings: Mapping[][];
         entries: LibraryEntry[];
     }> {
-        let url = `https://api.myanimelist.net/v2/users/${encodeURIComponent(
-            account.user!.name!
-        )}/mangalist?sort=list_updated_at&limit=1000&fields=list_status{status,score,num_chapters_read,num_volumes_read,is_rereading,start_date,finish_date,priority,num_times_reread,reread_value,tags,comments,updated_at},start_date,end_date,nsfw,genres,media_type,num_chapters,num_volumes,alternative_titles`;
+        let page = 1;
 
-        const res = await fetch<any>(url, {
-            method: "GET",
-            headers: {
-                Authorization: `Bearer ${account.auth!.accessToken}`,
-            },
-        });
+        while (true) {
+            let url = `https://api.myanimelist.net/v2/users/${encodeURIComponent(
+                account.user!.name!
+            )}/mangalist?sort=list_updated_at&limit=${
+                page * 1000
+            }&fields=list_status{status,score,num_chapters_read,num_volumes_read,is_rereading,start_date,finish_date,priority,num_times_reread,reread_value,tags,comments,updated_at},start_date,end_date,nsfw,genres,media_type,num_chapters,num_volumes,alternative_titles`;
 
-        if (res.ok === false) {
-            throw Error("Failed to get manga list");
+            const res = await fetch<any>(url, {
+                method: "GET",
+                headers: {
+                    Authorization: `Bearer ${await this.accessToken(account)}`,
+                },
+            });
+
+            if (res.ok === false) {
+                throw Error("Failed to get manga list");
+            }
+
+            let newMedia: Media[] = [];
+            let newMappings: Mapping[][] = [];
+            let newLibraryEntries: LibraryEntry[] = [];
+
+            for (const entry of res.data.data) {
+                let normalized = this.malMangaToInternalValue(entry.node);
+                let libraryEntry = this.libraryEntryToInternalValue(
+                    entry.list_status,
+                    `myanimelist:manga:${entry.node.id.toString()}`
+                );
+
+                newMedia.push(normalized.media);
+                newMappings.push(normalized.mappings);
+                newLibraryEntries.push(libraryEntry);
+            }
+
+            yield {
+                media: newMedia,
+                mappings: newMappings,
+                entries: newLibraryEntries,
+            };
+
+            if (!res.data.paging.next) break;
+
+            page++;
         }
-
-        let newMedia: Media[] = [];
-        let newMappings: Mapping[][] = [];
-        let newLibraryEntries: LibraryEntry[] = [];
-
-        for (const entry of res.data.data) {
-            let normalized = this.malMangaToInternalValue(entry.node);
-            let libraryEntry = this.libraryEntryToInternalValue(
-                entry.list_status,
-                `myanimelist:manga:${entry.node.id.toString()}`
-            );
-
-            newMedia.push(normalized.media);
-            newMappings.push(normalized.mappings);
-            newLibraryEntries.push(libraryEntry);
-        }
-
-        yield {
-            media: newMedia,
-            mappings: newMappings,
-            entries: newLibraryEntries,
-        };
     }
 
     async search(
@@ -604,6 +628,45 @@ export class MyAnimeList extends BaseProvider {
             name: data.username,
             imageUrl: data.images.webp.image_url,
         };
+    }
+
+    private async accessToken(account: ExternalAccount): Promise<string> {
+        if (!account.auth) throw Error("Account is not logged in");
+
+        if (
+            account.auth!.accessTokenExpiresAt!.getTime() < new Date().getTime()
+        ) {
+            return account.auth.accessToken!;
+        }
+
+        const res = await fetch<{
+            access_token?: string;
+        }>("https://naoka.nyeki.dev/api/auth/oauth2/myanimelist/refresh", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: Body.json({
+                refresh_token: account.auth!.refreshToken,
+            }),
+        });
+
+        if (!res.ok) throw Error("Could not refresh token.");
+        if (!res.data.access_token) {
+            delete account.auth;
+            delete account.user;
+            await db.externalAccounts.put(account);
+            throw Error("Refresh token has expired.");
+        }
+
+        account.auth.accessToken = res.data.access_token;
+        account.auth.accessTokenExpiresAt = new Date(
+            new Date().getTime() + 1000 * 60 * 60
+        );
+
+        await db.externalAccounts.put(account);
+
+        return res.data.access_token;
     }
 
     async authorize(account: ExternalAccount, { code }: { code: string }) {

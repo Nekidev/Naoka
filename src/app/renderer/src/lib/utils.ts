@@ -1,4 +1,8 @@
 /**
+ * Some utility functions.
+ */
+
+/**
  * Concatenates an array of strings into a single string.
  *
  * @param {string[]} classes - An array of strings representing CSS classes.

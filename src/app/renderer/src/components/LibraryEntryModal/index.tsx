@@ -15,7 +15,6 @@ import {
 
 import { db } from "@/lib/db";
 import React from "react";
-import { defaultLibraryEntry } from "@/lib/db/defaults";
 import ImageModal from "../ImageModal";
 import Modal from "../Modal";
 import AddToListModal from "../AddToListModal";
@@ -59,13 +58,12 @@ function FormModal({
     const libraryEntry: LibraryEntry | undefined = useLiveQuery(
         () => db.library.get({ mapping }),
         [mapping],
-        {
-            ...defaultLibraryEntry,
+        new LibraryEntry({
             type: mediaType,
             mapping: mapping,
-        }
+        })
     );
-    const isFavorite = libraryEntry?.favorite || false;
+    const isFavorite = libraryEntry?.isFavorite || false;
 
     const media = useMedia(mapping);
 
@@ -87,7 +85,7 @@ function FormModal({
     function save(overrides = {}) {
         const formData = new FormData(formRef.current!);
 
-        const newLibraryEntry: LibraryEntry = {
+        const newLibraryEntry = new LibraryEntry({
             type: mediaType,
             favorite: isFavorite,
             status: formData.get("status") as LibraryStatus,
@@ -109,7 +107,7 @@ function FormModal({
             mapping: mapping,
             updatedAt: new Date(),
             ...overrides,
-        };
+        });
 
         db.library
             .put(newLibraryEntry)
@@ -161,12 +159,14 @@ function FormModal({
                                         .then((updated) => {
                                             if (!updated) {
                                                 db.library
-                                                    .add({
-                                                        ...defaultLibraryEntry,
-                                                        type: mediaType,
-                                                        mapping: mapping,
-                                                        favorite: !isFavorite,
-                                                    })
+                                                    .add(
+                                                        new LibraryEntry({
+                                                            type: mediaType,
+                                                            mapping: mapping,
+                                                            favorite:
+                                                                !isFavorite,
+                                                        })
+                                                    )
                                                     .then((value) => {});
                                             }
                                         });
@@ -174,7 +174,7 @@ function FormModal({
                             >
                                 <HeartIcon
                                     className={`h-4 w-4 stroke-2 ${
-                                        libraryEntry?.favorite
+                                        libraryEntry?.isFavorite
                                             ? "text-red-400 fill-red-400"
                                             : ""
                                     }`}

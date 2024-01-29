@@ -2,6 +2,8 @@ import { db } from "../db";
 import { BaseProvider } from "./base";
 import {
     ExternalAccount,
+    LibraryEntry,
+    Mapping,
     Media,
     MediaRating,
     MediaType,
@@ -81,10 +83,11 @@ export class ProviderAPI {
     }
 
     async *getUserLibrary(type: MediaType, account: ExternalAccount) {
-        for await (const { media, mappings, entries } of this.api.getUserLibrary(
-            type,
-            account
-        )) {
+        for await (const {
+            media,
+            mappings,
+            entries,
+        } of this.api.getUserLibrary(type, account)) {
             (async () => {
                 await db.media.bulkPut(media);
                 for (const ms of mappings) {
@@ -94,6 +97,30 @@ export class ProviderAPI {
 
             yield { media, mappings, entries };
         }
+    }
+
+    async getLibraryEntry(
+        account: ExternalAccount,
+        entry: LibraryEntry,
+        mappings: Mapping[]
+    ) {
+        return this.api.getLibraryEntry(account, entry, mappings);
+    }
+
+    async updateLibraryEntry(
+        account: ExternalAccount,
+        entry: LibraryEntry,
+        mappings: Mapping[]
+    ) {
+        return this.api.updateLibraryEntry(account, entry, mappings);
+    }
+
+    async deleteLibraryEntry(
+        account: ExternalAccount,
+        entry: LibraryEntry,
+        mappings: Mapping[]
+    ) {
+        return this.api.deleteLibraryEntry(account, entry, mappings);
     }
 
     async getUser(account: ExternalAccount): Promise<UserData> {

@@ -1,3 +1,8 @@
+/**
+ * Some react hooks to manage some specific settings that must dinamically
+ * update things in the app.
+ */
+
 import { useLocalStorage } from "@uidotdev/usehooks";
 import { Dispatch, SetStateAction } from "react";
 import { Media } from "./db/types";
@@ -26,9 +31,9 @@ export function useTitleLanguage() {
 /**
  * Retrieves the title of a media in the specified or otherwise preferred language.
  *
- * @param {Media} media - The media object.
- * @param {("english" | "romaji" | "native")=} lang - The language to retrieve the title in. Default is the user's preferred title language.
- * @return {string | undefined} - The title of the media in the specified language, or undefined if the title is not available.
+ * @param {Media} media The media object.
+ * @param {("english" | "romaji" | "native")} lang The language to retrieve the title in. Default is the user's preferred title language.
+ * @return {string | undefined} The title of the media in the specified language, or undefined if the title is not available.
  */
 export function getMediaTitle(media: Media, lang?: "english" | "romaji" | "native"): string | undefined {
     if (!lang) {

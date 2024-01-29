@@ -53,8 +53,8 @@ export async function updateMappings(
 /**
  * Checks if the given mapping is from the specified provider.
  *
- * @param {Mapping} mapping - The mapping to check.
- * @param {string} provider - The provider to compare against.
+ * @param {Mapping} mapping The mapping to check.
+ * @param {string} provider The provider to compare against.
  * @return {boolean} True if the mapping is from the provider, false otherwise.
  */
 export function isMappingFromProvider(
@@ -67,8 +67,8 @@ export function isMappingFromProvider(
 /**
  * Retrieves media data based on the provided mapping and optional provider.
  *
- * @param {Mapping} mapping - The mapping to retrieve media data for.
- * @param {Provider} provider - The optional provider to filter the media data by.
+ * @param {Mapping} mapping The mapping to retrieve media data for.
+ * @param {Provider} provider The optional provider to filter the media data by.
  * @return {Media | undefined} The retrieved media data.
  */
 export function useMedia(
@@ -86,8 +86,8 @@ export function useMedia(
  * Retrieves the media from the specified provider from the database
  * based on the given mapping and provider.
  *
- * @param {Mapping} mapping - The mapping object.
- * @param {Provider} provider - The provider object.
+ * @param {Mapping} mapping The mapping object.
+ * @param {Provider} provider The provider object.
  * @return {Promise<Media>} The media object.
  */
 export async function getMedia(mapping: Mapping, provider: Provider) {
@@ -112,9 +112,9 @@ export async function getMedia(mapping: Mapping, provider: Provider) {
 /**
  * Retrieves media in bulk based on the provided mappings and provider.
  *
- * @param {Mapping[]} mappings - The array of mappings to filter media.
- * @param {Provider} provider - The provider to retrieve media from.
- * @return {Promise<Media[]>} - Returns a promise that resolves to an array of media objects.
+ * @param {Mapping[]} mappings The array of mappings to filter media.
+ * @param {Provider} provider The provider to retrieve media from.
+ * @return {Promise<Media[]>} Returns a promise that resolves to an array of media objects.
  */
 export async function getBulkMedia(mappings: Mapping[], provider: Provider): Promise<(Media | undefined)[]> {
     let allMappings = (

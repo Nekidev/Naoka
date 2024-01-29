@@ -1,3 +1,7 @@
+/**
+ * React hooks and functions to manage app messages and translations.
+ */
+
 import React from "react";
 import { useLocalStorage, usePreferredLanguage } from "@uidotdev/usehooks";
 import defaultMessages from "./translations/en-US";

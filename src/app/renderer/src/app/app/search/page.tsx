@@ -683,7 +683,7 @@ function MediaRow({ media }: { media: Media }) {
                                             ...defaultLibraryEntry,
                                             type: media.type,
                                             mapping: media.mapping,
-                                            favorite: true,
+                                            isFavorite: true,
                                         })
                                         .then((value) => {});
                                 }

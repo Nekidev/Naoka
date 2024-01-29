@@ -165,6 +165,22 @@ export class BaseProvider {
     }
 
     /**
+     * Retrieves a library entry for the given account and entry, using the provided mappings.
+     *
+     * @param {ExternalAccount} account - the external account to retrieve the library entry for
+     * @param {LibraryEntry} entry - the library entry to retrieve
+     * @param {Mapping[]} mappings - the mappings to use for retrieval
+     * @return {Promise<LibraryEntry>} a promise that resolves to the retrieved library entry
+     */
+    async getLibraryEntry(
+        account: ExternalAccount,
+        entry: LibraryEntry,
+        mappings: Mapping[]
+    ): Promise<LibraryEntry> {
+        throw Error("Not implemented");
+    }
+
+    /**
      * Updates a library entry.
      *
      * @param {MediaType} type - the type of media
@@ -173,7 +189,22 @@ export class BaseProvider {
      * @return {Promise<void>} a promise that resolves once the update is complete
      */
     async updateLibraryEntry(
-        type: MediaType,
+        account: ExternalAccount,
+        entry: LibraryEntry,
+        mappings: Mapping[],
+    ): Promise<void> {
+        throw Error("Not implemented");
+    }
+
+    /**
+     * Deletes a library entry for a given account.
+     *
+     * @param {ExternalAccount} account - the external account
+     * @param {LibraryEntry} entry - the library entry to delete
+     * @return {Promise<void>} a promise that resolves with no value
+     */
+    async deleteLibraryEntry(
+        account: ExternalAccount,
         entry: LibraryEntry,
         mappings: Mapping[]
     ): Promise<void> {

@@ -360,7 +360,7 @@ export class AniList extends BaseProvider {
 
                 newLibraryEntries.push({
                     type: media.type.toLowerCase() as MediaType,
-                    favorite: false,
+                    isFavorite: false,
                     status: normalizeLibraryStatus(entry.status),
                     score: Math.min(entry.score * scoreMultiplier, 100),
                     restarts: entry.repeats,
@@ -381,7 +381,7 @@ export class AniList extends BaseProvider {
                     isPrivate: entry.private,
                     mapping: media.mapping,
                     updatedAt: new Date(entry.updatedAt),
-                    missedSyncs: []
+                    missedSyncs: [],
                 });
             }
 

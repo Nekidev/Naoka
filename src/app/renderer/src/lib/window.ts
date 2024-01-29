@@ -1,3 +1,7 @@
+/**
+ * App window management functions and React hooks.
+ */
+
 import React from "react";
 
 import { WebviewWindow } from "@tauri-apps/api/window";
