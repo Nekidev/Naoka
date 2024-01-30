@@ -39,7 +39,7 @@ In case it finds two rows (with different mappings, but the recently fetched dat
 
 #### But why?
 
-Imagine you want to import your lists from MAL and AniList at the same time. If the app didn't have this system working in the background, you'd end with duplicate library entries in case that you have tracked the same media in both accounts. The mappings table helps to prevent this and it'd be extremely rare for this to happen (it may happen when media haven't got much information in the providers for the app to be able to link them together).
+Imagine you want to import your lists from MAL and AniList at the same time. If the app didn't have this system working in the background, you'd end with duplicate library entries in case that you have tracked the same media in both accounts. The mappings table helps to prevent this and it'd be extremely rare for this to happen (it may happen when media haven't got much information in the providers for the app to be able to link them together). This is still being worked on to reduce even more the possibility of not finding linked resources and ending up with duplicated library entries (see issue #52).
 
 The other use case is when you want to sync your library with external accounts. It may happen that you import your list from AL but want to sync it with MAL, in which case the app would need to know what's the media ID of each AL media in your library in MAL. The mappings table does this job, since it can link separate resources together. That's how the app can sync your lists and transfer them between accounts.
 
