@@ -4,6 +4,7 @@ import { type NextRequest } from "next/server";
 import { encrypt } from "@/lib/crypto";
 
 export const dynamic = "force-dynamic";
+export const fetchCache = 'force-no-store';
 
 export async function GET(request: NextRequest) {
     const res = await fetch("https://anilist.co/api/v2/oauth/token", {

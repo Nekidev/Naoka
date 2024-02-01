@@ -90,7 +90,7 @@ function FormModal(props: Options) {
             ...(review || {
                 mapping: props.mapping!,
             }),
-            accounts: [],
+            accountIds: [],
             isPrivate: !!values.isPrivate,
             isSpoiler: !!values.isSpoiler,
             isPublished: false,
@@ -103,7 +103,7 @@ function FormModal(props: Options) {
             writingScore: numberOrNull(values.writingScore),
             engagementScore: numberOrNull(values.engagementScore),
             overallScore: numberOrNull(values.overallScore),
-            review: values.review,
+            body: values.review,
             summary: values.summary || "",
             recommendation:
                 values.recommendation === "null"
@@ -161,7 +161,7 @@ function FormModal(props: Options) {
                     </div>
                     <div className="p-4 flex flex-col gap-4">
                         <ReviewEditor
-                            defaultValue={review ? review.review : ""}
+                            defaultValue={review ? review.body : ""}
                             defaultIsSpoiler={!!(review && review.isSpoiler)}
                         />
                         <div className="flex flex-row items-center gap-4">

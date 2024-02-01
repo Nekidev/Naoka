@@ -1,3 +1,7 @@
+/**
+ * Some types to programatically create and reuse forms.
+ */
+
 export enum InputType {
     Select,
     Text,

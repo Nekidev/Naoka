@@ -4,7 +4,7 @@ import { Header, Separator, Setting } from "../components";
 import Tooltip from "@/components/Tooltip";
 import { db } from "@/lib/db";
 import { useLiveQuery } from "dexie-react-hooks";
-import { XMarkIcon } from "@heroicons/react/24/outline";
+import { ArrowPathIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import FormModal from "@/components/FormModal";
 import React from "react";
 import { CheckCircleIcon } from "@heroicons/react/20/solid";
@@ -94,7 +94,7 @@ function ProviderButton({
             <button
                 onClick={async () => {
                     await db.externalAccounts.add(
-                        ExternalAccount.create({
+                        new ExternalAccount({
                             provider: code,
                         })
                     );
@@ -182,12 +182,20 @@ function Account({ account }: { account: ExternalAccount }) {
                                     : m("settings_connections_account_connect")}
                             </Button>
                         </div>
-                        <div className="flex flex-row items-center gap-2">
+                        <div className="flex flex-row items-stretch gap-2">
+                            <button
+                                className="leading-none text-sm rounded bg-zinc-700/50 hover:bg-zinc-600/50 transition text-zinc-300 disabled:cursor-default disabled:opacity-50 disabled:hover:bg-zinc-700/50 flex flex-col items-center justify-center w-8"
+                                disabled={
+                                    !account.isAuthed ||
+                                    api.config.syncing?.mediaTypes.length === 0
+                                }
+                            >
+                                <ArrowPathIcon className="h-4 w-4" />
+                            </button>
                             <Button
                                 disabled={
                                     !account.isAuthed ||
-                                    api.config.syncing?.import?.mediaTypes
-                                        .length === 0
+                                    api.config.syncing?.mediaTypes.length === 0
                                 }
                                 onClick={(e: any) => {
                                     if (e.target.disabled) return;
@@ -196,14 +204,11 @@ function Account({ account }: { account: ExternalAccount }) {
                             >
                                 {m("settings_connections_account_import")}
                             </Button>
-                            <Button disabled={true}>
-                                {m("settings_connections_account_export")}
-                            </Button>
                         </div>
                     </div>
                 </div>
             </div>
-            {api.config.syncing?.auth.type === "username" ? (
+            {api.config.syncing?.authType === "username" ? (
                 <ConnectAccountUsernameModal
                     isOpen={isConnectAccountModalOpen}
                     closeModal={() => setIsConnectAccountModalOpen(false)}
@@ -237,7 +242,7 @@ function Account({ account }: { account: ExternalAccount }) {
                                 label: "Type",
                                 required: true,
                                 options: [
-                                    ...(api.config.syncing?.import?.mediaTypes.includes(
+                                    ...(api.config.syncing?.mediaTypes.includes(
                                         "anime"
                                     )
                                         ? [
@@ -255,7 +260,7 @@ function Account({ account }: { account: ExternalAccount }) {
                                               },
                                           ]
                                         : []),
-                                    ...(api.config.syncing?.import?.mediaTypes.includes(
+                                    ...(api.config.syncing?.mediaTypes.includes(
                                         "manga"
                                     )
                                         ? [
@@ -468,7 +473,6 @@ function ConnectAccountOAuthModal({
                             type: InputType.Text,
                             name: "code",
                             label: m("settings_connections_connect_oauth_code"),
-                            defaultValue: account.auth?.username || "",
                         },
                     ],
                 },

@@ -5,6 +5,7 @@ import { encrypt } from "@/lib/crypto";
 import { encodeGetParams } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
+export const fetchCache = "force-no-store";
 
 export async function GET(request: NextRequest) {
     const cookieStore = cookies();

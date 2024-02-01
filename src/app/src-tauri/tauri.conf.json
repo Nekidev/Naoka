@@ -22,7 +22,8 @@
                 "scope": [
                     "https://graphql.anilist.co/*",
                     "https://api.myanimelist.net/v2/*",
-                    "https://api.jikan.moe/*"
+                    "https://api.jikan.moe/*",
+                    "https://*.nyeki.dev/*"
                 ]
             },
             "window": {

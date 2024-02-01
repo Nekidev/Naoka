@@ -4,12 +4,9 @@ import { Config } from "../base";
 const config: Config = {
     mediaTypes: ["anime", "manga"],
     syncing: {
-        auth: {
-            type: "oauth",
-        },
-        import: {
-            mediaTypes: ["anime", "manga"],
-        },
+        mediaTypes: ["anime", "manga"],
+        authType: "oauth",
+        dateSorted: true,
     },
     search: {
         anime: {

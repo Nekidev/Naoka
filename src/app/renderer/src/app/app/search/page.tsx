@@ -16,11 +16,11 @@ import { cn } from "@/lib/utils";
 import styles from "./styles.module.css";
 import { useLiveQuery } from "dexie-react-hooks";
 import { db } from "@/lib/db";
-import { defaultLibraryEntry } from "@/lib/db/defaults";
 import Chip from "@/components/Chip";
 import TextInput from "@/components/TextInput";
 import { ProviderAPI } from "@/lib/providers";
 import {
+    LibraryEntry,
     LibraryStatus,
     Mapping,
     Media,
@@ -124,7 +124,7 @@ export default function Search() {
         });
 
         try {
-            const results = await api.search(searchType, {
+            const results = await api.getSearch(searchType, {
                 query,
                 sortBy: sortByRef.current?.value || null,
                 ...filters,
@@ -463,11 +463,10 @@ function MediaCard({ media }: { media: Media }) {
     const libraryEntry = useLiveQuery(
         () => db.library.get({ mapping: media.mapping }),
         [media],
-        {
-            ...defaultLibraryEntry,
+        new LibraryEntry({
             type: media.type,
             mapping: media.mapping,
-        }
+        })
     );
 
     const { open: openLibraryEntryModal } = React.useContext(
@@ -492,7 +491,7 @@ function MediaCard({ media }: { media: Media }) {
                     className="w-full aspect-[2/3] object-cover object-center rounded"
                 />
                 <div className="opacity-0 group-hover:opacity-100 absolute top-0 bottom-0 left-0 right-0 bg-zinc-950/30 transition-all"></div>
-                {libraryEntry?.favorite && (
+                {libraryEntry?.isFavorite && (
                     <button className="rounded-full bg-zinc-950 absolute top-1 left-1 p-1">
                         <HeartIcon className="h-3 w-3 text-red-400 fill-red-400" />
                     </button>
@@ -565,11 +564,10 @@ function MediaRow({ media }: { media: Media }) {
     const libraryEntry = useLiveQuery(
         () => db.library.get({ mapping: media.mapping }),
         [media],
-        {
-            ...defaultLibraryEntry,
+        new LibraryEntry({
             type: media.type,
             mapping: media.mapping,
-        }
+        })
     );
 
     return (
@@ -637,13 +635,14 @@ function MediaRow({ media }: { media: Media }) {
                                 })
                                 .then((updated) => {
                                     if (!updated) {
-                                        db.library.add({
-                                            ...defaultLibraryEntry,
-                                            type: media.type,
-                                            mapping: media.mapping,
-                                            status: e.target
-                                                .value as LibraryStatus,
-                                        });
+                                        db.library.add(
+                                            new LibraryEntry({
+                                                type: media.type,
+                                                mapping: media.mapping,
+                                                status: e.target
+                                                    .value as LibraryStatus,
+                                            })
+                                        );
                                     }
                                 });
                         }}
@@ -674,17 +673,18 @@ function MediaRow({ media }: { media: Media }) {
                     onClick={() => {
                         db.library
                             .update(media.mapping, {
-                                favorite: !libraryEntry?.favorite,
+                                favorite: !libraryEntry?.isFavorite,
                             })
                             .then((updated) => {
                                 if (!updated) {
                                     db.library
-                                        .add({
-                                            ...defaultLibraryEntry,
-                                            type: media.type,
-                                            mapping: media.mapping,
-                                            favorite: true,
-                                        })
+                                        .add(
+                                            new LibraryEntry({
+                                                type: media.type,
+                                                mapping: media.mapping,
+                                                isFavorite: true,
+                                            })
+                                        )
                                         .then((value) => {});
                                 }
                             });
@@ -692,7 +692,7 @@ function MediaRow({ media }: { media: Media }) {
                 >
                     <HeartIcon
                         className={`w-4 h-4 stroke-2 ${
-                            libraryEntry?.favorite
+                            libraryEntry?.isFavorite
                                 ? "text-red-400 fill-red-400"
                                 : ""
                         }`}

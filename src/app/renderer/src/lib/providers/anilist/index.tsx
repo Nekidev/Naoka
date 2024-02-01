@@ -1,8 +1,7 @@
-import userQuery from "./queries/User";
-import mediaQuery from "./queries/Media";
-import searchQuery from "./queries/Search";
-import viewerQuery from "./queries/Viewer";
-import libraryQuery from "./queries/Library";
+import mediaQuery from "./queries/GetMedia";
+import searchQuery from "./queries/GetSearch";
+import viewerQuery from "./queries/GetViewer";
+import libraryQuery from "./queries/GetLibrary";
 import config from "./config";
 import { BaseProvider } from "../base";
 import {
@@ -152,7 +151,7 @@ export class AniList extends BaseProvider {
         };
     }
 
-    async search(
+    async getSearch(
         type: MediaType,
         options: { [key: string]: any }
     ): Promise<{
@@ -264,18 +263,16 @@ export class AniList extends BaseProvider {
 
     async getUser(account: ExternalAccount): Promise<UserData> {
         const {
-            data: { User: data },
+            data: { Viewer: data },
         } = await fetch("https://graphql.anilist.co", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
                 Accept: "application/json",
+                Authorization: `Bearer ${account.auth!.accessToken!}`,
             },
             body: JSON.stringify({
-                query: userQuery,
-                variables: {
-                    username: account.auth!.username!,
-                },
+                query: viewerQuery,
             }),
         }).then((res) => res.json());
 
@@ -286,10 +283,10 @@ export class AniList extends BaseProvider {
         };
     }
 
-    async getLibrary(
+    async *getUserLibrary(
         type: MediaType,
         account: ExternalAccount
-    ): Promise<{
+    ): AsyncGenerator<{
         media: Media[];
         mappings: Mapping[][];
         entries: LibraryEntry[];
@@ -297,11 +294,11 @@ export class AniList extends BaseProvider {
         let hasNextPage = true;
         let page = 1;
 
-        let newMedia: Media[] = [];
-        let newMappings: Mapping[][] = [];
-        let newLibraryEntries: LibraryEntry[] = [];
-
         while (hasNextPage) {
+            let newMedia: Media[] = [];
+            let newMappings: Mapping[][] = [];
+            let newLibraryEntries: LibraryEntry[] = [];
+
             const {
                 data: {
                     User: {
@@ -314,11 +311,12 @@ export class AniList extends BaseProvider {
                 headers: {
                     "Content-Type": "application/json",
                     Accept: "application/json",
+                    Authorization: `Bearer ${account.auth!.accessToken!}`,
                 },
                 body: JSON.stringify({
                     query: libraryQuery,
                     variables: {
-                        username: account.auth!.username!,
+                        username: account.user!.name!,
                         type: type.toUpperCase(),
                         page,
                     },
@@ -360,38 +358,40 @@ export class AniList extends BaseProvider {
                 newMedia.push(media);
                 newMappings.push(mappings);
 
-                newLibraryEntries.push({
-                    type: media.type.toLowerCase() as MediaType,
-                    favorite: false,
-                    status: normalizeLibraryStatus(entry.status),
-                    score: Math.min(entry.score * scoreMultiplier, 100),
-                    restarts: entry.repeats,
-                    startDate: entry.startDate
-                        ? new Date(
-                              `${entry.startDate.year}-${entry.startDate.month}-${entry.startDate.day}`
-                          )
-                        : null,
-                    finishDate: entry.endDate
-                        ? new Date(
-                              `${entry.endDate.year}-${entry.endDate.month}-${entry.endDate.day}`
-                          )
-                        : null,
-                    episodeProgress: entry.progress,
-                    chapterProgress: entry.progress,
-                    volumeProgress: entry.progressVolumes,
-                    notes: entry.notes,
-                    isPrivate: entry.private,
-                    mapping: media.mapping,
-                    updatedAt: new Date(entry.updatedAt),
-                });
+                newLibraryEntries.push(
+                    new LibraryEntry({
+                        type: media.type.toLowerCase() as MediaType,
+                        isFavorite: false,
+                        status: normalizeLibraryStatus(entry.status),
+                        score: Math.min(entry.score * scoreMultiplier, 100),
+                        restarts: entry.repeats,
+                        startDate: entry.startDate
+                            ? new Date(
+                                  `${entry.startDate.year}-${entry.startDate.month}-${entry.startDate.day}`
+                              )
+                            : null,
+                        finishDate: entry.endDate
+                            ? new Date(
+                                  `${entry.endDate.year}-${entry.endDate.month}-${entry.endDate.day}`
+                              )
+                            : null,
+                        episodeProgress: entry.progress,
+                        chapterProgress: entry.progress,
+                        volumeProgress: entry.progressVolumes,
+                        notes: entry.notes,
+                        isPrivate: entry.private,
+                        mapping: media.mapping,
+                        updatedAt: new Date(entry.updatedAt),
+                    })
+                );
             }
-        }
 
-        return {
-            media: newMedia,
-            mappings: newMappings,
-            entries: newLibraryEntries,
-        };
+            yield {
+                media: newMedia,
+                mappings: newMappings,
+                entries: newLibraryEntries,
+            };
+        }
     }
 
     async authorize(account: ExternalAccount, { code }: { code: string }) {
@@ -429,6 +429,7 @@ export class AniList extends BaseProvider {
         if (!res.ok) throw Error("Could not login");
 
         account.user = await this.getUser(account);
+        account.auth.username = account.user.name;
 
         await db.externalAccounts.update(account.id!, account);
     }

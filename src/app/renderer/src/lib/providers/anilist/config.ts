@@ -40,12 +40,9 @@ const sortBy = [
 const config: Config = {
     mediaTypes: ["anime", "manga"],
     syncing: {
-        auth: {
-            type: "oauth",
-        },
-        import: {
-            mediaTypes: ["anime", "manga"],
-        },
+        authType: "oauth",
+        mediaTypes: ["anime", "manga"],
+        dateSorted: true,
     },
     search: {
         anime: {
@@ -296,9 +293,9 @@ const config: Config = {
         },
     },
     reviews: {
-        validator(review: Review, media: Media) {
+        validate(review: Review, media: Media) {
             return (
-                review.review.length >= 2200 &&
+                review.body.length >= 2200 &&
                 review.summary.length >= 20 &&
                 review.summary.length <= 120 &&
                 review.overallScore != null

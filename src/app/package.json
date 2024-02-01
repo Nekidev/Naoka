@@ -25,7 +25,6 @@
         "@heroicons/react": "^2.0.18",
         "@tauri-apps/api": "^1.5.3",
         "@uidotdev/usehooks": "^2.4.1",
-        "dataclass": "^2.1.1",
         "dexie": "^3.2.4",
         "dexie-react-hooks": "^1.1.7",
         "framer-motion": "^10.16.5",
