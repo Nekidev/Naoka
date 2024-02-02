@@ -18,8 +18,8 @@ interface SearchConfig {
 
     // Sort options
     sortBy?: {
-        label: string;
-        value: string;
+        label: string; // Human-readable label
+        value: string; // Value passed to the `BaseProvider.search` method
     }[];
 
     // Filter options
