@@ -154,7 +154,7 @@ function Account({ account }: { account: ExternalAccount }) {
                         />
                         <div className="text-zinc-300">
                             {account.user?.name ||
-                                account.auth?.username ||
+                                account.auth?.login ||
                                 api.name}
                         </div>
                     </div>
@@ -411,7 +411,7 @@ function ConnectAccountUsernameModal({
                             label: m(
                                 "settings_connections_connect_username_username"
                             ),
-                            defaultValue: account.auth?.username || "",
+                            defaultValue: account.auth?.login || "",
                         },
                     ],
                 },

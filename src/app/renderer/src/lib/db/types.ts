@@ -152,21 +152,39 @@ export interface Mappings {
 }
 
 export class LibraryEntry extends Dataclass {
-    // The type of the media
+    /**
+     * The type of the media
+     */
     type!: MediaType;
 
-    // Is it favorited?
+    /**
+     * Is it favorited?
+     */
     isFavorite: boolean = false;
 
-    // The status of the library entry
+    /**
+     * The status of the library entry
+     */
     status: LibraryStatus = LibraryStatus.NotStarted;
 
-    // 0-100. Other rating formats need to be normalized to this range
+    /**
+     * 0-100. Other rating formats need to be normalized to this range
+     */
     score: number | null = null;
 
-    // The progress of the media
+    /**
+     * The progress of the media
+     */
     episodeProgress?: number;
+
+    /**
+     * The progress of the media
+     */
     chapterProgress?: number;
+
+    /**
+     * The progress of the media
+     */
     volumeProgress?: number;
 
     /**
@@ -175,14 +193,24 @@ export class LibraryEntry extends Dataclass {
      */
     restarts: number = 0;
 
-    // Dates when the user started and finished watching the series
+    /**
+     * Date when the user started reading/watching/playing the media
+     */
     startDate: Date | null = null;
+
+    /**
+     * Date when the user finished reading/watching/playing the media
+     */
     finishDate: Date | null = null;
 
-    // Personal private (?) notes about the series. Not a review
+    /**
+     * Personal private (?) notes about the series. Not a review
+     */
     notes: string = "";
 
-    // Should this entry be hidden from the public?
+    /**
+     * Should this entry be hidden from the public?
+     */
     isPrivate: boolean = false;
 
     /**
@@ -192,7 +220,9 @@ export class LibraryEntry extends Dataclass {
      */
     mapping!: Mapping;
 
-    // Last time this entry was updated
+    /**
+     * Last time this entry was updated
+     */
     updatedAt!: Date;
 
     /**
@@ -210,13 +240,19 @@ export class LibraryEntry extends Dataclass {
      * retried later.
      */
     missedSyncs: {
-        // The account ID of the account that missed the sync
+        /**
+         * The account ID of the account that missed the sync
+         */
         accountId: number;
 
-        // The type of missed sync
+        /**
+         * The type of missed sync
+         */
         type: "update" | "removal";
 
-        // The date and time the missed sync happened
+        /**
+         * The date and time the missed sync happened
+         */
         time: Date;
     }[] = [];
 
@@ -313,20 +349,28 @@ export enum RecommendationLevel {
 export interface Review {
     id?: number;
 
-    // Mapping to the media entry. It'll be queried using the `mappings` table
-    // to return the media corresponding to the selected provider
+    /**
+     * Mapping to the media entry. It'll be queried using the `mappings` table
+     * to return the media corresponding to the selected provider
+     */
     mapping: Mapping;
 
-    // Accounts (IDs) used to publish the review. Users may publish reviews
-    // from multiple accounts if they want.
+    /**
+     * Accounts (IDs) used to publish the review. Users may publish reviews
+     * from multiple accounts if they want.
+     */
     accountIds: number[];
 
-    // Whether it has been already published or not. This is used to choose
-    // the publish button's label (publish review/update review)
+    /**
+     * Whether it has been already published or not. This is used to choose
+     * the publish button's label (publish review/update review)
+     */
     isPublished: boolean;
 
-    // Individual scores for each of the review's categories. They must be
-    // normalized to the 1-100 range.
+    /**
+     * Individual scores for each of the review's categories. They must be
+     * normalized to the 1-100 range.
+     */
     charactersScore: number | null;
     illustrationScore: number | null;
     soundtrackScore: number | null;
@@ -336,77 +380,129 @@ export interface Review {
     writingScore: number | null;
     engagementScore: number | null;
 
-    // Overall critical score of the review. By default it can be an average of
-    // all other individual scores, but the user may change it as they wish.
+    /**
+     * Overall critical score of the review. By default it can be an average of
+     * all other individual scores, but the user may change it as they wish.
+     */
     overallScore: number | null;
 
-    // The review's long content
+    /**
+     * The review's long content
+     */
     body: string;
 
-    // A summary of the review. This may be used when Kitsu is added to publish
-    // "reactions".
+    /**
+     * A summary of the review. This may be used when Kitsu is added to publish
+     * "reactions".
+     */
     summary: string;
 
-    // Whether the review contains spoilers or not. || spoilers aren't
-    // currently supported in the markdown editor (though they should be in a
-    // future version).
+    /**
+     * Whether the review contains spoilers or not. || spoilers aren't
+     * currently supported in the markdown editor (though they should be in a
+     * future version).
+     */
     isSpoiler: boolean;
 
-    // The MAL recommendation level
+    /**
+     * The MAL recommendation level
+     */
     recommendation: RecommendationLevel | null;
 
-    // Should the review be visible only to the owner of the review?
+    /**
+     * Should the review be visible only to the owner of the review?
+     */
     isPrivate: boolean;
 
-    // Last time the review was updated
+    /**
+     * Last time the review was updated
+     */
     updatedAt: Date;
 }
 
 export enum ImportMethod {
-    // Keep the current library entry
+    /**
+     * Keep the current library entry
+     */
     Keep = "keep",
 
-    // Keep the new library entry
+    /**
+     * Keep the new library entry
+     */
     Overwrite = "overwrite",
 
-    // Keep the lastest library entry
+    /**
+     * Keep the lastest library entry
+     */
     Latest = "latest",
 
-    // Merge both library entries, preferring the data of the latest updated entry
+    /**
+     * Merge both library entries, preferring the data of the latest updated entry
+     */
     Merge = "merge",
 }
 
 export interface UserData {
-    // ID in the provider. i.e. MAL's user ID, AniList's user ID, etc.
+    /**
+     * ID in the provider. i.e. MAL's user ID, AniList's user ID, etc.
+     */
     id: string;
 
-    // Username
+    /**
+     * Username
+     */
     name: string;
 
-    // The largest version available of the user's avatar
+    /**
+     * The largest version available of the user's avatar
+     */
     imageUrl: string;
 }
 
-// An external account (MAL account, AniList account, etc.)
+/**
+ * An external account (MAL account, AniList account, etc.)
+ */
 export class ExternalAccount extends Dataclass {
-    // Local ID, NOT external ID
+    /**
+     * Local ID, NOT external ID
+     */
     id?: number;
+
+    /**
+     * The provider's code
+     */
     provider: Provider = "myanimelist";
 
-    // The account's authorization credentials.
+    /**
+     * The account's authorization credentials.
+     */
     auth?: {
         accessToken?: string;
         accessTokenExpiresAt?: Date;
         refreshToken?: string;
         refreshTokenExpiresAt?: Date;
-        username?: string;
+
+        /**
+         * The account's username used to login. This may not be the user's
+         * username, but also may be an email or whatever public identifier is
+         * used to log in.
+         */
+        login?: string;
+
+        /**
+         * The user's raw password.
+         */
         password?: string;
     };
 
-    // The account's profiled data from the provider
+    /**
+     * The account's public profile data from the provider
+     */
     user?: UserData;
 
-    // Which media libraries should be synced?
+    /**
+     * Which media libraries should be synced?
+     */
     syncing: MediaType[] = [];
 
     getUserLibrary(type: MediaType) {
@@ -424,12 +520,17 @@ export class ExternalAccount extends Dataclass {
         return api.authorize(this, props);
     }
 
+    /**
+     * A getter function to check if the user is authorized based on the provider's authentication type.
+     *
+     * @return {boolean} Indicates if the user is authorized.
+     */
     get isAuthed(): boolean {
         const api = new ProviderAPI(this.provider);
 
         switch (api.config.syncing?.authType) {
             case "username":
-                return !!this.auth?.username;
+                return !!this.auth?.login;
 
             case "oauth":
                 /**
@@ -459,23 +560,30 @@ export class ExternalAccount extends Dataclass {
                 return false;
 
             case "basic":
-                return !!this.auth?.username && !!this.auth?.password;
+                return !!this.auth?.login && !!this.auth?.password;
         }
 
         return false;
     }
 
-    // I burnt out my brain working on this function, so I wouldn't be suprised
-    // if you cannot understand how tf it works.
+    /**
+     * Import's the account's library.
+     */
     async importLibrary(
-        // What media library to import
+        /**
+         * What media library to import
+         */
         type: MediaType,
 
-        // What to do with the imported library
+        /**
+         * How to import the library
+         */
         method: ImportMethod = ImportMethod.Keep,
 
-        // If true, all entries will be imported. Otherwise, the import will
-        // only include the entries updated after the last local update.
+        /**
+         * If true, all entries will be imported. Otherwise, the import will
+         * only include the entries updated after the last local update.
+         */
         all: boolean = true
     ) {
         const api = new ProviderAPI(this.provider);

@@ -429,7 +429,7 @@ export class AniList extends BaseProvider {
         if (!res.ok) throw Error("Could not login");
 
         account.user = await this.getUser(account);
-        account.auth.username = account.user.name;
+        account.auth.login = account.user.name;
 
         await db.externalAccounts.update(account.id!, account);
     }

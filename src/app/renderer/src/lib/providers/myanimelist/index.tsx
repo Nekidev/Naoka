@@ -612,7 +612,7 @@ export class MyAnimeList extends BaseProvider {
 
     async getUser(account: ExternalAccount): Promise<UserData> {
         const url = `https://api.jikan.moe/v4/users/${encodeURIComponent(
-            account.auth!.username!
+            account.auth!.login!
         )}/full`;
 
         const res = await fetch<any>(url);
