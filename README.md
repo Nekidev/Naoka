@@ -30,6 +30,9 @@
 
 ![screenshot](https://raw.githubusercontent.com/naoka-dev/naoka/main/src/web/public/imgs/screenshot-01.png)
 
+> [!IMPORTANT]  
+> Naoka will be rewritten (code is a mess)
+
 ## Key Features
 
 - **Nice UI** — There's a lot of effort put on making everything look nice.
