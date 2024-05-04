@@ -31,7 +31,7 @@
 ![screenshot](https://raw.githubusercontent.com/naoka-dev/naoka/main/src/web/public/imgs/screenshot-01.png)
 
 > [!IMPORTANT]  
-> Naoka will be rewritten (code is a mess)
+> Naoka will be rewritten to structure the app in a better way. Go to the `rewrite` branch to see the current work.
 
 ## Key Features
 
