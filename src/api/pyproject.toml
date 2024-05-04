@@ -1,0 +1,16 @@
+[tool.poetry]
+name = "naoka"
+version = "0.1.0"
+description = "Naoka's media API."
+authors = ["Nyeki.py <nyeki@nyeki.dev>"]
+
+[tool.poetry.dependencies]
+python = "^3.12"
+django = "^5.0.4"
+
+[tool.poetry.scripts]
+dev = "manage.run"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
