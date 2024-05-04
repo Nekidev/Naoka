@@ -1,9 +1,0 @@
-@tailwind components;
-@tailwind utilities;
-
-@layer components {
-    .scrollable {
-        @apply overflow-auto;
-        scrollbar-gutter: stable;
-    }
-}
