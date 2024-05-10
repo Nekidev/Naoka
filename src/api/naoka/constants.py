@@ -1,1 +1,1 @@
-media_types = ["anime", "manga", "visual_novel"]
+MEDIA_TYPES = ["anime", "manga", "visual_novel"]

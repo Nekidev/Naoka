@@ -7,9 +7,9 @@ authors = ["Nyeki.py <nyeki@nyeki.dev>"]
 [tool.poetry.dependencies]
 python = "^3.12"
 django = "^5.0.4"
-
-[tool.poetry.scripts]
-dev = "manage.run"
+validators = "^0.28.1"
+requests = "^2.31.0"
+python-dotenv = "^1.0.1"
 
 [build-system]
 requires = ["poetry-core"]
