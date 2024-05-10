@@ -4,7 +4,7 @@ Docs: https://docs.api.jikan.moe/
       https://myanimelist.net/apiconfig/references/api/v2
 """
 
-from typing import Iterator
+from typing import Iterator, Literal
 
 from datetime import datetime
 
@@ -17,46 +17,61 @@ import requests
 
 class MyAnimeListProvider(BaseProvider):
     code = "MyAnimeList"
+    media_types = ["anime", "manga"]
 
     _base_url = "https://api.jikan.moe/v4"
 
-    def init(self) -> Iterator[Media]:
-        # Anime fetching
-        page = 1
+    def init(self, offset: int = 0) -> Iterator[Media]:
+        anime_total = self._get_media_count("anime")
 
-        while True:
-            r = requests.get(f"{self._base_url}/anime?page={page}")
-            r.raise_for_status()
+        def _init(type, page, skip, func) -> Iterator[Media]:
+            initial_page = page
 
-            data = r.json()
+            while True:
+                r = requests.get(f"{self._base_url}/{type}?page={page}")
+                r.raise_for_status()
 
-            for anime in data["data"]:
-                yield self._anime_to_media(anime)
+                data = r.json()
 
-            if not data["pagination"]["has_next_page"]:
-                break
+                i = 0
+                for media in data["data"]:
+                    if page == initial_page and i < skip:
+                        i += 1
+                        continue
+                    yield func(media)
 
-            page += 1
+                if not data["pagination"]["has_next_page"]:
+                    break
 
-        # Manga fetching
-        page = 1
+                page += 1
 
-        while True:
-            r = requests.get(f"{self._base_url}/manga?page={page}")
-            r.raise_for_status()
+        if anime_total > offset:
+            yield from _init("anime", offset // 25 + 1, offset % 25, self._anime_to_media)
 
-            data = r.json()
-
-            for anime in data["data"]:
-                yield self._manga_to_media(anime)
-
-            if not data["pagination"]["has_next_page"]:
-                break
-
-            page += 1
+        yield from _init(
+            "manga",
+            (offset - anime_total if offset - anime_total >= 0 else 0) // 25 + 1,
+            (offset - anime_total if offset - anime_total >= 0 else 0) % 25,
+            self._manga_to_media
+        )
 
     def update(self) -> Iterator[Media]:
         pass
+
+    def _get_media_count(self, type: Literal["anime"] | Literal["manga"]) -> int:
+        """Returns the amount of items in the API.
+
+        Args:
+            type ("anime" | "manga"): _description_
+
+        Returns:
+            int: The amount of media from the specific type in the API.
+        """
+
+        r = requests.get(f"{self._base_url}/{type}?limit=1")
+        r.raise_for_status()
+
+        return r.json()["pagination"]["items"]["total"]
 
     def _anime_to_media(self, data: dict) -> Media:
         """Converts the raw jikan API anime data to an internal Media instance.

@@ -19,22 +19,34 @@ class Command(BaseCommand):
         )
 
         parser.add_argument(
-            "--cooldown",
-            type=int,
-            help="The time in seconds to wait between call to the API."
+            "--commit-every", type=int, help="Commit changes to DB every x media."
         )
         parser.add_argument(
-            "--commit-every",
-            type=int,
-            help="Commit changes to DB every x media."
-        )
-        parser.add_argument(
-            "--ignore-conflicts",
+            "--conflict",
             action="store_true",
-            help="Ignore DB conflicts."
+            help="Stop initialization if there's a conflict during the committing to the DB.",
+        )
+        parser.add_argument(
+            "--offset",
+            type=int,
+            help="Skip the first x media for initialization.",
+        )
+        parser.add_argument(
+            "--resume",
+            action="store_true",
+            help="Skip the same amount of media as media from the provider already in the DB.",
         )
 
-    def handle(self, provider_code: str, commit_every: int | None, ignore_conflicts: bool = False, *args, **kwargs) -> None:
+    def handle(
+        self,
+        provider_code: str,
+        commit_every: int | None,
+        conflict: bool = False,
+        offset: int = 0,
+        resume: bool = False,
+        *args,
+        **kwargs,
+    ) -> None:
         provider = next(
             filter(lambda p: p.code.lower() == provider_code.lower(), registry), None
         )
@@ -46,7 +58,19 @@ class Command(BaseCommand):
         i = 0
 
         try:
-            for m in provider().init():
+            for m in provider().init(
+                offset=(
+                    offset
+                    if offset
+                    else (
+                        Media.objects.filter(
+                            mapping__iregex=f":{provider.code}:"
+                        ).count()
+                        if resume
+                        else 0
+                    )
+                )
+            ):
                 m.full_clean(validate_unique=False)
                 media.append(m)
                 i += 1
@@ -54,7 +78,7 @@ class Command(BaseCommand):
                 self.stdout.write(f"Adding: ({i}) {m.mapping}", ending="\r")
 
                 if commit_every and i % commit_every == 0:
-                    Media.objects.bulk_create(media, ignore_conflicts=ignore_conflicts)
+                    Media.objects.bulk_create(media, ignore_conflicts=not conflict)
                     media = []
 
         except Exception as e:
@@ -62,6 +86,6 @@ class Command(BaseCommand):
                 f'Stopping import because of "{e}". All imported media up to now ({i}) will be added to the database.'
             )
 
-        Media.objects.bulk_create(media, ignore_conflicts=ignore_conflicts)
+        Media.objects.bulk_create(media, ignore_conflicts=not conflict)
 
         self.stdout.write(f"{i} new media were added to the database.")
