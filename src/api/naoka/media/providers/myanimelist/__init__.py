@@ -9,6 +9,7 @@ from typing import Iterator, Literal
 from datetime import datetime
 
 from naoka.utils import parse_time
+from naoka.utils.types import media_types
 from naoka.media.models import Media
 from naoka.media.providers.base import BaseProvider
 
@@ -21,39 +22,32 @@ class MyAnimeListProvider(BaseProvider):
 
     _base_url = "https://api.jikan.moe/v4"
 
-    def init(self, offset: int = 0) -> Iterator[Media]:
+    def init(self, media_type: media_types, offset: int = 0) -> Iterator[Media]:
         anime_total = self._get_media_count("anime")
 
-        def _init(type, page, skip, func) -> Iterator[Media]:
-            initial_page = page
+        page = offset // 25 + 1 if media_type == "anime" else (offset - anime_total if offset - anime_total >= 0 else 0) // 25 + 1
+        skip = offset % 25 if media_type == "anime" else (offset - anime_total if offset - anime_total >= 0 else 0) % 25
+        func = self._anime_to_media if media_type == "anime" else self._manga_to_media
+        
+        initial_page = page
 
-            while True:
-                r = requests.get(f"{self._base_url}/{type}?page={page}")
-                r.raise_for_status()
+        while True:
+            r = requests.get(f"{self._base_url}/{media_type}?page={page}")
+            r.raise_for_status()
 
-                data = r.json()
+            data = r.json()
 
-                i = 0
-                for media in data["data"]:
-                    if page == initial_page and i < skip:
-                        i += 1
-                        continue
-                    yield func(media)
+            i = 0
+            for media in data["data"]:
+                if page == initial_page and i < skip:
+                    i += 1
+                    continue
+                yield func(media)
 
-                if not data["pagination"]["has_next_page"]:
-                    break
+            if not data["pagination"]["has_next_page"]:
+                break
 
-                page += 1
-
-        if anime_total > offset:
-            yield from _init("anime", offset // 25 + 1, offset % 25, self._anime_to_media)
-
-        yield from _init(
-            "manga",
-            (offset - anime_total if offset - anime_total >= 0 else 0) // 25 + 1,
-            (offset - anime_total if offset - anime_total >= 0 else 0) % 25,
-            self._manga_to_media
-        )
+            page += 1
 
     def update(self) -> Iterator[Media]:
         pass

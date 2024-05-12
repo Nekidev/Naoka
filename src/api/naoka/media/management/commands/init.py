@@ -58,28 +58,35 @@ class Command(BaseCommand):
         i = 0
 
         try:
-            for m in provider().init(
-                offset=(
-                    offset
-                    if offset
-                    else (
-                        Media.objects.filter(
-                            mapping__iregex=f":{provider.code}:"
-                        ).count()
-                        if resume
-                        else 0
+            for media_type in provider.media_types:
+                for m in provider().init(
+                    media_type=media_type,
+                    offset=(
+                        offset
+                        if offset
+                        else (
+                            Media.objects.filter(
+                                mapping__iregex=f":{provider.code}:"
+                            ).count()
+                            if resume
+                            else 0
+                        )
                     )
-                )
-            ):
-                m.full_clean(validate_unique=False)
-                media.append(m)
-                i += 1
+                ):
+                    m.full_clean(validate_unique=False)
+                    media.append(m)
+                    i += 1
 
-                self.stdout.write(f"Adding: ({i}) {m.mapping}", ending="\r")
+                    self.stdout.write(f"Adding {media_type} ({i}): {m.mapping}", ending="\r")
 
-                if commit_every and i % commit_every == 0:
-                    Media.objects.bulk_create(media, ignore_conflicts=not conflict)
-                    media = []
+                    if commit_every and i % commit_every == 0:
+                        Media.objects.bulk_create(media, ignore_conflicts=not conflict)
+                        media = []
+                
+                Media.objects.bulk_create(media, ignore_conflicts=not conflict)
+                media = []
+
+                self.stdout.write("\n")
 
         except Exception as e:
             self.stderr.write(

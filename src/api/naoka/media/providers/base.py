@@ -5,19 +5,22 @@ Kitsu are some examples of providers.
 
 from typing import Iterator, List, Literal
 
+from naoka.utils.types import media_types
 from naoka.media.models import Media
 
 
 class BaseProvider:
     code: str
-    media_types: List[Literal["anime"] | Literal["manga"] | Literal["visual_novel"]]
+    media_types: List[media_types]
 
-    def init(self, offset: int = 0) -> Iterator[Media]:
+    def init(self, media_type: media_types, offset: int = 0) -> Iterator[Media]:
         """Initializes this provider in the database. Imports all the media.
 
         Args:
+            media_type ("anime" | "manga" | "visual_novel"): The type of the media to
+                initialize.
             offset (int): The amount of items to skip during initialization. Useful to
-                          continue previous failed runs.
+                continue previous failed runs.
 
         Returns:
             List[Media]: The updated media objects.
