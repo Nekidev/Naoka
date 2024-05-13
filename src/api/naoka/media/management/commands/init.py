@@ -19,7 +19,10 @@ class Command(BaseCommand):
         )
 
         parser.add_argument(
-            "--commit-every", type=int, help="Commit changes to DB every x media."
+            "--commit-every",
+            type=int,
+            help="Commit changes to DB every x media.",
+            default=25,
         )
         parser.add_argument(
             "--conflict",
@@ -40,7 +43,7 @@ class Command(BaseCommand):
     def handle(
         self,
         provider_code: str,
-        commit_every: int | None,
+        commit_every: int = 25,
         conflict: bool = False,
         offset: int = 0,
         resume: bool = False,
@@ -71,18 +74,20 @@ class Command(BaseCommand):
                             if resume
                             else 0
                         )
-                    )
+                    ),
                 ):
                     m.full_clean(validate_unique=False)
                     media.append(m)
                     i += 1
 
-                    self.stdout.write(f"Adding {media_type} ({i}): {m.mapping}", ending="\r")
+                    self.stdout.write(
+                        f"Adding {media_type} ({i}): {m.mapping}", ending="\r"
+                    )
 
                     if commit_every and i % commit_every == 0:
                         Media.objects.bulk_create(media, ignore_conflicts=not conflict)
                         media = []
-                
+
                 Media.objects.bulk_create(media, ignore_conflicts=not conflict)
                 media = []
 

@@ -9,11 +9,13 @@ from typing import Iterator, Literal
 from datetime import datetime
 
 from naoka.utils import parse_time
-from naoka.utils.types import media_types
+from naoka.utils.types import MediaType
 from naoka.media.models import Media
 from naoka.media.providers.base import BaseProvider
 
 import requests
+
+import validators
 
 
 class MyAnimeListProvider(BaseProvider):
@@ -22,13 +24,21 @@ class MyAnimeListProvider(BaseProvider):
 
     _base_url = "https://api.jikan.moe/v4"
 
-    def init(self, media_type: media_types, offset: int = 0) -> Iterator[Media]:
+    def init(self, media_type: MediaType, offset: int = 0) -> Iterator[Media]:
         anime_total = self._get_media_count("anime")
 
-        page = offset // 25 + 1 if media_type == "anime" else (offset - anime_total if offset - anime_total >= 0 else 0) // 25 + 1
-        skip = offset % 25 if media_type == "anime" else (offset - anime_total if offset - anime_total >= 0 else 0) % 25
+        page = (
+            offset // 25 + 1
+            if media_type == "anime"
+            else (offset - anime_total if offset - anime_total >= 0 else 0) // 25 + 1
+        )
+        skip = (
+            offset % 25
+            if media_type == "anime"
+            else (offset - anime_total if offset - anime_total >= 0 else 0) % 25
+        )
         func = self._anime_to_media if media_type == "anime" else self._manga_to_media
-        
+
         initial_page = page
 
         while True:
@@ -42,7 +52,13 @@ class MyAnimeListProvider(BaseProvider):
                 if page == initial_page and i < skip:
                     i += 1
                     continue
-                yield func(media)
+
+                r = requests.get(
+                    f"{self._base_url}/{media_type}/{media["mal_id"]}/full"
+                )
+                r.raise_for_status()
+
+                yield func(r.json()["data"])
 
             if not data["pagination"]["has_next_page"]:
                 break
@@ -83,7 +99,11 @@ class MyAnimeListProvider(BaseProvider):
             title_ro=data["title"],
             title_en=data["title_english"],
             title_es=next(
-                map(lambda t: t["title"], filter(lambda t: t["type"] == "Spanish", data["titles"])), None
+                map(
+                    lambda t: t["title"],
+                    filter(lambda t: t["type"] == "Spanish", data["titles"]),
+                ),
+                None,
             ),
             title_na=data["title_japanese"],
             description=data["synopsis"],
@@ -112,7 +132,8 @@ class MyAnimeListProvider(BaseProvider):
                         [genre["name"] for genre in data["genres"]],
                     ),
                 )
-            ) + list(
+            )
+            + list(
                 filter(
                     lambda i: i,
                     map(
@@ -123,7 +144,18 @@ class MyAnimeListProvider(BaseProvider):
             ),
             format=self._normalize_format(data["type"]) if data["type"] else None,
             rating=self._normalize_rating(data["rating"]) if data["rating"] else None,
-            links=[f"https://myanimelist.net/anime/{data["mal_id"]}"]
+            links=list(
+                filter(
+                    validators.url,
+                    [f"https://myanimelist.net/anime/{data["mal_id"]}"]
+                    + list(map(lambda l: l["url"], data["external"]))
+                    + (
+                        list(map(lambda l: l["url"], data["streaming"]))
+                        if "streaming" in data
+                        else []
+                    ),
+                )
+            ),
         )
 
     def _manga_to_media(self, data: dict) -> Media:
@@ -142,7 +174,11 @@ class MyAnimeListProvider(BaseProvider):
             title_ro=data["title"],
             title_en=data["title_english"],
             title_es=next(
-                map(lambda t: t["title"], filter(lambda t: t["type"] == "Spanish", data["titles"])), None
+                map(
+                    lambda t: t["title"],
+                    filter(lambda t: t["type"] == "Spanish", data["titles"]),
+                ),
+                None,
             ),
             title_na=data["title_japanese"],
             description=data["synopsis"],
@@ -171,7 +207,8 @@ class MyAnimeListProvider(BaseProvider):
                         [genre["name"] for genre in data["genres"]],
                     ),
                 )
-            ) + list(
+            )
+            + list(
                 filter(
                     lambda i: i,
                     map(
@@ -181,7 +218,7 @@ class MyAnimeListProvider(BaseProvider):
                 )
             ),
             format=self._normalize_format(data["type"]) if data["type"] else None,
-            links=[f"https://myanimelist.net/anime/{data["mal_id"]}"]
+            links=[f"https://myanimelist.net/anime/{data["mal_id"]}"],
         )
 
     def _normalize_genre(self, genre: str) -> Media.Genre | None:
@@ -262,5 +299,5 @@ class MyAnimeListProvider(BaseProvider):
             "finished airing": Media.Status.FINISHED,
             "finished": Media.Status.FINISHED,
             "on hiatus": Media.Status.HIATUS,
-            "discontinued": Media.Status.CANCELLED
+            "discontinued": Media.Status.CANCELLED,
         }.get(status.lower(), Media.Status.AUTO)

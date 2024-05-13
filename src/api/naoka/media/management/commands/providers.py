@@ -14,5 +14,7 @@ class Command(BaseCommand):
 
         i = 1
         for provider in registry:
-            self.stdout.write(f"{i}. {provider.code} ({Media.objects.filter(mapping__iregex=f":{provider.code}:").count()})")
+            self.stdout.write(
+                f"{i}. {provider.code} ({Media.objects.filter(mapping__iregex=f":{provider.code}:").count()})"
+            )
             i += 1

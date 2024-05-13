@@ -12,4 +12,6 @@ class Command(BaseCommand):
         media_count, _ = Media.objects.all().delete()
         mappings_count, _ = Mappings.objects.all().delete()
 
-        self.stdout.write(f"Successfully flushed DB.\nDeleted Media: {media_count}\nDeleted Mappings: {mappings_count}")
+        self.stdout.write(
+            f"Successfully flushed DB.\nDeleted Media: {media_count}\nDeleted Mappings: {mappings_count}"
+        )
